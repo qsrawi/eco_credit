@@ -3,8 +3,12 @@ import 'package:eco_credit/home_screen.dart';
 import 'package:eco_credit/notification.dart';
 import 'package:eco_credit/profile.dart';
 import 'package:flutter/material.dart';
+import 'dart:io';
 
-void main() => runApp(const MyApp());
+void main() {
+  disableHttpsCertificateVerification();
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -67,5 +71,17 @@ class _MainScreenState extends State<MainScreen> {
         type: BottomNavigationBarType.fixed,
       ),
     );
+  }
+}
+
+void disableHttpsCertificateVerification() {
+  HttpOverrides.global = new MyHttpOverrides();
+}
+
+class MyHttpOverrides extends HttpOverrides{
+  @override
+  HttpClient createHttpClient(SecurityContext? context){
+    return super.createHttpClient(context)
+      ..badCertificateCallback = (X509Certificate cert, String host, int port)=> true;
   }
 }

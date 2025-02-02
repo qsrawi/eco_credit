@@ -1,8 +1,20 @@
+import 'package:eco_credit/services/api_service.dart';
 import 'package:flutter/material.dart';
-import 'waste_collection_statistics_card.dart'; // Ensure this is the correct path
+import 'waste_collection_statistics_card.dart';
 
-class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key});
+class ProfileScreen extends StatefulWidget {
+  @override
+  _ProfileScreenState createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  late Future<GeneratorResource> profile;
+
+  @override
+  void initState() {
+    super.initState();
+    profile = ApiService().fetchGeneratorsProfile(1); // Assuming '1' is the ID you want to fetch
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,65 +30,87 @@ class ProfileScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: ListView(
-        children: <Widget>[
-          _buildProfileHeader(),
-          WasteCollectionStatisticsCard(
-            pending: 3,
-            completed: 121,
-            inProgress: 2,
-            cancelled: 1,
-          ),
-          const ListTile(
-            title: Text('Full Name'),
-            subtitle: Text('سوبر ماركت النجمة '),
-            leading: Icon(Icons.person),
-          ),
-          const ListTile(
-            title: Text('Email'),
-            subtitle: Text('MohAhmad@email.com'),
-            leading: Icon(Icons.email),
-          ),
-          const ListTile(
-            title: Text('Phone'),
-            subtitle: Text('+1 234 567 8900'),
-            leading: Icon(Icons.phone),
-          ),
-          const ListTile(
-            title: Text('Location'),
-            subtitle: Text('شارع الوكالات, صويفية, عمان'),
-            leading: Icon(Icons.map),
-          ),
-        ],
+      body: FutureBuilder<GeneratorResource>(
+        future: profile,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return Center(child: Text("Error: ${snapshot.error}"));
+          }
+          if (snapshot.hasData) {
+            return buildProfile(snapshot.data!);
+          } else {
+            return Center(child: Text("No data available"));
+          }
+        },
       ),
     );
   }
 
-  Widget _buildProfileHeader() {
+  Widget buildProfile(GeneratorResource profile) {
+    return ListView(
+      children: <Widget>[
+        _buildProfileHeader(profile),
+        WasteCollectionStatisticsCard(
+          pending: 3, // These should ideally come from the API
+          completed: 121,
+          inProgress: 2,
+          cancelled: 1,
+        ),
+        ListTile(
+          title: const Text('Full Name'),
+          subtitle: Text(profile.name ?? 'Unknown'),
+          leading: const Icon(Icons.person),
+        ),
+        ListTile(
+          title: const Text('Email'),
+          subtitle: Text(profile.email ?? 'Unknown'),
+          leading: const Icon(Icons.email),
+        ),
+        ListTile(
+          title: const Text('Phone'),
+          subtitle: Text(profile.phone ?? 'Unknown'),
+          leading: const Icon(Icons.phone),
+        ),
+        ListTile(
+          title: const Text('Location'),
+          subtitle: Text('Add Location parsing logic here'), // Assuming location needs special handling
+          leading: const Icon(Icons.map),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildProfileHeader(GeneratorResource profile) {
     return Container(
       color: Colors.white,
-      child: const Padding(
-        padding: EdgeInsets.all(16.0),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
         child: Row(
           children: <Widget>[
-            CircleAvatar(
-              radius: 50,
-              backgroundImage: AssetImage('assets/images/2.jpeg'), // Placeholder image URL
-            ),
+          CircleAvatar(
+            radius: 50,
+            backgroundImage: profile.image != null 
+              ? NetworkImage(profile.image!) as ImageProvider<Object>
+              : AssetImage('assets/images/carton.jpg') as ImageProvider<Object>,
+          ),
+
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Text(
-                    'سوبر ماركت النجمة ',
-                    style: TextStyle(
+                    profile.name ?? 'Name not available',
+                    style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   Text(
-                    'Generator ID: #G12345',
-                    style: TextStyle(
+                    'Generator ID: #${profile.manualId}',
+                    style: const TextStyle(
                       fontSize: 16,
                       color: Colors.grey,
                     ),
