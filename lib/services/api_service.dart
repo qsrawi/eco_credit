@@ -19,10 +19,10 @@ static const String baseUrl = 'https://10.0.2.2:7254/api'; // For Android emulat
     }
   }
 
-  Future<List<CollectionResponse>> getCollections(String status, {int? userId, String? userType}) async {
+  Future<List<CollectionResponse>> getCollections(int status, {int? userId, String? userType}) async {
     final uri = Uri.parse('$baseUrl/collections')
       .replace(queryParameters: {
-        'status': status,
+        'collectionStatus': status.toString(),
         'userID': userId?.toString(),
         'userType': userType,
       });
@@ -54,6 +54,34 @@ static const String baseUrl = 'https://10.0.2.2:7254/api'; // For Android emulat
       return GeneratorResource.fromJson(json.decode(response.body));
     } else {
       throw Exception('Failed to load profile');
+    }
+  }
+
+  Future<List<NotificationListResource>> fetchNotifications() async {
+    final uri = Uri.parse('$baseUrl/notifications')
+      .replace(queryParameters: {
+        'userID': '1',
+        'userType': 'Generator',
+      });
+
+    final response = await http.get(uri);
+
+    if (response.statusCode == 200) {
+      var data = json.decode(response.body);
+      if (data['notificationListResource'] != null && 
+          data['notificationListResource'] is Map<String, dynamic>) {
+        var notificationsMap = data['notificationListResource'] as Map<String, dynamic>;
+        List<NotificationListResource> notifications = [];
+        notificationsMap.forEach((key, value) {
+          if (value is List) {
+            notifications.addAll(value.map((item) => NotificationListResource.fromJson(item)).toList());
+          }
+        });
+        return notifications;
+      }
+      return []; // Return an empty list if 'notificationListResource' is improperly formatted
+    } else {
+      throw Exception('Failed to load notifications: ${response.statusCode} ${response.body}');
     }
   }
 }
@@ -123,18 +151,16 @@ class CollectionGeneratorResource {
 }
 
 class NotificationGeneratorResource {
-  final int id;
-  final String message;
+  final int notificationID;
+  // final String message;
 
   NotificationGeneratorResource({
-    required this.id,
-    required this.message,
+    required this.notificationID
   });
 
   factory NotificationGeneratorResource.fromJson(Map<String, dynamic> json) {
     return NotificationGeneratorResource(
-      id: json['id'],
-      message: json['message'],
+      notificationID: json['notificationID']
     );
   }
 }
@@ -148,6 +174,7 @@ class CollectionResponse {
   final int collectionStatusID;
   final int wasteTypeID;
   final String? wasteTypeName;
+  final String? collectionStatusName;
   final String? description;
   final DateTime? createdDate;
   final String? image;
@@ -159,6 +186,7 @@ class CollectionResponse {
     required this.generatorID,
     this.pickerID,
     this.notificationID,
+    this.collectionStatusName,
     required this.collectionStatusID,
     required this.wasteTypeID,
     this.wasteTypeName,
@@ -176,6 +204,7 @@ class CollectionResponse {
       pickerID: json['pickerID'],
       notificationID: json['notificationID'],
       collectionStatusID: json['collectionStatusID'],
+      collectionStatusName: json['collectionStatusName'],
       wasteTypeID: json['wasteTypeID'],
       wasteTypeName: json['wasteTypeName'],
       description: json['description'],
@@ -197,6 +226,34 @@ class Generator {
     return Generator(
       name: json['name'],
       imageUrl: json['imageUrl'],
+    );
+  }
+}
+
+class NotificationListResource {
+  final int notificationID;
+  final int notificationTypeID;
+  final String? notificationTypeName;
+  final String? description;
+  final DateTime? createdDate;
+
+  NotificationListResource({
+    required this.notificationID,
+    required this.notificationTypeID,
+    this.notificationTypeName,
+    this.description,
+    this.createdDate,
+  });
+
+  factory NotificationListResource.fromJson(Map<String, dynamic> json) {
+    return NotificationListResource(
+      notificationID: json['notificationID'],
+      notificationTypeID: json['notificationTypeID'],
+      description: json['description'],
+      notificationTypeName: json['notificationTypeName'],
+      createdDate: json['createdDate'] != null 
+          ? DateTime.parse(json['createdDate'])
+          : null,
     );
   }
 }

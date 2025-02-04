@@ -24,12 +24,12 @@ class WasteCollectionCard extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.end,
           children: <Widget>[
             Text(
               status,
               style: TextStyle(
-                color: status == 'Pending' ? Colors.orange : Colors.green,
+                color: status == 'بالانتظار' ? Colors.orange : Colors.green,
                 fontWeight: FontWeight.bold,
               ),
             ),

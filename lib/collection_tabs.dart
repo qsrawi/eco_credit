@@ -30,8 +30,8 @@ class _CollectionTabsState extends State<CollectionTabs> with SingleTickerProvid
 
   void initializeTabs() {
     myTabs = <Tab>[
-      const Tab(text: 'Pending'),
-      const Tab(text: 'Picked'),
+      const Tab(text: 'بالانتظار'),
+      const Tab(text: 'في الطريق'),
     ];
 
     myTabViews = <Widget>[
@@ -40,7 +40,7 @@ class _CollectionTabsState extends State<CollectionTabs> with SingleTickerProvid
     ];
 
     if (widget.showCompleted) {
-      myTabs.add(const Tab(text: 'Completed'));
+      myTabs.add(const Tab(text: 'اكتملت'));
       myTabViews.add(createListViewCompleted());
     }
 
@@ -51,17 +51,17 @@ class _CollectionTabsState extends State<CollectionTabs> with SingleTickerProvid
     );
   }
 
-  Future<ListView> createListView(String status) async {
+  Future<ListView> createListView(int status) async {
     try {
       final collections = await _apiService.getCollections(
-        status.toLowerCase(),
+        status,
         userId: 1, // Replace with actual user ID
         userType: 'generator' // Replace with actual user type
       );
       
       return ListView(
         children: collections.map((collection) => WasteCollectionCard(
-          status: status,
+          status: collection.collectionStatusName ?? 'Unknown',
           title: collection.wasteTypeName ?? 'Unknown',
           name: collection.generator?.name ?? 'Unknown',
           imageUrl: collection.image ?? 'assets/images/default.jpg',
@@ -78,18 +78,18 @@ class _CollectionTabsState extends State<CollectionTabs> with SingleTickerProvid
     final difference = DateTime.now().difference(date);
     
     if (difference.inDays > 0) {
-      return '${difference.inDays} days ago';
+      return 'من ${difference.inDays} يوم';
     } else if (difference.inHours > 0) {
-      return '${difference.inHours} hrs ago';
+      return 'من ${difference.inHours} ساعة';
     } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes} mins ago';
+      return 'من ${difference.inMinutes} دقيقة';
     }
     return 'Just now';
   }
 
   // Update list view methods to handle async
   Widget createListViewPending() => FutureBuilder<ListView>(
-    future: createListView('Pending'),
+    future: createListView(1),
     builder: (context, snapshot) {
       if (snapshot.connectionState == ConnectionState.waiting) {
         return const Center(child: CircularProgressIndicator());
@@ -112,7 +112,7 @@ class _CollectionTabsState extends State<CollectionTabs> with SingleTickerProvid
   );
 
   Widget createListViewPicked() => FutureBuilder<ListView>(
-    future: createListView('Picked'),
+    future: createListView(3),
     builder: (context, snapshot) {
       if (snapshot.connectionState == ConnectionState.waiting) {
         return const Center(child: CircularProgressIndicator());
@@ -122,7 +122,7 @@ class _CollectionTabsState extends State<CollectionTabs> with SingleTickerProvid
   );
 
   Widget createListViewCompleted() => FutureBuilder<ListView>(
-    future: createListView('Completed'),
+    future: createListView(4),
     builder: (context, snapshot) {
       if (snapshot.connectionState == ConnectionState.waiting) {
         return const Center(child: CircularProgressIndicator());

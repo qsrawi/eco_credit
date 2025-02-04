@@ -1,55 +1,131 @@
-import 'package:eco_credit/notification_card.dart';
+import 'package:eco_credit/services/api_service.dart';
 import 'package:flutter/material.dart';
+import 'notification_card.dart';
 
-class NotificationsScreen extends StatelessWidget {
+class NotificationsScreen extends StatefulWidget {
+  @override
+  _NotificationsScreenState createState() => _NotificationsScreenState();
+}
+
+class _NotificationsScreenState extends State<NotificationsScreen> {
+  late final ApiService _apiService = ApiService();
+  late Future<List<NotificationListResource>> _notificationsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _notificationsFuture = _apiService.fetchNotifications();
+  }
+
+  Map<String, List<Widget>> grouped = {
+      'Today': <Widget>[],
+      'Yesterday': <Widget>[],
+      'Earlier': <Widget>[]
+  };
+
+  Map<String, List<Widget>> groupNotifications(List<NotificationListResource> notifications) {
+    final Map<String, List<Widget>> grouped = {
+      'Today': <Widget>[],
+      'Yesterday': <Widget>[],
+      'Earlier': <Widget>[],
+    };
+    
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
+
+    for (var notification in notifications) {
+      final date = notification.createdDate;
+      if (date == null) {
+        grouped['Earlier']!.add(_buildNotificationCard(notification));
+        continue;
+      }
+
+      final notificationDate = DateTime(date.year, date.month, date.day);
+      if (notificationDate == today) {
+        grouped['Today']!.add(_buildNotificationCard(notification));
+      } else if (notificationDate == yesterday) {
+        grouped['Yesterday']!.add(_buildNotificationCard(notification));
+      } else {
+        grouped['Earlier']!.add(_buildNotificationCard(notification));
+      }
+    }
+
+    grouped.removeWhere((key, value) => value.isEmpty);
+    return grouped;
+  }
+
+  Widget _buildNotificationCard(NotificationListResource notification) {
+    IconData icon;
+    Color color;
+    String title;
+
+    switch (notification.notificationTypeID) {
+      case 1:
+        icon = Icons.error;
+        color = Colors.red;
+        title = 'Waste Rejected';
+        break;
+      case 2:
+        icon = Icons.timelapse;
+        color = Colors.blue;
+        title = 'Waste Accepted';
+        break;
+      case 5:
+        icon = Icons.check_circle;
+        color = Colors.green;
+        title = 'Collection Completed';
+        break;
+      default:
+        icon = Icons.notifications;
+        color = Colors.grey;
+        title = 'Notification';
+    }
+
+    return NotificationCard(
+      title: title,
+      description: notification.description ?? 'No description available',
+      icon: icon,
+      iconColor: color,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Example data grouped by days
-    Map<String, List<Widget>> groupedNotifications = {
-      'Today': [
-        NotificationCard(
-          title: 'Collection Completed',
-          description: 'You Complete waste collection of Cartoon for Omar.',
-          icon: Icons.check_circle,
-          iconColor: Colors.green,
-        ),
-        NotificationCard(
-          title: 'Waste Accepted',
-          description: 'You Accept waste Collection of Iron For Khalid',
-          icon: Icons.timelapse,
-          iconColor: Colors.blue,
-        ),
-      ],
-      'Yesterday': [
-        NotificationCard(
-          title: 'Waste Accepted',
-          description: 'You Accept waste Collection of Iron For Khalid',
-          icon: Icons.timelapse,
-          iconColor: Colors.blue,
-        ),
-      ],
-      'Earlier': [
-        NotificationCard(
-          title: 'Waste Rejected',
-          description: 'You Reject collection waste of Plastic for Othman.',
-          icon: Icons.error,
-          iconColor: Colors.red,
-        ),
-      ],
-    };
-
     return Scaffold(
       appBar: AppBar(
         title: Text('Notifications'),
       ),
-      body: ListView(
-        children: groupedNotifications.entries.expand((entry) => [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Text(entry.key, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          ),
-          ...entry.value,
-        ]).toList(),
+      body: FutureBuilder<List<NotificationListResource>>(
+        future: _notificationsFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(child: Text('No notifications found'));
+          }
+
+          final grouped = groupNotifications(snapshot.data!);
+          
+          return ListView(
+            children: grouped.entries.expand((entry) => [
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Text(
+                  entry.key,
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ),
+              ...entry.value,
+            ]).toList(),
+          );
+        },
       ),
     );
   }
