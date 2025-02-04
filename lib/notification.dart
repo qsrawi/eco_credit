@@ -64,22 +64,22 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       case 1:
         icon = Icons.error;
         color = Colors.red;
-        title = 'Waste Rejected';
+        title = 'مجموعة مرفوضة';
         break;
       case 2:
         icon = Icons.timelapse;
         color = Colors.blue;
-        title = 'Waste Accepted';
+        title = 'مجموعة مقبولة';
         break;
       case 5:
         icon = Icons.check_circle;
         color = Colors.green;
-        title = 'Collection Completed';
+        title = 'مجموعة اكتملت';
         break;
       default:
         icon = Icons.notifications;
         color = Colors.grey;
-        title = 'Notification';
+        title = 'مجموعة';
     }
 
     return NotificationCard(

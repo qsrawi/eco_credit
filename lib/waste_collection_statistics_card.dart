@@ -22,10 +22,10 @@ class WasteCollectionStatisticsCard extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
-            _buildStatColumn('Pending', pending),
-            _buildStatColumn('Completed', completed),
-            _buildStatColumn('In Progress', inProgress),
-            _buildStatColumn('Cancelled', cancelled),
+            _buildStatColumn('بالانتظار', pending),
+            _buildStatColumn('اكتملت', completed),
+            _buildStatColumn('في الطريق', inProgress),
+            _buildStatColumn('ألغيت', cancelled),
           ],
         ),
       ),

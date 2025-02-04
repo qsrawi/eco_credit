@@ -13,38 +13,41 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
-    profile = ApiService().fetchGeneratorsProfile(1); // Assuming '1' is the ID you want to fetch
+    profile = ApiService().fetchGeneratorsProfile(2); // Assuming '1' is the ID you want to fetch
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Profile'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              // Handle settings
-            },
-          ),
-        ],
-      ),
-      body: FutureBuilder<GeneratorResource>(
-        future: profile,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return Center(child: Text("Error: ${snapshot.error}"));
-          }
-          if (snapshot.hasData) {
-            return buildProfile(snapshot.data!);
-          } else {
-            return Center(child: Text("No data available"));
-          }
-        },
+    return Directionality(
+      textDirection: TextDirection.rtl, // Set text direction to RTL
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('ملف شخصي'),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.settings),
+              onPressed: () {
+                // Handle settings
+              },
+            ),
+          ],
+        ),
+        body: FutureBuilder<GeneratorResource>(
+          future: profile,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            }
+            if (snapshot.hasError) {
+              return Center(child: Text("Error: ${snapshot.error}"));
+            }
+            if (snapshot.hasData) {
+              return buildProfile(snapshot.data!);
+            } else {
+              return Center(child: Text("No data available"));
+            }
+          },
+        ),
       ),
     );
   }
@@ -60,24 +63,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
           cancelled: 1,
         ),
         ListTile(
-          title: const Text('Full Name'),
+          title: const Text('الاسم الكامل'),
           subtitle: Text(profile.name ?? 'Unknown'),
           leading: const Icon(Icons.person),
         ),
         ListTile(
-          title: const Text('Email'),
+          title: const Text('الأيميل'),
           subtitle: Text(profile.email ?? 'Unknown'),
           leading: const Icon(Icons.email),
         ),
         ListTile(
-          title: const Text('Phone'),
+          title: const Text('الموبايل'),
           subtitle: Text(profile.phone ?? 'Unknown'),
           leading: const Icon(Icons.phone),
         ),
-        ListTile(
-          title: const Text('Location'),
-          subtitle: Text('Add Location parsing logic here'), // Assuming location needs special handling
-          leading: const Icon(Icons.map),
+        const ListTile(
+          title: Text('الموقع'),
+          subtitle: Text('Unknown'), // Assuming location needs special handling
+          leading: Icon(Icons.map),
         ),
       ],
     );
@@ -94,7 +97,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             radius: 50,
             backgroundImage: profile.image != null 
               ? NetworkImage(profile.image!) as ImageProvider<Object>
-              : AssetImage('assets/images/carton.jpg') as ImageProvider<Object>,
+              : AssetImage('assets/images/default.jpg') as ImageProvider<Object>,
           ),
 
             Expanded(
@@ -109,7 +112,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ),
                   Text(
-                    'Generator ID: #${profile.manualId}',
+                    'رقم المنشأه: #${profile.manualId}',
                     style: const TextStyle(
                       fontSize: 16,
                       color: Colors.grey,
