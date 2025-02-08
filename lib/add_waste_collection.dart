@@ -1,3 +1,8 @@
+import 'dart:io';
+
+import 'package:eco_credit/sale-or-donation-selector.dart';
+import 'package:eco_credit/services/api_service.dart';
+import 'package:eco_credit/upload-photo-section.dart';
 import 'package:flutter/material.dart';
 import 'picker_widget.dart';  // Assuming you have this file
 import 'waste_type_widget.dart';  // Assuming you have this file
@@ -8,11 +13,49 @@ class AddWasteCollectionScreen extends StatefulWidget {
 }
 
 class _AddWasteCollectionScreenState extends State<AddWasteCollectionScreen> {
+  // bool _isSellChecked = false;
+  // bool _isDonateChecked = false;
+  File? _collectionImage;
+  int? _pickerId;
+  int? _wasteTypeId;
+  int? _collectionTypeId;
+  final TextEditingController _descriptionController = TextEditingController();
+
+  @override
+  void dispose() {
+    _descriptionController.dispose(); // Proper cleanup
+    super.dispose();
+  }
+
+  void setImage(File image) {
+    setState(() {
+      _collectionImage = image; // Updates the image in the state
+    });
+  }
+
+  void setPickerId(int pickerId) {
+    setState(() {
+      _pickerId = pickerId; // Updates the image in the state
+    });
+  }
+
+  void setWasteTypeId(int wasteTypeId) {
+    setState(() {
+      _wasteTypeId = wasteTypeId; // Updates the image in the state
+    });
+  }
+
+  void setCollectionTypeId(int collectionTypeId) {
+    setState(() {
+      _collectionTypeId = collectionTypeId; // Updates the image in the state
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Waste Collection'),
+        title: Text('أضافة مجموعة جديدة'),
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
@@ -29,20 +72,44 @@ class _AddWasteCollectionScreenState extends State<AddWasteCollectionScreen> {
                 valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
               ),
             ),
-            SizedBox(height: 20),
-            _buildPhotoSection(),
-            PickerWidget(),
-            WasteTypeWidget(),
+            const SizedBox(height: 20),
+            UploadPhotoSection(onImageSelected: setImage),
+            PickerWidget(onSelected: setPickerId),
+            WasteTypeWidget(onSelected: setWasteTypeId),
+            SaleOrDonationSelector(onSelected: setCollectionTypeId),
+            _buildDescriptionInput(),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 20.0),
               child: ElevatedButton(
-                onPressed: () {
-                  // Handle submission
-                },
-                child: Text('Submit Collection'),
+              onPressed: () async {
+                // Assuming _collectionImage is updated through setImage method as per previous discussions
+                if (_collectionImage == null) {
+                  print('No image selected');
+                  return;
+                }
+                
+                Map<String, dynamic> collectionData = {
+                  'GeneratorID': 1,
+                  'PickerID': _pickerId,
+                  'CollectionStatusID': 1,
+                  'CollectionTypeID': _collectionTypeId,
+                  'WasteTypeID': _wasteTypeId,
+                  'Description': _descriptionController.text, 
+                };
+                
+                var response = await ApiService.createCollectionWithImage(collectionData, _collectionImage);
+                if (response != null && response.statusCode == 200) {
+                  print('Collection created successfully!');
+                  // Optionally, navigate to another screen or show a success message
+                } else {
+                  print('Failed to submit collection. Status code: ${response?.statusCode}');
+                }
+              },
+
+                child: Text('أضافة المجموعة'),
                 style: ButtonStyle(
-                  backgroundColor: MaterialStateProperty.all<Color>(Colors.green), // Correct way to set background color
-                  foregroundColor: MaterialStateProperty.all<Color>(Colors.white), // Correct way to set text color
+                  backgroundColor: MaterialStateProperty.all<Color>(Colors.green),
+                  foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
                   padding: MaterialStateProperty.all<EdgeInsets>(
                     EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                   ),
@@ -55,80 +122,24 @@ class _AddWasteCollectionScreenState extends State<AddWasteCollectionScreen> {
     );
   }
 
-Widget _buildPhotoSection() {
-  return Container(
-    margin: const EdgeInsets.symmetric(horizontal: 20),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(14),
-      border: Border.all(color: Colors.grey.shade300, width: 1.2),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.grey.withOpacity(0.1),
-          spreadRadius: 1,
-          blurRadius: 8,
-          offset: const Offset(0, 4),
+  Widget _buildDescriptionInput() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: TextField(
+        controller: _descriptionController, // Attach the controller here
+        decoration: InputDecoration(
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          labelText: 'وصف',
+          hintText: 'ادخل وصف مجموعة النفايات',
+          // Align label and hint text to the right
+          alignLabelWithHint: true,
         ),
-      ],
-    ),
-    child: Padding(
-      padding: const EdgeInsets.symmetric(vertical: 20),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Text(
-              'Take a photo of the waste collection',
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w500,
-                color: Colors.grey[800],
-                height: 1.3,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-          const SizedBox(height: 20),
-          Container(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.grey.shade300, width: 1.8),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(10),
-              child: Icon(Icons.camera_alt, 
-                size: 40, 
-                color: Colors.grey[700],
-              ),
-            ),
-          ),
-          const SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: () {},
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF22C55E),
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-              elevation: 2,
-            ),
-            child: const Text(
-              'Take Photo',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 0.2,
-              ),
-            ),
-          ),
-        ],
+        textAlign: TextAlign.right, // Right-align the text
+        maxLines: 3, // Allows for multi-line input
       ),
-    ),
-  );
-}
-
+    );
+  }
 
 }

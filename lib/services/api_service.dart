@@ -1,23 +1,58 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 
 class ApiService {
   
-static const String baseUrl = 'https://10.0.2.2:7254/api'; // For Android emulator
+  static const String baseUrl = 'https://10.0.2.2:7254/api'; // For Android emulator
 
-  Future<CollectionResponse> createCollection(Map<String, dynamic> data) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/collections/create'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(data),
-    );
+static Future<http.Response?> createCollectionWithImage(Map<String, dynamic> collectionData, File? imageFile) async {
+  var uri = Uri.parse('$baseUrl/collections/create');
 
-    if (response.statusCode == 200) {
-      return CollectionResponse.fromJson(json.decode(response.body));
-    } else {
-      throw Exception('Failed to create collection: ${response.body}');
+  var request = http.MultipartRequest('POST', uri);
+
+  // Add fields only if they are not null
+  void addFieldIfNotNull(String key, dynamic value) {
+    if (value != null) {
+      request.fields[key] = value.toString();
     }
   }
+
+  addFieldIfNotNull('GeneratorID', collectionData['GeneratorID']);
+  addFieldIfNotNull('PickerID', collectionData['PickerID']);
+  addFieldIfNotNull('InvoiceID', collectionData['InvoiceID']); // Pass null if InvoiceID is null
+  addFieldIfNotNull('CollectionStatusID', collectionData['CollectionStatusID']);
+  addFieldIfNotNull('CollectionTypeID', collectionData['CollectionTypeID']);
+  addFieldIfNotNull('WasteTypeID', collectionData['WasteTypeID']);
+  addFieldIfNotNull('CollectionSize', collectionData['CollectionSize']);
+  addFieldIfNotNull('Description', collectionData['Description']);
+
+  if (imageFile != null) {
+    String fileName = imageFile.path.split('/').last;
+    request.files.add(
+      await http.MultipartFile.fromPath(
+        'CollectionImage',
+        imageFile.path,
+        contentType: MediaType('image', fileName.split('.').last),
+      ),
+    );
+  }
+
+  try {
+    var streamedResponse = await request.send();
+    var response = await http.Response.fromStream(streamedResponse);
+    if (response.statusCode == 200) {
+      return response;
+    } else {
+      print('Failed to create collection: ${response.body}');
+      return null;
+    }
+  } catch (e) {
+    print('Exception when calling API: $e');
+    return null;
+  }
+}
 
   Future<List<CollectionResponse>> getCollections(int status, {int? userId, String? userType}) async {
     final uri = Uri.parse('$baseUrl/collections')
@@ -32,6 +67,24 @@ static const String baseUrl = 'https://10.0.2.2:7254/api'; // For Android emulat
     if (response.statusCode == 200) {
       List<dynamic> data = json.decode(response.body);
       return data.map((item) => CollectionResponse.fromJson(item)).toList();
+    } else {
+      throw Exception('Failed to load collections: ${response.statusCode} ${response.body}');
+    }
+  }
+
+  Future<List<PickerListResource>> getPickers(int? wasteGroupID, int? generatorID, String? strSearch) async {
+    final uri = Uri.parse('$baseUrl/pickers')
+      .replace(queryParameters: {
+        'wasteGroupID': wasteGroupID?.toString(),
+        'generatorID': generatorID?.toString(),
+        'strSearch': strSearch,
+      });
+
+    final response = await http.get(uri);
+
+    if (response.statusCode == 200) {
+      List<dynamic> data = json.decode(response.body);
+      return data.map((item) => PickerListResource.fromJson(item)).toList();
     } else {
       throw Exception('Failed to load collections: ${response.statusCode} ${response.body}');
     }
@@ -93,6 +146,7 @@ class GeneratorResource {
   final String? email;
   final String? phone;
   final int? locationId;
+  final String? locationName;
   final int wasteTypeId;
   final String? wasteTypeName;
   final double? collectionCount;
@@ -109,6 +163,7 @@ class GeneratorResource {
     this.locationId,
     required this.wasteTypeId,
     this.wasteTypeName,
+    this.locationName,
     this.collectionCount,
     this.image,
     this.collections,
@@ -125,6 +180,7 @@ class GeneratorResource {
       locationId: json['locationID'] as int? ?? 0,
       wasteTypeId: json['wasteTypeID'] as int? ?? 0, // Handle null with default
       wasteTypeName: json['wasteTypeName'] as String?,
+      locationName: json['locationName'] as String?,
       collectionCount: (json['collectionCount'] as num?)?.toDouble(),
       image: json['image'] as String?,
       collections: (json['collections'] as List<dynamic>?)?.map((x) => CollectionGeneratorResource.fromJson(x)).toList(),
@@ -254,6 +310,108 @@ class NotificationListResource {
       createdDate: json['createdDate'] != null 
           ? DateTime.parse(json['createdDate'])
           : null,
+    );
+  }
+}
+
+class PickerListResource {
+  final int id;
+  final String? manualId;
+  final String? name;
+  final String? email;
+  final String? phone;
+  final int? locationId;
+  final String? locationName;
+  final double? collectionCount;
+  final String? image;
+  final List<CollectionPickerResource>? collections;  // Add this line
+
+  PickerListResource({
+    required this.id,
+    this.manualId,
+    this.name,
+    this.email,
+    this.phone,
+    this.locationId,
+    this.locationName,
+    this.collectionCount,
+    this.image,
+    this.collections, // Add this line
+  });
+
+  factory PickerListResource.fromJson(Map<String, dynamic> json) {
+    return PickerListResource(
+      id: json['id'] as int? ?? 0, // Handle null with default value
+      manualId: json['manualID'] as String?,
+      name: json['name'] as String?,
+      email: json['email'] as String?,
+      phone: json['phone'] as String?,
+      locationName: json['locationName'] as String?,
+      collectionCount: (json['collectionCount'] as num?)?.toDouble(),
+      locationId: json['locationID'] as int? ?? 0,
+      image: json['image'] as String?,
+      collections: json['Collections'] != null
+        ? (json['Collections'] as List)
+            .map((e) => CollectionPickerResource.fromJson(e as Map<String, dynamic>))
+            .toList()
+        : null, // Parse collections if not null
+    );
+  }
+}
+
+
+class CollectionPickerResource {
+  final int collectionID;
+  final int collectionStatusID;
+
+  CollectionPickerResource({
+    required this.collectionID,
+    required this.collectionStatusID,
+  });
+
+  factory CollectionPickerResource.fromJson(Map<String, dynamic> json) {
+    return CollectionPickerResource(
+      collectionID: json['CollectionID'] as int,
+      collectionStatusID: json['CollectionStatusID'] as int,
+    );
+  }
+}
+
+
+class GeneratorListResource {
+  final int id;
+  final String? manualId;
+  final String? name;
+  final String? email;
+  final String? phone;
+  final int? locationId;
+  final String? locationName;
+  final double? collectionCount;
+  final String? image;
+
+  GeneratorListResource({
+    required this.id,
+    this.manualId,
+    this.name,
+    this.email,
+    this.phone,
+    this.locationId,
+    this.locationName,
+    this.collectionCount,
+    this.image,
+  });
+
+  factory GeneratorListResource.fromJson(Map<String, dynamic> json) {
+    return GeneratorListResource(
+      id: json['id'] as int? ?? 0, // Handle null with default value
+      manualId: json['manualID'] as String?,
+      name: json['name'] as String?,
+      email: json['email'] as String?,
+      phone: json['phone'] as String?,
+      locationName: json['locationName'] as String?,
+      collectionCount: (json['collectionCount'] as num?)?.toDouble(),
+      locationId: json['locationID'] as int? ?? 0,
+      image: json['image'] as String?
     );
   }
 }

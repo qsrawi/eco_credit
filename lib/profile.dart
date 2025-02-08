@@ -36,7 +36,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           future: profile,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(child: CircularProgressIndicator());
+              return const Center(child: CircularProgressIndicator());
             }
             if (snapshot.hasError) {
               return Center(child: Text("Error: ${snapshot.error}"));
@@ -44,7 +44,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             if (snapshot.hasData) {
               return buildProfile(snapshot.data!);
             } else {
-              return Center(child: Text("No data available"));
+              return const Center(child: Text("No data available"));
             }
           },
         ),
@@ -77,10 +77,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           subtitle: Text(profile.phone ?? 'Unknown'),
           leading: const Icon(Icons.phone),
         ),
-        const ListTile(
-          title: Text('الموقع'),
-          subtitle: Text('Unknown'), // Assuming location needs special handling
-          leading: Icon(Icons.map),
+        ListTile(
+          title: const Text('الموقع'),
+          subtitle: Text(profile.locationName ?? 'Unknown'), // Assuming location needs special handling
+          leading: const Icon(Icons.map),
         ),
       ],
     );
@@ -97,7 +97,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             radius: 50,
             backgroundImage: profile.image != null 
               ? NetworkImage(profile.image!) as ImageProvider<Object>
-              : AssetImage('assets/images/default.jpg') as ImageProvider<Object>,
+              : const AssetImage('assets/images/default.jpg') as ImageProvider<Object>,
           ),
 
             Expanded(
@@ -126,4 +126,5 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
   }
+  
 }

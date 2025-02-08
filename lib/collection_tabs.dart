@@ -26,6 +26,31 @@ class _CollectionTabsState extends State<CollectionTabs> with SingleTickerProvid
   void initState() {
     super.initState();
     initializeTabs();
+    _tabController.addListener(_handleTabSelection);
+  }
+
+  @override
+  void didUpdateWidget(CollectionTabs oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    initializeTabs();
+  }
+
+  void _handleTabSelection() {
+    if (_tabController.indexIsChanging) {
+      switch (_tabController.index) {
+        case 0:
+          refreshTabData(1);  // Assuming status 1 is for 'بالانتظار'
+          break;
+        case 1:
+          refreshTabData(3);  // Assuming status 3 is for 'في الطريق'
+          break;
+        case 2:
+          if (widget.showCompleted) {
+            refreshTabData(4);  // Assuming status 4 is for 'اكتملت'
+          }
+          break;
+      }
+    }
   }
 
   void initializeTabs() {
@@ -52,31 +77,34 @@ class _CollectionTabsState extends State<CollectionTabs> with SingleTickerProvid
   }
 
   Future<ListView> createListView(int status) async {
-    try {
-      final collections = await _apiService.getCollections(
-        status,
-        userId: 1, // Replace with actual user ID
-        userType: 'generator' // Replace with actual user type
-      );
-      
-      return ListView(
-        children: collections.map((collection) => WasteCollectionCard(
+    // API Call Handling Simplified
+    final collections = await _apiService.getCollections(status, userId: 1, userType: 'generator');
+    return ListView.builder(
+      itemCount: collections.length,
+      itemBuilder: (context, index) {
+        final collection = collections[index];
+        return WasteCollectionCard(
           status: collection.collectionStatusName ?? 'Unknown',
           title: collection.wasteTypeName ?? 'Unknown',
           name: collection.generator?.name ?? 'Unknown',
           imageUrl: collection.image ?? 'assets/images/default.jpg',
           timeAgo: _formatTimeAgo(collection.createdDate),
-        )).toList(),
-      );
-    } catch (e) {
-      return ListView(children: [Text('Error: ${e.toString()}')]);
-    }
+        );
+      },
+    );
+  }
+
+  // Simplified to showcase how to refresh a specific tab's data
+  void refreshTabData(int status) {
+    setState(() {
+      createListView(status);  // Refresh the ListView for the selected tab
+    });
   }
 
   String _formatTimeAgo(DateTime? date) {
     if (date == null) return 'Unknown time';
     final difference = DateTime.now().difference(date);
-    
+
     if (difference.inDays > 0) {
       return 'من ${difference.inDays} يوم';
     } else if (difference.inHours > 0) {
@@ -88,7 +116,11 @@ class _CollectionTabsState extends State<CollectionTabs> with SingleTickerProvid
   }
 
   // Update list view methods to handle async
-  Widget createListViewPending() => FutureBuilder<ListView>(
+Widget createListViewPending() => RefreshIndicator(
+  onRefresh: () async {
+    setState(() {}); // Trigger a rebuild to refresh data
+  },
+  child: FutureBuilder<ListView>(
     future: createListView(1),
     builder: (context, snapshot) {
       if (snapshot.connectionState == ConnectionState.waiting) {
@@ -109,7 +141,8 @@ class _CollectionTabsState extends State<CollectionTabs> with SingleTickerProvid
       }
       return snapshot.data ?? const Text('No pending collections');
     },
-  );
+  ),
+);
 
   Widget createListViewPicked() => FutureBuilder<ListView>(
     future: createListView(3),
@@ -131,8 +164,10 @@ class _CollectionTabsState extends State<CollectionTabs> with SingleTickerProvid
     },
   );
 
+
   @override
   void dispose() {
+    _tabController.removeListener(_handleTabSelection);
     _tabController.dispose();
     super.dispose();
   }
