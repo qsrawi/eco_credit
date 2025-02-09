@@ -2,59 +2,98 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
   
   static const String baseUrl = 'https://10.0.2.2:7254/api'; // For Android emulator
 
-static Future<http.Response?> createCollectionWithImage(Map<String, dynamic> collectionData, File? imageFile) async {
-  var uri = Uri.parse('$baseUrl/collections/create');
+  static Future<http.Response?> createCollectionWithImage(Map<String, dynamic> collectionData, File? imageFile) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('authToken');
 
-  var request = http.MultipartRequest('POST', uri);
+    var uri = Uri.parse('$baseUrl/collections/create');
+    var request = http.MultipartRequest('POST', uri);
 
-  // Add fields only if they are not null
-  void addFieldIfNotNull(String key, dynamic value) {
-    if (value != null) {
-      request.fields[key] = value.toString();
+    request.headers.addAll({
+      'Authorization': 'Bearer $token'  // Include the token in the header
+    });
+
+    // Add fields only if they are not null
+    void addFieldIfNotNull(String key, dynamic value) {
+      if (value != null) {
+        request.fields[key] = value.toString();
+      }
     }
-  }
 
-  addFieldIfNotNull('GeneratorID', collectionData['GeneratorID']);
-  addFieldIfNotNull('PickerID', collectionData['PickerID']);
-  addFieldIfNotNull('InvoiceID', collectionData['InvoiceID']); // Pass null if InvoiceID is null
-  addFieldIfNotNull('CollectionStatusID', collectionData['CollectionStatusID']);
-  addFieldIfNotNull('CollectionTypeID', collectionData['CollectionTypeID']);
-  addFieldIfNotNull('WasteTypeID', collectionData['WasteTypeID']);
-  addFieldIfNotNull('CollectionSize', collectionData['CollectionSize']);
-  addFieldIfNotNull('Description', collectionData['Description']);
+    addFieldIfNotNull('GeneratorID', collectionData['GeneratorID']);
+    addFieldIfNotNull('PickerID', collectionData['PickerID']);
+    addFieldIfNotNull('InvoiceID', collectionData['InvoiceID']); // Pass null if InvoiceID is null
+    addFieldIfNotNull('CollectionStatusID', collectionData['CollectionStatusID']);
+    addFieldIfNotNull('CollectionTypeID', collectionData['CollectionTypeID']);
+    addFieldIfNotNull('WasteTypeID', collectionData['WasteTypeID']);
+    addFieldIfNotNull('CollectionSize', collectionData['CollectionSize']);
+    addFieldIfNotNull('Description', collectionData['Description']);
 
-  if (imageFile != null) {
-    String fileName = imageFile.path.split('/').last;
-    request.files.add(
-      await http.MultipartFile.fromPath(
-        'CollectionImage',
-        imageFile.path,
-        contentType: MediaType('image', fileName.split('.').last),
-      ),
-    );
-  }
+    if (imageFile != null) {
+      String fileName = imageFile.path.split('/').last;
+      request.files.add(
+        await http.MultipartFile.fromPath(
+          'CollectionImage',
+          imageFile.path,
+          contentType: MediaType('image', fileName.split('.').last),
+        ),
+      );
+    }
 
-  try {
-    var streamedResponse = await request.send();
-    var response = await http.Response.fromStream(streamedResponse);
-    if (response.statusCode == 200) {
-      return response;
-    } else {
-      print('Failed to create collection: ${response.body}');
+    try {
+      var streamedResponse = await request.send();
+      var response = await http.Response.fromStream(streamedResponse);
+      if (response.statusCode == 200) {
+        return response;
+      } else {
+        print('Failed to create collection: ${response.body}');
+        return null;
+      }
+    } catch (e) {
+      print('Exception when calling API: $e');
       return null;
     }
-  } catch (e) {
-    print('Exception when calling API: $e');
-    return null;
   }
-}
+  
+  static Future<String> login(String email, String password, String? type) async {
+    var url = Uri.parse('$baseUrl/admins/login');
+    try {
+      var response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',  // Ensuring headers are set for JSON
+        },
+        body: jsonEncode({
+          'email': email,
+          'password': password,
+          'type': type
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        // Assuming the token is directly the body response, adjust based on actual response structure
+        String token = response.body;  
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('authToken', token);
+        return token;
+      } else {
+        throw Exception('Failed to login with status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Failed to login: $e');
+    }
+  }
 
   Future<List<CollectionResponse>> getCollections(int status, {int? userId, String? userType}) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('authToken');
+
     final uri = Uri.parse('$baseUrl/collections')
       .replace(queryParameters: {
         'collectionStatus': status.toString(),
@@ -62,7 +101,9 @@ static Future<http.Response?> createCollectionWithImage(Map<String, dynamic> col
         'userType': userType,
       });
 
-    final response = await http.get(uri);
+    final response = await http.get(uri, headers: {
+      'Authorization': 'Bearer $token',  // Use the token here
+    });
 
     if (response.statusCode == 200) {
       List<dynamic> data = json.decode(response.body);
@@ -149,10 +190,15 @@ class GeneratorResource {
   final String? locationName;
   final int wasteTypeId;
   final String? wasteTypeName;
+  final String? collectionTypeName;
   final double? collectionCount;
   final String? image;
   final List<CollectionGeneratorResource>? collections;
   final List<NotificationGeneratorResource>? notifications;
+  final int? pending;
+  final int? ignored;
+  final int? picked;
+  final int? completed;
 
   GeneratorResource({
     required this.id,
@@ -163,11 +209,16 @@ class GeneratorResource {
     this.locationId,
     required this.wasteTypeId,
     this.wasteTypeName,
+    this.collectionTypeName,
     this.locationName,
     this.collectionCount,
     this.image,
     this.collections,
     this.notifications,
+    this.pending,
+    this.ignored,
+    this.picked,
+    this.completed,
   });
 
   factory GeneratorResource.fromJson(Map<String, dynamic> json) {
@@ -180,11 +231,16 @@ class GeneratorResource {
       locationId: json['locationID'] as int? ?? 0,
       wasteTypeId: json['wasteTypeID'] as int? ?? 0, // Handle null with default
       wasteTypeName: json['wasteTypeName'] as String?,
+      collectionTypeName: json['collectionTypeName'] as String?,
       locationName: json['locationName'] as String?,
       collectionCount: (json['collectionCount'] as num?)?.toDouble(),
       image: json['image'] as String?,
       collections: (json['collections'] as List<dynamic>?)?.map((x) => CollectionGeneratorResource.fromJson(x)).toList(),
       notifications: (json['notifications'] as List<dynamic>?)?.map((x) => NotificationGeneratorResource.fromJson(x)).toList(),
+      pending: json['pending'] as int?,
+      ignored: json['ignored'] as int?,
+      picked: json['picked'] as int?,
+      completed: json['completed'] as int?,
     );
   }
 }
@@ -231,7 +287,9 @@ class CollectionResponse {
   final int wasteTypeID;
   final String? wasteTypeName;
   final String? collectionStatusName;
+  final String? collectionTypeName;
   final String? description;
+  final double? collectionSize;
   final DateTime? createdDate;
   final String? image;
   final Generator? generator;
@@ -243,9 +301,11 @@ class CollectionResponse {
     this.pickerID,
     this.notificationID,
     this.collectionStatusName,
+    this.collectionTypeName,
     required this.collectionStatusID,
     required this.wasteTypeID,
     this.wasteTypeName,
+    this.collectionSize,
     this.description,
     this.createdDate,
     this.image,
@@ -260,7 +320,9 @@ class CollectionResponse {
       pickerID: json['pickerID'],
       notificationID: json['notificationID'],
       collectionStatusID: json['collectionStatusID'],
+      collectionTypeName: json['collectionTypeName'],
       collectionStatusName: json['collectionStatusName'],
+      collectionSize: (json['collectionSize'] != null) ? json['collectionSize'].toDouble() : null,
       wasteTypeID: json['wasteTypeID'],
       wasteTypeName: json['wasteTypeName'],
       description: json['description'],

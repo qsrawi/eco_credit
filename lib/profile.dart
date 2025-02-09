@@ -13,7 +13,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
-    profile = ApiService().fetchGeneratorsProfile(2); // Assuming '1' is the ID you want to fetch
+    profile = ApiService().fetchGeneratorsProfile(1); // Assuming '1' is the ID you want to fetch
   }
 
   @override
@@ -57,10 +57,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
       children: <Widget>[
         _buildProfileHeader(profile),
         WasteCollectionStatisticsCard(
-          pending: 3, // These should ideally come from the API
-          completed: 121,
-          inProgress: 2,
-          cancelled: 1,
+          pending: profile.pending ?? 0, // These should ideally come from the API
+          completed: profile.completed ?? 0,
+          inProgress: profile.picked ?? 0,
+          cancelled: profile.ignored ?? 0,
         ),
         ListTile(
           title: const Text('الاسم الكامل'),
@@ -81,6 +81,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
           title: const Text('الموقع'),
           subtitle: Text(profile.locationName ?? 'Unknown'), // Assuming location needs special handling
           leading: const Icon(Icons.map),
+        ),
+        ListTile(
+          title: const Text('عدد الجموعات'),
+          subtitle: Text('${profile.collectionCount ?? 0}'),
+          leading: const Icon(Icons.list),
         ),
       ],
     );

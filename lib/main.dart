@@ -1,84 +1,107 @@
-import 'package:eco_credit/add_waste_collection.dart';
-import 'package:eco_credit/home_screen.dart';
-import 'package:eco_credit/notification.dart';
-import 'package:eco_credit/profile.dart';
-import 'package:flutter/material.dart';
 import 'dart:io';
 
+import 'package:eco_credit/login/login.dart';
+import 'package:flutter/material.dart';
+
 void main() {
-  disableHttpsCertificateVerification();
+ // Your code
+ 
   runApp(MyApp());
+   HttpOverrides.global = MyHttpOverrides();
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: MainScreen(),
+    return MaterialApp(
+      home: HomePage(),
     );
   }
 }
 
-class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
-
-  @override
-  // ignore: library_private_types_in_public_api
-  _MainScreenState createState() => _MainScreenState();
-}
-
-class _MainScreenState extends State<MainScreen> {
-  int _selectedIndex = 0; // Default index for the first screen
-
-  // Updated list of widgets for each tab
-  final List<Widget> _widgetOptions = <Widget>[
-    HomeScreen(),  // Now using HomeScreen widget
-    HomeScreen(showCompleted: true),
-    AddWasteCollectionScreen(),
-    NotificationsScreen(),
-    ProfileScreen(),
-  ];
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
+class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    // Obtain screen size for responsive layout
+    var screenSize = MediaQuery.of(context).size;
+
     return Scaffold(
-      body: Center(
-        // Replace direct element access with IndexedStack for keeping state
-        child: IndexedStack(
-          index: _selectedIndex,
-          children: _widgetOptions,
+      backgroundColor: Color(0xFFD5E4E1),
+      appBar: AppBar(
+        title: Text('EcoCredit'),
+        backgroundColor: Color(0xFFD5E4E1),
+        elevation: 0,
+      ),
+      body: SingleChildScrollView(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              ImageCard(
+                imagePath: 'assets/images/dryclean.jpg', 
+                label: 'Dry Clean', 
+                onTap: () => navigateToLogin(context, 'dry_clean'),
+                height: screenSize.height * 0.3, // 30% of screen height
+              ),
+              ImageCard(
+                imagePath: 'assets/images/erecycleHUB.jpg', 
+                label: 'eRecycleHUB', 
+                onTap: () => navigateToLogin(context, 'erecycleHUB'),
+                height: screenSize.height * 0.3, // 30% of screen height
+              ),
+            ],
+          ),
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.reorder), label: 'Collections'),
-          BottomNavigationBarItem(icon: Icon(Icons.add), label: 'Add'),
-          BottomNavigationBarItem(icon: Icon(Icons.notifications), label: 'Notifications'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: Colors.blue,
-        onTap: _onItemTapped,
-        type: BottomNavigationBarType.fixed,
+    );
+  }
+
+  void navigateToLogin(BuildContext context, String type) {
+    Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage(type: type)));
+  }
+}
+
+class ImageCard extends StatelessWidget {
+  final String imagePath;
+  final String label;
+  final VoidCallback onTap;
+  final double height;
+
+  ImageCard({
+    required this.imagePath, 
+    required this.label, 
+    required this.onTap, 
+    required this.height
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: Colors.white,
+      margin: EdgeInsets.all(16),
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          height: height,
+          padding: EdgeInsets.all(20),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Expanded(
+                child: Image.asset(imagePath, fit: BoxFit.contain),  // Adjust image fitting
+              ),
+              SizedBox(height: 8),
+              Text(label, style: TextStyle(fontSize: 16)),
+            ],
+          ),
+        ),
       ),
     );
   }
 }
 
-void disableHttpsCertificateVerification() {
-  HttpOverrides.global = new MyHttpOverrides();
-}
 
-class MyHttpOverrides extends HttpOverrides{
+ class MyHttpOverrides extends HttpOverrides{
   @override
   HttpClient createHttpClient(SecurityContext? context){
     return super.createHttpClient(context)

@@ -86,9 +86,13 @@ class _CollectionTabsState extends State<CollectionTabs> with SingleTickerProvid
         return WasteCollectionCard(
           status: collection.collectionStatusName ?? 'Unknown',
           title: collection.wasteTypeName ?? 'Unknown',
+          collectionTypeName: collection.collectionTypeName ?? 'Unknown',
           name: collection.generator?.name ?? 'Unknown',
+          pickerName: collection.picker?.name ?? 'Unknown',
           imageUrl: collection.image ?? 'assets/images/default.jpg',
+          collectionSize: collection.collectionSize ?? 0.00,
           timeAgo: _formatTimeAgo(collection.createdDate),
+          description: collection.description ?? 'Unknown'
         );
       },
     );
