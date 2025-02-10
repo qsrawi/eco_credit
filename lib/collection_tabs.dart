@@ -1,6 +1,7 @@
 import 'package:eco_credit/services/api_service.dart';
 import 'package:eco_credit/wast_collection_card.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CollectionTabs extends StatefulWidget {
   final int initialIndex;
@@ -77,8 +78,11 @@ class _CollectionTabsState extends State<CollectionTabs> with SingleTickerProvid
   }
 
   Future<ListView> createListView(int status) async {
-    // API Call Handling Simplified
-    final collections = await _apiService.getCollections(status, userId: 1, userType: 'generator');
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    int userId = prefs.getInt('id') ?? 1; // Default to 1 if not set
+    String userType = prefs.getString('role') ?? 'Generator'; // Default to 'Generator' if not set
+
+    final collections = await _apiService.getCollections(status, userId: userId, userType: userType);
     return ListView.builder(
       itemCount: collections.length,
       itemBuilder: (context, index) {

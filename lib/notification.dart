@@ -1,5 +1,6 @@
 import 'package:eco_credit/services/api_service.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'notification_card.dart';
 
 class NotificationsScreen extends StatefulWidget {
@@ -14,20 +15,28 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   @override
   void initState() {
     super.initState();
-    _notificationsFuture = _apiService.fetchNotifications();
+    loadInitialData();
+  }
+
+  void loadInitialData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    int userId = prefs.getInt('id') ?? 1; // Default to 1 if not set
+    String userType = prefs.getString('role') ?? 'Generator';
+    _notificationsFuture = _apiService.fetchNotifications(userId, userType);
+    setState(() {}); // This is optional, depends on if you need to update the UI after data is fetched
   }
 
   Map<String, List<Widget>> grouped = {
-      'Today': <Widget>[],
-      'Yesterday': <Widget>[],
-      'Earlier': <Widget>[]
+      'اليوم': <Widget>[],
+      'البارحة': <Widget>[],
+      'اقدم': <Widget>[]
   };
 
   Map<String, List<Widget>> groupNotifications(List<NotificationListResource> notifications) {
     final Map<String, List<Widget>> grouped = {
-      'Today': <Widget>[],
-      'Yesterday': <Widget>[],
-      'Earlier': <Widget>[],
+      'اليوم': <Widget>[],
+      'البارحة': <Widget>[],
+      'اقدم': <Widget>[],
     };
     
     final now = DateTime.now();
@@ -37,17 +46,17 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     for (var notification in notifications) {
       final date = notification.createdDate;
       if (date == null) {
-        grouped['Earlier']!.add(_buildNotificationCard(notification));
+        grouped['اقدم']!.add(_buildNotificationCard(notification));
         continue;
       }
 
       final notificationDate = DateTime(date.year, date.month, date.day);
       if (notificationDate == today) {
-        grouped['Today']!.add(_buildNotificationCard(notification));
+        grouped['اليوم']!.add(_buildNotificationCard(notification));
       } else if (notificationDate == yesterday) {
-        grouped['Yesterday']!.add(_buildNotificationCard(notification));
+        grouped['البارحة']!.add(_buildNotificationCard(notification));
       } else {
-        grouped['Earlier']!.add(_buildNotificationCard(notification));
+        grouped['اقدم']!.add(_buildNotificationCard(notification));
       }
     }
 
@@ -94,7 +103,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Notifications'),
+        title: Text('إشعارات'),
       ),
       body: FutureBuilder<List<NotificationListResource>>(
         future: _notificationsFuture,

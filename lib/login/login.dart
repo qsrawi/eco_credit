@@ -1,3 +1,4 @@
+import 'package:eco_credit/e_recycle_hub.dart';
 import 'package:eco_credit/services/api_service.dart';
 import 'package:flutter/material.dart';
 
@@ -112,14 +113,18 @@ class _LoginPageState extends State<LoginPage> {
                 } else {
                   // Proceed with the login process if the password is not empty
                   try {
-                    await ApiService.login(_emailController.text, _passwordController.text, _selectedOption);
-                    //print('Logged in user ID: $userId');
-                  } catch (e) {
+                    var loginResult = await ApiService.login(_emailController.text, _passwordController.text, _selectedOption);
+                    if (loginResult.containsKey('id') && loginResult.containsKey('role')) {
+                      Navigator.of(context).pushReplacement(MaterialPageRoute(
+                        builder: (context) => ERecycleHub(id: loginResult['id'], role: loginResult['role']),
+                      ));
+                    }
+                  }catch (e) {
                     showDialog(
                       context: context,
                       builder: (ctx) => AlertDialog(
                         title: Text('Login Error'),
-                        content: Text(e.toString()),
+                        content: const Text("الرجاء التأكد من كلمة المرور او البريد الالكتروني"),
                         actions: <Widget>[
                           TextButton(
                             child: Text('OK'),
@@ -133,22 +138,22 @@ class _LoginPageState extends State<LoginPage> {
                   }
                 }
               },
-              child: Text('Log In'),
               style: ElevatedButton.styleFrom(
                 foregroundColor: Colors.black,
                 backgroundColor: Colors.blue,
                 minimumSize: Size.fromHeight(50),
               ),
+              child: const Text('تسجيل الدخول'),
             ),
             SizedBox(height: 15),
             ElevatedButton(
               onPressed: () {},
-              child: Text('Sign Up'),
               style: ElevatedButton.styleFrom(
                 foregroundColor: Colors.black,
                 backgroundColor: Colors.green,
                 minimumSize: Size.fromHeight(50),
               ),
+              child: const Text('إنشاء حساب'),
             ),
             if (widget.type == 'dry_clean')
               SizedBox(height: 15),

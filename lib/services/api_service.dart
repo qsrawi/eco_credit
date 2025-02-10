@@ -61,13 +61,13 @@ class ApiService {
     }
   }
   
-  static Future<String> login(String email, String password, String? type) async {
+  static Future<Map<String, dynamic>> login(String email, String password, String? type) async {
     var url = Uri.parse('$baseUrl/admins/login');
     try {
       var response = await http.post(
         url,
         headers: {
-          'Content-Type': 'application/json',  // Ensuring headers are set for JSON
+          'Content-Type': 'application/json',
         },
         body: jsonEncode({
           'email': email,
@@ -77,13 +77,24 @@ class ApiService {
       );
 
       if (response.statusCode == 200) {
-        // Assuming the token is directly the body response, adjust based on actual response structure
-        String token = response.body;  
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString('authToken', token);
-        return token;
+        var jsonResponse = jsonDecode(response.body);
+        if (jsonResponse['token'] != null && jsonResponse['id'] != null) {
+          String token = jsonResponse['token'];
+          int id = jsonResponse['id'];
+          String role = jsonResponse['role'];
+
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          await prefs.setString('authToken', token);
+          await prefs.setInt('id', id);
+          await prefs.setString('role', role);
+
+          return { 'token': token, 'id': id, 'role': role };
+        } else {
+          throw Exception('Token or User ID not found in response');
+        }
       } else {
-        throw Exception('Failed to login with status code: ${response.statusCode}');
+        var error = jsonDecode(response.body);
+        throw Exception('Failed to login with status code: ${response.statusCode}, Error: ${error['message']}');
       }
     } catch (e) {
       throw Exception('Failed to login: $e');
@@ -151,11 +162,11 @@ class ApiService {
     }
   }
 
-  Future<List<NotificationListResource>> fetchNotifications() async {
+  Future<List<NotificationListResource>> fetchNotifications(int? userId, String? userType) async {
     final uri = Uri.parse('$baseUrl/notifications')
       .replace(queryParameters: {
-        'userID': '1',
-        'userType': 'Generator',
+        'userID': userId?.toString(),
+        'userType': userType,
       });
 
     final response = await http.get(uri);

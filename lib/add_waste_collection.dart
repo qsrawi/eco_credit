@@ -1,9 +1,11 @@
 import 'dart:io';
 
+import 'package:eco_credit/e_recycle_hub.dart';
 import 'package:eco_credit/sale-or-donation-selector.dart';
 import 'package:eco_credit/services/api_service.dart';
 import 'package:eco_credit/upload-photo-section.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'picker_widget.dart';  // Assuming you have this file
 import 'waste_type_widget.dart';  // Assuming you have this file
 
@@ -58,7 +60,20 @@ class _AddWasteCollectionScreenState extends State<AddWasteCollectionScreen> {
         title: Text('أضافة مجموعة جديدة'),
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () async {
+            // Retrieve values from SharedPreferences
+            SharedPreferences prefs = await SharedPreferences.getInstance();
+            int someId = prefs.getInt('id') ?? 0; // Provide a default value in case it's null
+            String someRole = prefs.getString('role') ?? ''; // Provide a default value in case it's null
+
+            // Navigate to ERecycleHub with the retrieved values
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ERecycleHub(id: someId, role: someRole),
+              ),
+            );
+          },
         ),
       ),
       body: SingleChildScrollView(
