@@ -1,5 +1,6 @@
 import 'package:eco_credit/collection_tabs.dart';
 import 'package:eco_credit/notification_icon.dart';
+import 'package:eco_credit/services/api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -14,6 +15,26 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int notificationCount = 5; // Example count, replace with actual data source
+  late final ApiService _apiService = ApiService();
+  Future<CollectionLightResource>? _futureStatistics;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchStatistics();
+  }
+
+  Future<void> _fetchStatistics() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    int? pickerId = prefs.getInt('id'); // Assuming pickerId is stored in SharedPreferences
+    String role = prefs.getString('role') ?? ''; // Provide a default value in case it's null
+
+    if (pickerId != null && role == "Picker") {
+      setState(() {
+        _futureStatistics = _apiService.statistics(pickerId);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,28 +75,45 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget roleBasedCards() {
-    return const Padding(
-      padding: EdgeInsets.all(8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          InfoCard(
-            title: "المهام المنجزة",
-            count: 8,
-            iconData: Icons.directions_car,
-            color: Colors.green,
+Widget roleBasedCards() {
+  return FutureBuilder<CollectionLightResource>(
+    future: _futureStatistics,
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return Center(child: CircularProgressIndicator());
+      } else if (snapshot.hasError) {
+        return Center(child: Text('Error: ${snapshot.error}'));
+      } else if (!snapshot.hasData) {
+        return Center(child: Text('No data available'));
+      } else {
+        // Extract the counts from the API response
+        int completedTasks = snapshot.data!.todayPickups ?? 0;
+        int pendingTasks = snapshot.data!.pending ?? 0;
+
+        return Padding(
+          padding: EdgeInsets.all(8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              InfoCard(
+                title: "المهام المنجزة",
+                count: completedTasks,
+                iconData: Icons.directions_car,
+                color: Colors.green,
+              ),
+              InfoCard(
+                title: "قيد الانتظار",
+                count: pendingTasks,
+                iconData: Icons.hourglass_empty,
+                color: Colors.amber,
+              ),
+            ],
           ),
-          InfoCard(
-            title: "قيد الانتظار",
-            count: 3,
-            iconData: Icons.hourglass_empty,
-            color: Colors.amber,
-          ),
-        ],
-      ),
-    );
-  }
+        );
+      }
+    },
+  );
+}
 }
 
 class InfoCard extends StatelessWidget {

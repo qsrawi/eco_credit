@@ -116,11 +116,13 @@ class ApiService {
           String token = jsonResponse['token'];
           int id = jsonResponse['id'];
           String role = jsonResponse['role'];
+          String wasteTypeID = jsonResponse['WasteTypeID'];
 
           SharedPreferences prefs = await SharedPreferences.getInstance();
           await prefs.setString('authToken', token);
           await prefs.setInt('id', id);
           await prefs.setString('role', role);
+          await prefs.setString('wasteTypeID', wasteTypeID);
 
           return { 'token': token, 'id': id, 'role': role };
         } else {
@@ -153,6 +155,29 @@ class ApiService {
     if (response.statusCode == 200) {
       List<dynamic> data = json.decode(response.body);
       return data.map((item) => CollectionResponse.fromJson(item)).toList();
+    } else {
+      throw Exception('Failed to load collections: ${response.statusCode} ${response.body}');
+    }
+  }
+
+  Future<CollectionLightResource> statistics(int? pickerId) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('authToken');
+
+    final uri = Uri.parse('$baseUrl/collections/statistics').replace(queryParameters: {
+      'pickerID': pickerId.toString(),
+    });
+
+    final response = await http.get(uri, headers: {
+      'Authorization': 'Bearer $token', // Use the token here
+    });
+
+    if (response.statusCode == 200) {
+      // Decode the JSON response
+      Map<String, dynamic> data = json.decode(response.body);
+
+      // Directly parse the JSON into a CollectionLightResource object
+      return CollectionLightResource.fromJson(data);
     } else {
       throw Exception('Failed to load collections: ${response.statusCode} ${response.body}');
     }
@@ -322,6 +347,22 @@ class NotificationGeneratorResource {
   }
 }
 
+class CollectionLightResource {
+  final int? pending;
+  final int? todayPickups;
+
+  CollectionLightResource({
+    this.pending,
+    this.todayPickups
+  });
+
+  factory CollectionLightResource.fromJson(Map<String, dynamic> json) {
+    return CollectionLightResource(
+      pending: json['pending'],
+      todayPickups: json['todayPickups']
+    );
+  }
+}
 
 class CollectionResponse {
   final int collectionID;

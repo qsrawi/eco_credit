@@ -12,12 +12,12 @@ class PickerWidget extends StatefulWidget {
 }
 
 class _PickerWidgetState extends State<PickerWidget> {
-  String? selectedPicker;
   List<PickerListResource> pickers = [];
   List<PickerListResource> dialogPickers = [];
   bool isLoading = true;
   TextEditingController searchController = TextEditingController();
   int? selectedPickerId; // Added to store the selected picker's ID
+  String? selectedPicker;
 
   @override
   void initState() {
@@ -99,6 +99,8 @@ class _PickerWidgetState extends State<PickerWidget> {
                                   Navigator.of(context).pop();
                                   setState(() {  // Update the main state to reflect selection
                                     selectedPicker = picker.name;
+                                    selectedPickerId = picker.id;
+                                    widget.onSelected(picker.id);
                                     if (!pickers.any((p) => p.name == picker.name)) {
                                       pickers.add(picker);
                                     }

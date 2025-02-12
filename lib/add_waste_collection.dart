@@ -125,6 +125,8 @@ class _AddWasteCollectionScreenState extends State<AddWasteCollectionScreen> {
                   return;
                 }
 
+                _wasteTypeId ??= prefs.getString('wasteTypeID') as int?;
+
                 Map<String, dynamic> collectionData = {
                   'GeneratorID': userId,
                   'PickerID': _pickerId,

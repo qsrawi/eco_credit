@@ -15,9 +15,21 @@ class _UploadPhotoSectionState extends State<UploadPhotoSection> {
   File? _image;
   final ImagePicker _picker = ImagePicker();
 
-  // Updated method to use the camera
-  Future<void> _pickImage() async {
+  // Method to pick an image from the camera
+  Future<void> _pickImageFromCamera() async {
     final XFile? pickedFile = await _picker.pickImage(source: ImageSource.camera);
+    if (pickedFile != null) {
+      File imageFile = File(pickedFile.path);
+      setState(() {
+        _image = imageFile;
+      });
+      widget.onImageSelected(imageFile);
+    }
+  }
+
+  // Method to pick an image from the gallery
+  Future<void> _pickImageFromGallery() async {
+    final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       File imageFile = File(pickedFile.path);
       setState(() {
@@ -53,9 +65,19 @@ class _UploadPhotoSectionState extends State<UploadPhotoSection> {
             color: Colors.grey[800],
           ),
         ),
-        trailing: IconButton(
-          icon: Icon(Icons.camera_alt, size: 30, color: Colors.green),  // Changed to camera icon
-          onPressed: _pickImage,
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min, // Ensure the icons stay close together
+          children: [
+            IconButton(
+              icon: Icon(Icons.camera_alt, size: 30, color: Colors.green), // Camera icon
+              onPressed: _pickImageFromCamera,
+            ),
+            const SizedBox(width: 8), // Add spacing between the icons
+            IconButton(
+              icon: Icon(Icons.photo_library, size: 30, color: Colors.blue), // Gallery icon
+              onPressed: _pickImageFromGallery,
+            ),
+          ],
         ),
       ),
     );
@@ -65,7 +87,7 @@ class _UploadPhotoSectionState extends State<UploadPhotoSection> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        if (_image != null) Image.file(_image!), // Displays the captured image
+        if (_image != null) Image.file(_image!), // Displays the selected/captured image
         _buildPhotoSection(),
       ],
     );

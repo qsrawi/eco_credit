@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'package:eco_credit/e_recycle_hub.dart';
 import 'package:eco_credit/services/api_service.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class WasteCollectionCard extends StatelessWidget {
   final int collectionID;
@@ -150,12 +152,21 @@ class WasteCollectionCard extends StatelessWidget {
                   children: [
                     ElevatedButton(
                       onPressed: () async {
+                      SharedPreferences prefs = await SharedPreferences.getInstance();
+                      int userId = prefs.getInt('id') ?? 1;
+                      String userType = prefs.getString('role') ?? 'Generator';
+                      
                         CollectionModel model = CollectionModel(
                           collectionID: collectionID,
                           collectionStatusID: 2,
                         );
                         ApiService apiService = ApiService();
                         await apiService.updateCollection(model);
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(builder: (context) => ERecycleHub(id: userId, role: userType)),
+                          (route) => false, // Remove all previous routes
+                        );
                       },
                       child: const Text('رفض', style: TextStyle(color: Colors.red)),
                       style: ButtonStyle(
@@ -189,14 +200,25 @@ class WasteCollectionCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 10), // Space between buttons
                     ElevatedButton(
-                      onPressed: () async {
-                        CollectionModel model = CollectionModel(
-                          collectionID: collectionID,
-                          collectionStatusID: 3,
-                        );
-                        ApiService apiService = ApiService();
-                        await apiService.updateCollection(model);
-                      },
+                    onPressed: () async {
+                      SharedPreferences prefs = await SharedPreferences.getInstance();
+                      int userId = prefs.getInt('id') ?? 1;
+                      String userType = prefs.getString('role') ?? 'Generator';
+                      // Create the updated model
+                      CollectionModel model = CollectionModel(
+                        collectionID: collectionID,
+                        collectionStatusID: 3, // Assuming 3 is the new status
+                      );
+
+                      // Call the API to update the collection
+                      ApiService apiService = ApiService();
+                      await apiService.updateCollection(model);
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (context) => ERecycleHub(id: userId, role: userType)),
+                        (route) => false, // Remove all previous routes
+                      ); // Pass `true` to indicate success
+                    },
                       child: const Text('قبول', style: TextStyle(color: Colors.white)),
                       style: ButtonStyle(
                         backgroundColor: MaterialStateProperty.resolveWith<Color>(

@@ -46,6 +46,15 @@ class _LoginPageState extends State<LoginPage> {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.all(5),
+              child: Image.asset(
+                'assets/images/main.jpg', // Path to your image
+                width: 500, // Adjust the width as needed
+                height: 150, // Adjust the height as needed
+                fit: BoxFit.contain, // Ensures the image fits within the specified dimensions
+              ),
+            ),
             TextFormField(
               controller: _emailController,
               decoration: const InputDecoration(
