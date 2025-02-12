@@ -1,8 +1,12 @@
 import 'dart:convert';
+import 'package:eco_credit/services/api_service.dart';
 import 'package:flutter/material.dart';
 
 class WasteCollectionCard extends StatelessWidget {
+  final int collectionID;
+  final String role;
   final String status; // حالة الجمع
+  final int statusID; // حالة الجمع
   final String title; // العنوان
   final String name; // الاسم
   final String pickerName; // اسم الجامع
@@ -13,7 +17,10 @@ class WasteCollectionCard extends StatelessWidget {
   final String description;
 
   const WasteCollectionCard({
+    required this.collectionID,
+    required this.role,
     required this.status,
+    required this.statusID,
     required this.title,
     required this.collectionTypeName,
     required this.name,
@@ -136,6 +143,93 @@ class WasteCollectionCard extends StatelessWidget {
                   ),
                 ),
               ),
+              if (role == "Picker" && statusID == 1) ...[
+                const SizedBox(height: 10),// Add space before the buttons
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () async {
+                        CollectionModel model = CollectionModel(
+                          collectionID: collectionID,
+                          collectionStatusID: 2,
+                        );
+                        ApiService apiService = ApiService();
+                        await apiService.updateCollection(model);
+                      },
+                      child: const Text('رفض', style: TextStyle(color: Colors.red)),
+                      style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                          (Set<MaterialState> states) {
+                            if (states.contains(MaterialState.pressed)) {
+                              return Colors.white.withOpacity(0.9); // Light opacity when pressed
+                            }
+                            return Colors.white; // Default non-pressed state
+                          }
+                        ),
+                        foregroundColor: MaterialStateProperty.all<Color>(Colors.red),
+                        padding: MaterialStateProperty.all<EdgeInsets>(
+                          const EdgeInsets.symmetric(horizontal: 75, vertical: 10)
+                        ),
+                        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8), // Smaller border radius
+                            side: BorderSide(color: Colors.red, width: 0.8), // Red border color
+                          )
+                        ),
+                        overlayColor: MaterialStateProperty.resolveWith<Color>(
+                          (Set<MaterialState> states) {
+                            if (states.contains(MaterialState.hovered) || states.contains(MaterialState.pressed)) {
+                              return Colors.red.withOpacity(0.1); // Hover and click effect color
+                            }
+                            return Colors.transparent; // Default is transparent
+                          }
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10), // Space between buttons
+                    ElevatedButton(
+                      onPressed: () async {
+                        CollectionModel model = CollectionModel(
+                          collectionID: collectionID,
+                          collectionStatusID: 3,
+                        );
+                        ApiService apiService = ApiService();
+                        await apiService.updateCollection(model);
+                      },
+                      child: const Text('قبول', style: TextStyle(color: Colors.white)),
+                      style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                          (Set<MaterialState> states) {
+                            if (states.contains(MaterialState.pressed)) {
+                              return Colors.green.withOpacity(0.9); // Light opacity when pressed
+                            }
+                            return Colors.green; // Default non-pressed state
+                          }
+                        ),
+                        foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
+                        padding: MaterialStateProperty.all<EdgeInsets>(
+                          const EdgeInsets.symmetric(horizontal: 75, vertical: 10)
+                        ),
+                        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8), // Smaller border radius
+                            side: BorderSide(color: Colors.green, width: 0.8), // Matching border color
+                          )
+                        ),
+                        overlayColor: MaterialStateProperty.resolveWith<Color>(
+                          (Set<MaterialState> states) {
+                            if (states.contains(MaterialState.hovered) || states.contains(MaterialState.pressed)) {
+                              return Colors.green.withOpacity(0.1); // Hover and click effect color
+                            }
+                            return Colors.transparent; // Default is transparent
+                          }
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ]
             ],
           ),
         ),

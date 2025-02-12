@@ -11,6 +11,8 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   late Future<GeneratorResource> profile;
+  int? userId;
+  String? userType;
 
   @override
   void initState() {
@@ -21,7 +23,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void loadInitialData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     int userId = prefs.getInt('id') ?? 1; // Default to 1 if not set
-    String userType = prefs.getString('role') ?? 'Generator';
+    userType = prefs.getString('role') ?? 'Generator';
     if(userType == "Generator") {
       profile = ApiService().fetchGeneratorsProfile(userId);
     } else {
@@ -137,7 +139,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           leading: const Icon(Icons.map, color: Colors.blue),
         ),
         ListTile(
-          title: const Text('عدد الجموعات'),
+          title: const Text('عدد المجموعات'),
           subtitle: Text('${profile.collectionCount ?? 0}'),
           leading: const Icon(Icons.list, color: Colors.blue),
         ),
@@ -171,6 +173,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
+                  if (userType == "Generator") ...[
+                    Text(
+                      'نوع المجموعة : ${profile.wasteTypeName}',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
                   Text(
                     'رقم المستخدم: #${profile.manualId}',
                     style: const TextStyle(

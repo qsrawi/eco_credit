@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:eco_credit/e_recycle_hub.dart';
 import 'package:eco_credit/sale-or-donation-selector.dart';
 import 'package:eco_credit/services/api_service.dart';
@@ -20,7 +19,7 @@ class _AddWasteCollectionScreenState extends State<AddWasteCollectionScreen> {
   File? _collectionImage;
   int? _pickerId;
   int? _wasteTypeId;
-  int? _collectionTypeId;
+  int? _collectionTypeId = 2;
   final TextEditingController _descriptionController = TextEditingController();
 
   @override
@@ -97,30 +96,91 @@ class _AddWasteCollectionScreenState extends State<AddWasteCollectionScreen> {
               padding: const EdgeInsets.symmetric(vertical: 20.0),
               child: ElevatedButton(
               onPressed: () async {
+              SharedPreferences prefs = await SharedPreferences.getInstance();
+              int userId = prefs.getInt('id') ?? 1;
+              String userType = prefs.getString('role') ?? 'Generator';
+
                 // Assuming _collectionImage is updated through setImage method as per previous discussions
                 if (_collectionImage == null) {
-                  print('No image selected');
+                  print('لا يوجد صورة مرفوعة');
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('لا يوجد صورة مرفوعة'),
+                      backgroundColor: Colors.red, // Red for error
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
                   return;
                 }
-                
+
+                if (_pickerId == null) {
+                  print('No Eco Champion');
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('اختر بطل بيئة'),
+                      backgroundColor: Colors.red, // Red for error
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                  return;
+                }
+
                 Map<String, dynamic> collectionData = {
-                  'GeneratorID': 1,
+                  'GeneratorID': userId,
                   'PickerID': _pickerId,
                   'CollectionStatusID': 1,
                   'CollectionTypeID': _collectionTypeId,
                   'WasteTypeID': _wasteTypeId,
-                  'Description': _descriptionController.text, 
+                  'Description': _descriptionController.text,
                 };
-                
+
                 var response = await ApiService.createCollectionWithImage(collectionData, _collectionImage);
                 if (response != null && response.statusCode == 200) {
                   print('Collection created successfully!');
-                  // Optionally, navigate to another screen or show a success message
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Row(
+                        children: [
+                          Icon(Icons.check_circle, color: Colors.white), // Success icon
+                          SizedBox(width: 8), // Spacing between icon and text
+                          Text('Collection added successfully!'),
+                        ],
+                      ),
+                      backgroundColor: Colors.green, // Green for success
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+
+                  // Clear the form data
+                  _descriptionController.clear();
+                  _collectionImage = null;
+                  _pickerId = null;
+                  _collectionTypeId = null;
+                  _wasteTypeId = null;
+
+                  // Navigate to HomeScreen
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => ERecycleHub(id: userId, role: userType)),
+                    (route) => false, // Remove all previous routes
+                  );
                 } else {
                   print('Failed to submit collection. Status code: ${response?.statusCode}');
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Row(
+                        children: [
+                          Icon(Icons.error, color: Colors.white), // Error icon
+                          SizedBox(width: 8), // Spacing between icon and text
+                          Text('Failed to add collection!'),
+                        ],
+                      ),
+                      backgroundColor: Colors.red, // Red for error
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
                 }
               },
-
                 child: Text('أضافة المجموعة'),
                 style: ButtonStyle(
                   backgroundColor: MaterialStateProperty.all<Color>(Colors.green),

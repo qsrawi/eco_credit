@@ -60,6 +60,40 @@ class ApiService {
       return null;
     }
   }
+
+  Future<void> updateCollection(CollectionModel model) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('authToken');
+    
+    var url = Uri.parse('$baseUrl/collections/update'); // Adjust endpoint as necessary
+
+    var request = http.MultipartRequest('PUT', url);
+
+    request.headers.addAll({
+      'Authorization': 'Bearer $token'  // Include the token in the header
+    });
+    
+    void addFieldIfNotNull(String key, dynamic value) {
+      if (value != null) {
+        request.fields[key] = value.toString();
+      }
+    }
+
+    addFieldIfNotNull('CollectionID', model.collectionID);
+    addFieldIfNotNull('CollectionStatusID', model.collectionStatusID);
+    try {
+    var streamedResponse = await request.send();
+      var response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode == 200) {
+        print('Update successful');
+      } else {
+        print('Failed to update: ${response.body}');
+      }
+    } catch (e) {
+      print('Error occurred: $e');
+    }
+  }
   
   static Future<Map<String, dynamic>> login(String email, String password, String? type) async {
     var url = Uri.parse('$baseUrl/admins/login');
@@ -487,4 +521,43 @@ class GeneratorListResource {
       image: json['image'] as String?
     );
   }
+}
+
+class CollectionModel {
+  int? collectionID;
+  int? generatorID;
+  int? pickerID;
+  int? invoiceID;
+  int? collectionStatusID;
+  int? collectionTypeID;
+  int? wasteTypeID;
+  DateTime? createdDate;
+  double? collectionSize;
+  String? description;
+
+  CollectionModel({
+    this.collectionID,
+    this.generatorID,
+    this.pickerID,
+    this.invoiceID,
+    this.collectionStatusID,
+    this.collectionTypeID,
+    this.wasteTypeID,
+    this.createdDate,
+    this.collectionSize,
+    this.description,
+  });
+
+  Map<String, dynamic> toJson() => {
+    'collectionID': collectionID,
+    'generatorID': generatorID,
+    'pickerID': pickerID,
+    'invoiceID': invoiceID,
+    'collectionStatusID': collectionStatusID,
+    'collectionTypeID': collectionTypeID,
+    'wasteTypeID': wasteTypeID,
+    'createdDate': createdDate?.toIso8601String(),
+    'collectionSize': collectionSize,
+    'description': description,
+  };
 }

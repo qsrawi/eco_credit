@@ -88,6 +88,9 @@ class _CollectionTabsState extends State<CollectionTabs> with SingleTickerProvid
       itemBuilder: (context, index) {
         final collection = collections[index];
         return WasteCollectionCard(
+          role: userType,
+          collectionID: collection.collectionID,
+          statusID: collection.collectionStatusID,
           status: collection.collectionStatusName ?? 'Unknown',
           title: collection.wasteTypeName ?? 'Unknown',
           collectionTypeName: collection.collectionTypeName ?? 'Unknown',
