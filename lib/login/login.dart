@@ -1,3 +1,4 @@
+import 'package:eco_credit/dry-clean/dry_clean.dart';
 import 'package:eco_credit/e_recycle_hub.dart';
 import 'package:eco_credit/services/api_service.dart';
 import 'package:flutter/material.dart';
@@ -32,6 +33,7 @@ class _LoginPageState extends State<LoginPage> {
       _userOptions = [
         {'label': 'منشأة', 'value': 'Generator'},
         {'label': 'بطل البيئة', 'value': 'Picker'},
+        {'label': 'ادمن', 'value': 'Admin'},
       ];
     }
   }
@@ -124,9 +126,22 @@ class _LoginPageState extends State<LoginPage> {
                   try {
                     var loginResult = await ApiService.login(_emailController.text, _passwordController.text, _selectedOption);
                     if (loginResult.containsKey('id') && loginResult.containsKey('role')) {
-                      Navigator.of(context).pushReplacement(MaterialPageRoute(
-                        builder: (context) => ERecycleHub(id: loginResult['id'], role: loginResult['role']),
-                      ));
+                      // Check the widget type and navigate to the appropriate screen
+                      if (widget.type == 'dry_clean') {
+                        Navigator.of(context).pushReplacement(MaterialPageRoute(
+                          builder: (context) => DryClean(id: loginResult['id'], role: loginResult['role']),
+                        ));
+                      } else if (widget.type == 'erecycleHUB') {
+                        Navigator.of(context).pushReplacement(MaterialPageRoute(
+                          builder: (context) => ERecycleHub(id: loginResult['id'], role: loginResult['role']),
+                        ));
+                      } else {
+                        // Optionally handle other types or show an error
+                        print('Unknown type, cannot navigate!');
+                      }
+                    } else {
+                      // Handle the case where login does not return the expected data
+                      print('Login failed or missing expected data (id or role).');
                     }
                   }catch (e) {
                     showDialog(
@@ -169,7 +184,7 @@ class _LoginPageState extends State<LoginPage> {
             if (widget.type == 'dry_clean')
               ElevatedButton(
                 onPressed: () {},
-                child: Text('Order Status'),
+                child: Text('حالة الطلب'),
                 style: ElevatedButton.styleFrom(
                   foregroundColor: Colors.black,
                   backgroundColor: Colors.grey,

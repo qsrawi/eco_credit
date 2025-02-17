@@ -116,13 +116,13 @@ class ApiService {
           String token = jsonResponse['token'];
           int id = jsonResponse['id'];
           String role = jsonResponse['role'];
-          String wasteTypeID = jsonResponse['WasteTypeID'];
+          int wasteTypeID = jsonResponse['wasteTypeID'];
 
           SharedPreferences prefs = await SharedPreferences.getInstance();
           await prefs.setString('authToken', token);
           await prefs.setInt('id', id);
           await prefs.setString('role', role);
-          await prefs.setString('wasteTypeID', wasteTypeID);
+          await prefs.setInt('wasteTypeID', wasteTypeID);
 
           return { 'token': token, 'id': id, 'role': role };
         } else {
