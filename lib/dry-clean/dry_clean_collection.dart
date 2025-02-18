@@ -1,8 +1,6 @@
 import 'dart:convert';
-import 'package:eco_credit/e_recycle_hub.dart';
-import 'package:eco_credit/services/api_service.dart';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class dryCleanCollectionCard extends StatelessWidget {
   final int id;
@@ -30,7 +28,6 @@ class dryCleanCollectionCard extends StatelessWidget {
   });
 
   void _showDetails(BuildContext context) {
-    final imageBytes = base64Decode(image);
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -38,7 +35,7 @@ class dryCleanCollectionCard extends StatelessWidget {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Image.memory(imageBytes, width: 300, height: 300, fit: BoxFit.cover),
+              getImageWidget(image, 150),
               const SizedBox(height: 20),
               Text(description, style: const TextStyle(fontSize: 16)),
               const SizedBox(height: 10),
@@ -51,7 +48,7 @@ class dryCleanCollectionCard extends StatelessWidget {
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('إغلاق'),
+              child: const Text('إغلاق'),
               onPressed: () => Navigator.of(context).pop(),
             ),
           ],
@@ -60,183 +57,118 @@ class dryCleanCollectionCard extends StatelessWidget {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => _showDetails(context),
+ @override
+Widget build(BuildContext context) {
+  return GestureDetector(
+    onTap: () => _showDetails(context),
+    child: Padding(
+      padding: const EdgeInsets.all(8.0), // Add padding around the card
       child: Card(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10.0),
         ),
         child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Column(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end, // Align everything to the right
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              // Data (Text and other widgets) on the right, next to the image
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end, // Align text to the right
                 children: <Widget>[
                   Text(
                     donationStatusName,
                     style: TextStyle(
-                      color: donationStatusName == 'بالانتظار' ? Colors.orange : Colors.green,
+                      color: donationStatusName == 'بانتظار الاستلام' ? Colors.orange : Colors.green,
                       fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    typesNames.join(', '),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    timeAgo,
+                    style: const TextStyle(
+                      color: Colors.grey,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'اسم المتبرع: $donaterName',
+                    style: const TextStyle(
+                      color: Colors.blue,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
-              Image.memory(
-                base64Decode(image),
-                width: double.infinity,
-                height: 100,
-                fit: BoxFit.cover,
-              ),
-              const SizedBox(height: 10),
-              Align(
-                alignment: Alignment.centerRight,
-                child: Text(
-              typesNames.join(', '),
-                    style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                  ),
+              const SizedBox(width: 10), // Add spacing between data and image
+              // Image on the far right
+              Container(
+                padding: const EdgeInsets.all(4.0), // Add padding around the image
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8.0),
+                  color: Colors.grey[200], // Optional: Add a background color
                 ),
+                child: getImageWidget(image, 80),
               ),
-              const SizedBox(height: 5),
-              Align(
-                alignment: Alignment.centerRight,
-                child: Text(
-                  '$timeAgo - $timeAgo',
-                  style: const TextStyle(
-                    color: Colors.grey,
-                    fontSize: 14,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 10),
-              Align(
-                alignment: Alignment.centerRight,
-                child: Text(
-                  'الجمع: $timeAgo',
-                  style: const TextStyle(
-                    color: Colors.blue,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                ),
-              ),
-              if (role == "Donater" && timeAgo == 1) ...[
-                const SizedBox(height: 10),// Add space before the buttons
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    ElevatedButton(
-                      onPressed: () async {
-                      SharedPreferences prefs = await SharedPreferences.getInstance();
-                      int userId = prefs.getInt('id') ?? 1;
-                      String userType = prefs.getString('role') ?? 'Generator';
-                      
-                        CollectionModel model = CollectionModel(
-                          collectionID: id,
-                          collectionStatusID: 2,
-                        );
-                        ApiService apiService = ApiService();
-                        await apiService.updateCollection(model);
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(builder: (context) => ERecycleHub(id: userId, role: userType)),
-                          (route) => false, // Remove all previous routes
-                        );
-                      },
-                      child: const Text('رفض', style: TextStyle(color: Colors.red)),
-                      style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.resolveWith<Color>(
-                          (Set<MaterialState> states) {
-                            if (states.contains(MaterialState.pressed)) {
-                              return Colors.white.withOpacity(0.9); // Light opacity when pressed
-                            }
-                            return Colors.white; // Default non-pressed state
-                          }
-                        ),
-                        foregroundColor: MaterialStateProperty.all<Color>(Colors.red),
-                        padding: MaterialStateProperty.all<EdgeInsets>(
-                          const EdgeInsets.symmetric(horizontal: 75, vertical: 10)
-                        ),
-                        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                          RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8), // Smaller border radius
-                            side: BorderSide(color: Colors.red, width: 0.8), // Red border color
-                          )
-                        ),
-                        overlayColor: MaterialStateProperty.resolveWith<Color>(
-                          (Set<MaterialState> states) {
-                            if (states.contains(MaterialState.hovered) || states.contains(MaterialState.pressed)) {
-                              return Colors.red.withOpacity(0.1); // Hover and click effect color
-                            }
-                            return Colors.transparent; // Default is transparent
-                          }
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 10), // Space between buttons
-                    ElevatedButton(
-                    onPressed: () async {
-                      SharedPreferences prefs = await SharedPreferences.getInstance();
-                      int userId = prefs.getInt('id') ?? 1;
-                      String userType = prefs.getString('role') ?? 'Generator';
-                      // Create the updated model
-                      CollectionModel model = CollectionModel(
-                        collectionID: id,
-                        collectionStatusID: 3, // Assuming 3 is the new status
-                      );
-
-                      // Call the API to update the collection
-                      ApiService apiService = ApiService();
-                      await apiService.updateCollection(model);
-                      Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(builder: (context) => ERecycleHub(id: userId, role: userType)),
-                        (route) => false, // Remove all previous routes
-                      ); // Pass `true` to indicate success
-                    },
-                      child: const Text('قبول', style: TextStyle(color: Colors.white)),
-                      style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.resolveWith<Color>(
-                          (Set<MaterialState> states) {
-                            if (states.contains(MaterialState.pressed)) {
-                              return Colors.green.withOpacity(0.9); // Light opacity when pressed
-                            }
-                            return Colors.green; // Default non-pressed state
-                          }
-                        ),
-                        foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
-                        padding: MaterialStateProperty.all<EdgeInsets>(
-                          const EdgeInsets.symmetric(horizontal: 75, vertical: 10)
-                        ),
-                        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                          RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8), // Smaller border radius
-                            side: BorderSide(color: Colors.green, width: 0.8), // Matching border color
-                          )
-                        ),
-                        overlayColor: MaterialStateProperty.resolveWith<Color>(
-                          (Set<MaterialState> states) {
-                            if (states.contains(MaterialState.hovered) || states.contains(MaterialState.pressed)) {
-                              return Colors.green.withOpacity(0.1); // Hover and click effect color
-                            }
-                            return Colors.transparent; // Default is transparent
-                          }
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ]
             ],
           ),
         ),
       ),
+    ),
+  );
+}
+}
+
+Widget getImageWidget(String image, double size) {
+  // Check if the image string contains a base64 data prefix
+  if (image.startsWith('assets/images')) {
+    // Assuming it's an asset path
+    return Image.asset(
+      image,
+      width: 80,
+      height: 80,
+      fit: BoxFit.cover,
+    );
+  } else {
+    // Assuming it's a base64 string after 'data:image/jpeg;base64,'
+    return Image.memory(
+      base64Decode(image),
+      width: size,
+      height: size,
+      fit: BoxFit.cover,
     );
   }
+}
+
+Widget _buildImageFromBase64(String base64String) {
+  Uint8List bytes;
+
+  try {
+    if (base64String.startsWith('data:image')) {
+      // Remove the prefix from the base64 string
+      base64String = base64String.split(',')[1];
+    }
+    bytes = base64Decode(base64String);
+  } catch (e) {
+    // Handle the error of an invalid base64 string
+    return const Text('Invalid image data');
+  }
+
+  return Image.memory(
+    bytes,
+    width: double.infinity,
+    height: 100,
+    fit: BoxFit.cover,
+  );
 }

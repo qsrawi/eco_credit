@@ -15,9 +15,9 @@ class _DonationTypeWidgetState extends State<DonationTypeWidget> {
   List<int> selectedDonationTypeIds = [];  // Now a list of selected IDs
 
   final List<Map<String, dynamic>> clothingTypes = [
-    {'id': 1, 'icon': 'assets/icons/shirt.svg', 'label': 'قمصان', 'color': Colors.blue},  // Shirts
-    {'id': 2, 'icon': 'assets/icons/jacket.svg', 'label': 'جاكيتات', 'color': Colors.brown},  // Coats & Jackets
-    {'id': 3, 'icon': 'assets/icons/pants.svg', 'label': 'بناطيل', 'color': Colors.grey},  // Pants
+    {'id': 1, 'icon': 'assets/icons/pants.svg', 'label': 'بناطيل', 'color': Colors.grey},  // Pants
+    {'id': 2, 'icon': 'assets/icons/shirt.svg', 'label': 'قمصان', 'color': Colors.blue},  // Shirts
+    {'id': 3, 'icon': 'assets/icons/jacket.svg', 'label': 'جاكيتات', 'color': Colors.brown},  // Coats & Jackets
     {'id': 4, 'icon': 'assets/icons/dress.svg', 'label': 'فساتين', 'color': Colors.pink},  // Dresses
     {'id': 5, 'icon': 'assets/icons/children_clothing.svg', 'label': 'ملابس أطفال', 'color': Colors.lightGreen},  // Children's Clothing
     {'id': 6, 'icon': 'assets/icons/shoe.svg', 'label': 'أحذية', 'color': Colors.black},  // Footwear

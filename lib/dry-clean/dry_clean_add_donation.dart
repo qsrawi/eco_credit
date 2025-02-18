@@ -1,7 +1,8 @@
 import 'dart:io';
+import 'package:eco_credit/dry-clean/dry_clean.dart';
 import 'package:eco_credit/dry-clean/dry_clean_donation_type.dart';
 import 'package:eco_credit/e_recycle_hub.dart';
-import 'package:eco_credit/services/api_service.dart';
+import 'package:eco_credit/services/dry_clean_service.dart';
 import 'package:eco_credit/upload-photo-section.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -22,9 +23,7 @@ class _DryCleanAddDonationScreenState extends State<DryCleanAddDonationScreen> {
   // bool _isSellChecked = false;
   // bool _isDonateChecked = false;
   File? _collectionImage;
-  int? _pickerId;
   List<int?>? _donationTypeIds;
-  int? _collectionTypeId = 2;
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _sizeController = TextEditingController();
   final TextEditingController _locationController = TextEditingController();
@@ -43,21 +42,9 @@ class _DryCleanAddDonationScreenState extends State<DryCleanAddDonationScreen> {
     });
   }
 
-  void setPickerId(int pickerId) {
-    setState(() {
-      _pickerId = pickerId; // Updates the image in the state
-    });
-  }
-
   void setDonationTypeId(List<int> donationTypeId) {
     setState(() {
       _donationTypeIds = donationTypeId; // Updates the image in the state
-    });
-  }
-
-  void setCollectionTypeId(int collectionTypeId) {
-    setState(() {
-      _collectionTypeId = collectionTypeId; // Updates the image in the state
     });
   }
 
@@ -110,11 +97,11 @@ class _DryCleanAddDonationScreenState extends State<DryCleanAddDonationScreen> {
               String userType = prefs.getString('role') ?? 'Generator';
 
                 // Assuming _collectionImage is updated through setImage method as per previous discussions
-                if (_collectionImage == null) {
-                  print('لا يوجد صورة مرفوعة');
+                if (_sizeController.text.isEmpty) {
+                  print('No Size');
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('لا يوجد صورة مرفوعة'),
+                      content: Text('لا يوجد حجم مختار'),
                       backgroundColor: Colors.red, // Red for error
                       behavior: SnackBarBehavior.floating,
                     ),
@@ -122,11 +109,11 @@ class _DryCleanAddDonationScreenState extends State<DryCleanAddDonationScreen> {
                   return;
                 }
 
-                if (_pickerId == null) {
+                if (_locationController.text.isEmpty) {
                   print('No Eco Champion');
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('اختر بطل بيئة'),
+                      content: Text('اختر موقع'),
                       backgroundColor: Colors.red, // Red for error
                       behavior: SnackBarBehavior.floating,
                     ),
@@ -137,15 +124,17 @@ class _DryCleanAddDonationScreenState extends State<DryCleanAddDonationScreen> {
                 // _donationTypeId ??= prefs.getString('DonationTypeID') as int?;
 
                 Map<String, dynamic> collectionData = {
-                  'GeneratorID': userId,
-                  'PickerID': _pickerId,
-                  'CollectionStatusID': 1,
-                  'CollectionTypeID': _collectionTypeId,
-                  // 'DonationTypeID': _donationTypeId,
+                  'Size': int.parse(_sizeController.text),
+                  'Types': _donationTypeIds,
+                  'DonationStatusID': 1,
+                  'DonaterID': userId,
+                  'Longitude': _longitudeController.text,
+                  'Latitude': _latitudController.text,
+                  'LocationName': _locationController.text,
                   'Description': _descriptionController.text,
                 };
 
-                var response = await ApiService.createCollectionWithImage(collectionData, _collectionImage);
+                var response = await DryCleanApiService.createDonation(collectionData, _collectionImage);
                 if (response != null && response.statusCode == 200) {
                   print('Collection created successfully!');
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -163,16 +152,17 @@ class _DryCleanAddDonationScreenState extends State<DryCleanAddDonationScreen> {
                   );
 
                   // Clear the form data
-                  _descriptionController.clear();
                   _collectionImage = null;
-                  _pickerId = null;
-                  _collectionTypeId = null;
-                  // _donationTypeId = null;
+                  _descriptionController.clear();
+                  _sizeController.clear();
+                  _locationController.clear();
+                  _latitudController.clear();
+                  _longitudeController.clear();
 
                   // Navigate to HomeScreen
                   Navigator.pushAndRemoveUntil(
                     context,
-                    MaterialPageRoute(builder: (context) => ERecycleHub(id: userId, role: userType)),
+                    MaterialPageRoute(builder: (context) => DryClean(id: userId, role: userType)),
                     (route) => false, // Remove all previous routes
                   );
                 } else {

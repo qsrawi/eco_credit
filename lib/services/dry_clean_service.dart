@@ -1,10 +1,73 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class DryCleanApiService {
   
   static const String baseUrl = 'https://10.0.2.2:7254/api';
+  
+  static Future<http.Response?> createDonation(Map<String, dynamic> collectionData, File? imageFile) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('authToken');
+
+    var uri = Uri.parse('$baseUrl/donations/create');
+    var request = http.MultipartRequest('POST', uri);
+
+    request.headers.addAll({
+      'Authorization': 'Bearer $token', // Include the token in the header
+    });
+
+    // Add fields only if they are not null
+    void addFieldIfNotNull(String key, dynamic value) {
+      if (value != null) {
+        if (value is List) {
+          // If the value is a list, add each item as a separate field
+          for (var i = 0; i < value.length; i++) {
+            request.fields['$key[$i]'] = value[i].toString();
+          }
+        } else {
+          // Otherwise, convert the value to a string as usual
+          request.fields[key] = value.toString();
+        }
+      }
+    }
+
+    addFieldIfNotNull('Longitude', collectionData['Longitude']);
+    addFieldIfNotNull('Latitude', collectionData['Latitude']);
+    addFieldIfNotNull('LocationName', collectionData['LocationName']);
+    addFieldIfNotNull('DonaterID', collectionData['DonaterID']);
+    addFieldIfNotNull('DonationStatusID', collectionData['DonationStatusID']);
+    addFieldIfNotNull('Types', collectionData['Types']); // Send as a list
+    addFieldIfNotNull('Size', collectionData['Size']);
+    // addFieldIfNotNull('Description', collectionData['Description']);
+
+    if (imageFile != null) {
+      String fileName = imageFile.path.split('/').last;
+      request.files.add(
+        await http.MultipartFile.fromPath(
+          'Image',
+          imageFile.path,
+          contentType: MediaType('image', fileName.split('.').last),
+        ),
+      );
+    }
+
+    try {
+      var streamedResponse = await request.send();
+      var response = await http.Response.fromStream(streamedResponse);
+      if (response.statusCode == 200) {
+        return response;
+      } else {
+        print('Failed to create collection: ${response.body}');
+        return null;
+      }
+    } catch (e) {
+      print('Exception when calling API: $e');
+      return null;
+    }
+  }
   
   Future<List<DonationResource>> getAllDonations(int donationStatus, int? userId) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -19,7 +82,7 @@ class DryCleanApiService {
     final response = await http.get(uri, headers: {
       'Authorization': 'Bearer $token',  // Use the token here
     });
-
+    print(response.body);
     if (response.statusCode == 200) {
       List<dynamic> data = json.decode(response.body);
       return data.map((item) => DonationResource.fromJson(item)).toList();
@@ -33,8 +96,6 @@ class DonationResource {
   final int id;
   final double? size;
   final int? locationID;
-  final String? types;
-  final List<int>? typesIDs;
   final List<String>? typesNames;
   final String? image;
   final int? createdSince;
@@ -52,8 +113,6 @@ class DonationResource {
     required this.id,
     this.size,
     this.locationID,
-    this.types,
-    this.typesIDs,
     this.typesNames,
     this.image,
     this.createdSince,
@@ -70,23 +129,21 @@ class DonationResource {
 
   factory DonationResource.fromJson(Map<String, dynamic> json) {
     return DonationResource(
-      id: json['ID'],
-      size: json['Size']?.toDouble(),
-      locationID: json['LocationID'],
-      types: json['Types'],
-      typesIDs: json['TypesIDs']?.cast<int>(),
-      typesNames: json['TypesNames']?.cast<String>(),
-      image: json['Image'],
-      createdSince: json['CreatedSince'],
-      createdAt: json['CreatedAt'] != null ? DateTime.parse(json['CreatedAt']) : null,
-      donationStatusID: json['DonationStatusID'],
-      donationStatusName: json['DonationStatusName'],
-      longitude: json['Longitude'],
-      latitude: json['Latitude'],
-      locationName: json['LocationName'],
-      address: json['Address'],
-      donaterID: json['DonaterID'],
-      donater: json['Donater'] != null ? DonationDonaterResource.fromJson(json['Donater']) : null,
+      id: int.parse(json['id'].toString()),
+      size: json['size'] != null ? double.tryParse(json['size'].toString()) : null,
+      locationID: json['locationID'] != null ? int.tryParse(json['locationID'].toString()) : null,
+      typesNames: (json['typesNames'] as List<dynamic>?)?.map((e) => e.toString()).toList(),
+      image: json['image'],
+      createdSince: json['createdSince'] != null ? int.tryParse(json['createdSince'].toString()) : null,
+      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null,
+      donationStatusID: json['donationStatusID'] != null ? int.tryParse(json['donationStatusID'].toString()) : null,
+      donationStatusName: json['donationStatusName'],
+      longitude: json['longitude'],
+      latitude: json['latitude'],
+      locationName: json['locationName'],
+      address: json['address'],
+      donaterID: json['donaterID'] != null ? int.tryParse(json['donaterID'].toString()) : null,
+      donater: json['donater'] != null ? DonationDonaterResource.fromJson(json['donater']) : null,
     );
   }
 
@@ -95,8 +152,6 @@ class DonationResource {
       'ID': id,
       'Size': size,
       'LocationID': locationID,
-      'Types': types,
-      'TypesIDs': typesIDs,
       'TypesNames': typesNames,
       'Image': image,
       'CreatedSince': createdSince,
@@ -142,33 +197,33 @@ class DonationDonaterResource {
 
   factory DonationDonaterResource.fromJson(Map<String, dynamic> json) {
     return DonationDonaterResource(
-      id: json['ID'],
-      manualID: json['ManualID'],
-      name: json['Name'],
-      email: json['Email'],
-      phone: json['Phone'],
-      locationID: json['LocationID'],
-      locationName: json['LocationName'],
+      id: json['id'],
+      manualID: json['manualID'],
+      name: json['name'],
+      email: json['email'],
+      phone: json['phone'],
+      locationID: json['locationID'] != null ? int.tryParse(json['locationID'].toString()) : null,
+      locationName: json['locationName'],
       image: json['Image'],
-      donationCount: json['DonationCount']?.toDouble(),
-      pending: json['Pending'],
-      completed: json['Completed'],
+      donationCount: json['donationCount']?.toDouble(),
+      pending: json['pending'] != null ? int.tryParse(json['pending'].toString()) : null,
+      completed: json['completed'] != null ? int.tryParse(json['completed'].toString()) : null,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'ID': id,
-      'ManualID': manualID,
-      'Name': name,
-      'Email': email,
-      'Phone': phone,
-      'LocationID': locationID,
-      'LocationName': locationName,
-      'Image': image,
-      'DonationCount': donationCount,
-      'Pending': pending,
-      'Completed': completed,
+      'id': id,
+      'manualID': manualID,
+      'name': name,
+      'email': email,
+      'phone': phone,
+      'locationID': locationID,
+      'locationName': locationName,
+      'image': image,
+      'donationCount': donationCount,
+      'pending': pending,
+      'completed': completed,
     };
   }
 }

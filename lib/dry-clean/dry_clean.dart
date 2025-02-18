@@ -40,7 +40,6 @@ class _MainScreenState extends State<MainScreen> {
   void initializeScreenOptions() {
     _widgetOptions = [
       DryCleanHomeScreen(),
-      // HomeScreen(showCompleted: true),
       //NotificationsScreen(),
       //ProfileScreen(),
     ];
