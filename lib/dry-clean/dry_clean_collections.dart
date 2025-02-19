@@ -98,7 +98,10 @@ class _CollectionTabsState extends State<DryCleanCollectionTabs>
     int userId = prefs.getInt('id') ?? 1;
     String userType = prefs.getString('role') ?? 'Donater';
 
-    final collections = await _apiService.getAllDonations(status, userId);
+    int? apiUserId = (userType == 'DCAdmin') ? null : userId;
+
+  // Make the API call with conditional userId
+  final collections = await _apiService.getAllDonations(status, apiUserId);
     return ListView.builder(
       itemCount: collections.length,
       itemBuilder: (context, index) {

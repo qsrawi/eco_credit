@@ -6,9 +6,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 class DryCleanHomeScreen extends StatefulWidget {
   final bool showCompleted;
 
-  DryCleanHomeScreen({this.showCompleted = false});
+  const DryCleanHomeScreen({super.key, this.showCompleted = false});
 
   @override
+  // ignore: library_private_types_in_public_api
   _HomeScreenState createState() => _HomeScreenState();
 }
 

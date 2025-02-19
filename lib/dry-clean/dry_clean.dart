@@ -1,5 +1,8 @@
 import 'package:eco_credit/dry-clean/dry_clean_add_donation.dart';
 import 'package:eco_credit/dry-clean/dry_clean_home.dart';
+import 'package:eco_credit/dry-clean/dry_clean_notification.dart';
+import 'package:eco_credit/dry-clean/dry_clean_orders.dart';
+import 'package:eco_credit/dry-clean/dry_clean_profile.dart';
 import 'package:flutter/material.dart';
 
 class DryClean extends StatelessWidget {
@@ -23,6 +26,7 @@ class MainScreen extends StatefulWidget {
   const MainScreen({super.key, required this.id, required this.role});
 
   @override
+  // ignore: library_private_types_in_public_api
   _MainScreenState createState() => _MainScreenState();
 }
 
@@ -39,9 +43,9 @@ class _MainScreenState extends State<MainScreen> {
 
   void initializeScreenOptions() {
     _widgetOptions = [
-      DryCleanHomeScreen(),
-      //NotificationsScreen(),
-      //ProfileScreen(),
+      const DryCleanHomeScreen(),
+      const DryCleanNotificationsScreen(),
+      const DryCleanProfileScreen(),
     ];
 
     _navBarItems = [
@@ -53,8 +57,12 @@ class _MainScreenState extends State<MainScreen> {
 
     // Include AddWasteCollectionScreen and its navigation item only if role is not 'Picker'
     if (widget.role == "Donater") {
-      _widgetOptions.insert(1, DryCleanAddDonationScreen());  // Insert at the correct position
+      _widgetOptions.insert(1, const DryCleanAddDonationScreen());  // Insert at the correct position
       _navBarItems.insert(1, const BottomNavigationBarItem(icon: Icon(Icons.add), label: 'Add'));
+    }
+    if (widget.role == "DCAdmin") {
+      _widgetOptions.insert(1, const DryCleanOrders());  // Insert at the correct position
+      _navBarItems.insert(1, const BottomNavigationBarItem(icon: Icon(Icons.receipt), label: 'Orders'));
     }
   }
 

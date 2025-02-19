@@ -82,12 +82,94 @@ class DryCleanApiService {
     final response = await http.get(uri, headers: {
       'Authorization': 'Bearer $token',  // Use the token here
     });
-    print(response.body);
+
     if (response.statusCode == 200) {
       List<dynamic> data = json.decode(response.body);
       return data.map((item) => DonationResource.fromJson(item)).toList();
     } else {
       throw Exception('Failed to load collections: ${response.statusCode} ${response.body}');
+    }
+  }
+
+  Future<List<OrderResource>> getAllOrders(int? orderStatus) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('authToken');
+
+    final uri = Uri.parse('$baseUrl/orders')
+      .replace(queryParameters: {
+        'orderStatus': orderStatus.toString()
+      });
+
+    final response = await http.get(uri, headers: {
+      'Authorization': 'Bearer $token',  // Use the token here
+    });
+
+    if (response.statusCode == 200) {
+      List<dynamic> data = json.decode(response.body);
+      return data.map((item) => OrderResource.fromJson(item)).toList();
+    } else {
+      throw Exception('Failed to load collections: ${response.statusCode} ${response.body}');
+    }
+  }
+
+  Future<DonaterResource> fetchDenatorProfile(int id) async {
+    final uri = Uri.parse('$baseUrl/donaters/$id');
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('authToken');
+
+    final response = await http.get(uri, headers: {
+      'Authorization': 'Bearer $token',  // Use the token here
+    });
+
+    if (response.statusCode == 200) {
+      return DonaterResource.fromJson(json.decode(response.body));
+    } else {
+      throw Exception('Failed to load profile');
+    }
+  }
+
+  Future<DonaterResource> fetchAdminProfile(int id) async {
+    final uri = Uri.parse('$baseUrl/dcAdmins/$id');
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('authToken');
+
+    final response = await http.get(uri, headers: {
+      'Authorization': 'Bearer $token',  // Use the token here
+    });
+
+    if (response.statusCode == 200) {
+      return DonaterResource.fromJson(json.decode(response.body));
+    } else {
+      throw Exception('Failed to load profile');
+    }
+  }
+
+  Future<void> updateDonation(DonationUpdateModel model) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('authToken');
+    
+    var url = Uri.parse('$baseUrl/donations/update'); // Adjust endpoint as necessary
+
+    var headers = {
+      'Content-Type': 'application/json', // Specify JSON content type
+      'Authorization': 'Bearer $token'    // Include the token in the header
+    };
+
+    var body = jsonEncode({
+      'ID': model.id,
+      'DonationStatusID': model.donationStatusID
+    });
+
+    try {
+      var response = await http.put(url, headers: headers, body: body);
+
+      if (response.statusCode == 200) {
+        print('Update successful');
+      } else {
+        print('Failed to update: ${response.statusCode} ${response.body}');
+      }
+    } catch (e) {
+      print('Error occurred: $e');
     }
   }
 }
@@ -226,4 +308,191 @@ class DonationDonaterResource {
       'completed': completed,
     };
   }
+}
+
+class DonaterResource {
+  final int id;
+  final String? manualID;
+  final String? name;
+  final String? email;
+  final String? phone;
+  final int? locationID;
+  final String? locationName;
+  final String? image;
+  final double? donationCount;
+  final int? pending;
+  final int? completed;
+  final List<DonaterDonationResource>? donations;
+
+  DonaterResource({
+    required this.id,
+    this.manualID,
+    this.name,
+    this.email,
+    this.phone,
+    this.locationID,
+    this.locationName,
+    this.image,
+    this.donationCount,
+    this.pending,
+    this.completed,
+    this.donations,
+  });
+
+  factory DonaterResource.fromJson(Map<String, dynamic> json) => DonaterResource(
+    id: json['id'] ?? 0,
+    manualID: json['manualID'],
+    name: json['name'],
+    email: json['email'],
+    phone: json['phone'],
+    locationID: json['locationID'],
+    locationName: json['locationName'],
+    image: json['image'],
+    donationCount: (json['donationCount'] != null) ? double.tryParse(json['donationCount'].toString()) : null,
+    pending: json['pending'],
+    completed: json['completed'],
+    donations: json['donations'] != null ? List<DonaterDonationResource>.from(json['donations'].map((x) => DonaterDonationResource.fromJson(x))) : null,
+  );
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'manualID': manualID,
+    'name': name,
+    'email': email,
+    'phone': phone,
+    'locationID': locationID,
+    'locationName': locationName,
+    'image': image,
+    'donationCount': donationCount,
+    'pending': pending,
+    'completed': completed,
+    'donations': donations?.map((x) => x.toJson()).toList(),
+  };
+}
+
+class AdminResource {
+  final int id;
+  final String? manualID;
+  final String? name;
+  final String? email;
+  final String? phone;
+  final int? locationID;
+  final String? locationName;
+  final String? image;
+
+  AdminResource({
+    required this.id,
+    this.manualID,
+    this.name,
+    this.email,
+    this.phone,
+    this.locationID,
+    this.locationName,
+    this.image
+  });
+
+  factory AdminResource.fromJson(Map<String, dynamic> json) => AdminResource(
+    id: json['id'] ?? 0,
+    manualID: json['manualID'],
+    name: json['name'],
+    email: json['email'],
+    phone: json['phone'],
+    locationID: json['locationID'],
+    locationName: json['locationName'],
+    image: json['image']
+  );
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'manualID': manualID,
+    'name': name,
+    'email': email,
+    'phone': phone,
+    'locationID': locationID,
+    'locationName': locationName,
+    'image': image
+  };
+}
+
+class DonaterDonationResource {
+  final int id;
+  final int? donationStatusID;
+  final String? donationStatusName;
+
+  DonaterDonationResource({
+    required this.id,
+    this.donationStatusID,
+    this.donationStatusName,
+  });
+
+  factory DonaterDonationResource.fromJson(Map<String, dynamic> json) => DonaterDonationResource(
+    id: json['id'] ?? 0,
+    donationStatusID: json['donationStatusID'],
+    donationStatusName: json['donationStatusName'],
+  );
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'donationStatusID': donationStatusID,
+    'donationStatusName': donationStatusName,
+  };
+}
+
+class OrderResource {
+  final int id;
+  final String? name;
+  final double? price;
+  final int? orderStatusID;
+  final String? orderStatusName;
+  final DateTime? createdAt;
+  final int? createdSince;
+  final int? orderNumber;
+
+  OrderResource({
+    required this.id,
+    this.name,
+    this.price,
+    this.orderStatusID,
+    this.orderStatusName,
+    this.createdAt,
+    this.createdSince,
+    this.orderNumber
+  });
+
+  factory OrderResource.fromJson(Map<String, dynamic> json) => OrderResource(
+    id: json['id'] ?? 0,
+    name: json['name'],
+    price: (json['price'] != null) ? double.tryParse(json['price'].toString()) : null,
+    orderStatusID: json['orderStatusID'],
+    orderStatusName: json['orderStatusName'],
+    createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null,
+    createdSince: json['createdSince'],
+    orderNumber: json['orderNumber'],
+  );
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'name': name,
+    'price': price,
+    'orderStatusID': orderStatusID,
+    'orderStatusName': orderStatusName,
+    'createdAt': createdAt,
+    'createdSince': createdSince,
+    'orderNumber': orderNumber
+  };
+}
+
+class DonationUpdateModel {
+  int? id;
+  int? donationStatusID;
+
+  DonationUpdateModel({
+    this.id,
+    this.donationStatusID,
+  });
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'donationStatusID': donationStatusID,
+  };
 }

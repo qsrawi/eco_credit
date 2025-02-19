@@ -4,7 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class DryCleanNotificationsScreen extends StatefulWidget {
+  const DryCleanNotificationsScreen({super.key});
+
   @override
+  // ignore: library_private_types_in_public_api
   _DryCleanNotificationsScreenState createState() => _DryCleanNotificationsScreenState();
 }
 

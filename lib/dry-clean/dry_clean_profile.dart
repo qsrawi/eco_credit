@@ -1,6 +1,5 @@
-import 'package:eco_credit/dry-clean/dry_clean_statisics_card.dart';
 import 'package:eco_credit/main.dart';
-import 'package:eco_credit/services/api_service.dart';
+import 'package:eco_credit/services/dry_clean_service.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -13,7 +12,7 @@ class DryCleanProfileScreen extends StatefulWidget {
 }
 
 class _DryCleanProfileScreenState extends State<DryCleanProfileScreen> {
-  late Future<GeneratorResource> profile;
+  late Future<DonaterResource> profile;
   int? userId;
   String? userType;
 
@@ -26,11 +25,11 @@ class _DryCleanProfileScreenState extends State<DryCleanProfileScreen> {
   void loadInitialData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     int userId = prefs.getInt('id') ?? 1; // Default to 1 if not set
-    userType = prefs.getString('role') ?? 'Generator';
-    if(userType == "Generator") {
-      profile = ApiService().fetchGeneratorsProfile(userId);
+    userType = prefs.getString('role') ?? 'Donater';
+    if(userType == "Donater") {
+      profile = DryCleanApiService().fetchDenatorProfile(userId);
     } else {
-      profile = ApiService().fetchProfile(userId);
+      profile = DryCleanApiService().fetchAdminProfile(userId);
     }
     setState(() {}); // This is optional, depends on if you need to update the UI after data is fetched
   }
@@ -75,7 +74,7 @@ class _DryCleanProfileScreenState extends State<DryCleanProfileScreen> {
             ),
           ],
         ),
-        body: FutureBuilder<GeneratorResource>(
+        body: FutureBuilder<DonaterResource>(
           future: profile,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -95,7 +94,7 @@ class _DryCleanProfileScreenState extends State<DryCleanProfileScreen> {
     );
   }
 
-  Widget buildProfile(GeneratorResource profile) {
+  Widget buildProfile(DonaterResource profile) {
     Color getColor(String itemName) {
       switch (itemName) {
         case 'الأيميل':
@@ -115,12 +114,12 @@ class _DryCleanProfileScreenState extends State<DryCleanProfileScreen> {
     return ListView(
       children: <Widget>[
         _buildProfileHeader(profile), // Assuming this is defined elsewhere
-        DryCleanStatisticsCard(
-          pending: profile.pending ?? 0,
-          completed: profile.completed ?? 0,
-          inProgress: profile.picked ?? 0,
-          cancelled: profile.ignored ?? 0,
-        ),
+        // DryCleanStatisticsCard(
+        //   pending: profile.pending ?? 0,
+        //   completed: profile.completed ?? 0,
+        //   inProgress: profile.picked ?? 0,
+        //   cancelled: profile.ignored ?? 0,
+        // ),
         ListTile(
           title: const Text('الاسم الكامل'),
           subtitle: Text(profile.name ?? 'Unknown'),
@@ -143,7 +142,7 @@ class _DryCleanProfileScreenState extends State<DryCleanProfileScreen> {
         ),
         ListTile(
           title: const Text('عدد المجموعات'),
-          subtitle: Text('${profile.collectionCount ?? 0}'),
+          subtitle: Text('${profile.donationCount ?? 0}'),
           leading: const Icon(Icons.list, color: Colors.blue),
         ),
       ],
@@ -151,7 +150,7 @@ class _DryCleanProfileScreenState extends State<DryCleanProfileScreen> {
   }
 
 
-  Widget _buildProfileHeader(GeneratorResource profile) {
+  Widget _buildProfileHeader(DonaterResource profile) {
     return Container(
       color: Colors.white,
       child: Padding(
@@ -176,17 +175,17 @@ class _DryCleanProfileScreenState extends State<DryCleanProfileScreen> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  if (userType == "Generator") ...[
-                    Text(
-                      'نوع المجموعة : ${profile.wasteTypeName}',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ],
+                  // if (userType == "Generator") ...[
+                  //   Text(
+                  //     'نوع المجموعة : ${profile.wasteTypeName}',
+                  //     style: const TextStyle(
+                  //       fontSize: 16,
+                  //       color: Colors.grey,
+                  //     ),
+                  //   ),
+                  // ],
                   Text(
-                    'رقم المستخدم: #${profile.manualId}',
+                    'رقم المستخدم: #${profile.manualID}',
                     style: const TextStyle(
                       fontSize: 16,
                       color: Colors.grey,
