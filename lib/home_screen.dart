@@ -182,6 +182,11 @@ Widget getTitleWidget(String role) {
       color = Colors.green;
       text = "بطل البيئة";
       break;
+   case "Admin":
+      iconData = Icons.admin_panel_settings;
+      color = Colors.red;
+      text = "آدمن";
+      break;
     default:
       iconData = Icons.error;
       color = Colors.grey;

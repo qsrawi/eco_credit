@@ -61,29 +61,25 @@ class ApiService {
     }
   }
 
-  Future<void> updateCollection(CollectionModel model) async {
+  Future<void> updateCollection(CollectionUpdateModel model) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('authToken');
     
     var url = Uri.parse('$baseUrl/collections/update'); // Adjust endpoint as necessary
 
-    var request = http.MultipartRequest('PUT', url);
+    var headers = {
+      'Content-Type': 'application/json', // Specify JSON content type
+      'Authorization': 'Bearer $token'    // Include the token in the header
+    };
 
-    request.headers.addAll({
-      'Authorization': 'Bearer $token'  // Include the token in the header
+    var body = jsonEncode({
+      'CollectionID': model.collectionID,
+      'CollectionStatusID': model.collectionStatusID,
+      'PickerID': model.pickerID
     });
-    
-    void addFieldIfNotNull(String key, dynamic value) {
-      if (value != null) {
-        request.fields[key] = value.toString();
-      }
-    }
 
-    addFieldIfNotNull('CollectionID', model.collectionID);
-    addFieldIfNotNull('CollectionStatusID', model.collectionStatusID);
     try {
-    var streamedResponse = await request.send();
-      var response = await http.Response.fromStream(streamedResponse);
+      var response = await http.put(url, headers: headers, body: body);
 
       if (response.statusCode == 200) {
         print('Update successful');
@@ -184,6 +180,9 @@ class ApiService {
   }
 
   Future<List<PickerListResource>> getPickers(int? wasteGroupID, int? generatorID, String? strSearch) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('authToken');
+
     final uri = Uri.parse('$baseUrl/pickers')
       .replace(queryParameters: {
         'wasteGroupID': wasteGroupID?.toString(),
@@ -191,11 +190,65 @@ class ApiService {
         'strSearch': strSearch,
       });
 
-    final response = await http.get(uri);
-
+    final response = await http.get(uri, headers: {
+      'Authorization': 'Bearer $token', // Use the token here
+    });
+    
     if (response.statusCode == 200) {
       List<dynamic> data = json.decode(response.body);
       return data.map((item) => PickerListResource.fromJson(item)).toList();
+    } else {
+      throw Exception('Failed to load collections: ${response.statusCode} ${response.body}');
+    }
+  }
+
+  Future<List<GeneratorListResource>> getAllGenerators() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('authToken');
+
+    final uri = Uri.parse('$baseUrl/generators');
+
+    final response = await http.get(uri, headers: {
+      'Authorization': 'Bearer $token', // Use the token here
+    });
+    
+    if (response.statusCode == 200) {
+      List<dynamic> data = json.decode(response.body);
+      return data.map((item) => GeneratorListResource.fromJson(item)).toList();
+    } else {
+      throw Exception('Failed to load collections: ${response.statusCode} ${response.body}');
+    }
+  }
+
+  Future<KpiResource> getGeneratorKpi(int generatorID) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('authToken');
+
+    final uri = Uri.parse('$baseUrl/kpi/generatorKpi/${generatorID.toString()}');
+
+    final response = await http.get(uri, headers: {
+      'Authorization': 'Bearer $token', // Use the token here
+    });
+    
+    if (response.statusCode == 200) {
+      return KpiResource.fromJson(json.decode(response.body));
+    } else {
+      throw Exception('Failed to load collections: ${response.statusCode} ${response.body}');
+    }
+  }
+
+  Future<KpiResource> getPickerKpi(int pickerID) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('authToken');
+
+    final uri = Uri.parse('$baseUrl/kpi/pickerKpi/${pickerID.toString()}');
+
+    final response = await http.get(uri, headers: {
+      'Authorization': 'Bearer $token', // Use the token here
+    });
+    
+    if (response.statusCode == 200) {
+      return KpiResource.fromJson(json.decode(response.body));
     } else {
       throw Exception('Failed to load collections: ${response.statusCode} ${response.body}');
     }
@@ -507,7 +560,6 @@ class PickerListResource {
   }
 }
 
-
 class CollectionPickerResource {
   final int collectionID;
   final int collectionStatusID;
@@ -564,41 +616,67 @@ class GeneratorListResource {
   }
 }
 
-class CollectionModel {
+class CollectionUpdateModel {
   int? collectionID;
-  int? generatorID;
   int? pickerID;
-  int? invoiceID;
   int? collectionStatusID;
-  int? collectionTypeID;
-  int? wasteTypeID;
-  DateTime? createdDate;
   double? collectionSize;
-  String? description;
 
-  CollectionModel({
+  CollectionUpdateModel({
     this.collectionID,
-    this.generatorID,
     this.pickerID,
-    this.invoiceID,
     this.collectionStatusID,
-    this.collectionTypeID,
-    this.wasteTypeID,
-    this.createdDate,
-    this.collectionSize,
-    this.description,
+    this.collectionSize
   });
 
   Map<String, dynamic> toJson() => {
     'collectionID': collectionID,
-    'generatorID': generatorID,
     'pickerID': pickerID,
-    'invoiceID': invoiceID,
     'collectionStatusID': collectionStatusID,
-    'collectionTypeID': collectionTypeID,
-    'wasteTypeID': wasteTypeID,
-    'createdDate': createdDate?.toIso8601String(),
     'collectionSize': collectionSize,
-    'description': description,
   };
+}
+
+class KpiResource {
+  List<WasteTypeStatus>? wasteTypeStatus;
+
+  KpiResource({
+    this.wasteTypeStatus
+  });
+
+  factory KpiResource.fromJson(Map<String, dynamic> json) {
+    return KpiResource(
+      wasteTypeStatus: json['wasteTypeStatus'] != null
+        ? (json['wasteTypeStatus'] as List)
+            .map((e) => WasteTypeStatus.fromJson(e as Map<String, dynamic>))
+            .toList()
+        : null, 
+    );
+  }
+  Map<String, dynamic> toJson() => {
+    'wasteTypeStatus': wasteTypeStatus,
+  };
+}
+
+class WasteTypeStatus {
+  int? wasteTypeID;
+  String? wasteTypeName;
+  int? collectionsCount;
+  double? collectionAmount;
+
+  WasteTypeStatus({
+    this.wasteTypeID,
+    this.wasteTypeName,
+    this.collectionsCount,
+    this.collectionAmount
+  });
+
+  factory WasteTypeStatus.fromJson(Map<String, dynamic> json) {
+    return WasteTypeStatus(
+      wasteTypeID: json['wasteTypeID'] as int? ?? 0, // Handle null with default value
+      wasteTypeName: json['wasteTypeName'] as String?,
+      collectionAmount: (json['collectionAmount'] as num?)?.toDouble(),
+      collectionsCount: json['collectionsCount'] as int? ?? 0
+    );
+  }
 }

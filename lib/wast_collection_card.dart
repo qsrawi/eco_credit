@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:eco_credit/e_recycle_hub.dart';
+import 'package:eco_credit/picker_widget.dart';
 import 'package:eco_credit/services/api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -33,6 +34,9 @@ class WasteCollectionCard extends StatelessWidget {
     required this.description,
   });
 
+  void setWasteTypeId(int wasteTypeId) {
+  }
+
   void _showDetails(BuildContext context) {
     final imageBytes = base64Decode(imageUrl);
     showDialog(
@@ -43,9 +47,9 @@ class WasteCollectionCard extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Image.memory(imageBytes, width: 300, height: 300, fit: BoxFit.cover),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Text(description, style: TextStyle(fontSize: 16)),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               Text(
                 'حجم الجمع: $collectionSize كغ', // "كغ" stands for kilograms in Arabic
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -55,7 +59,48 @@ class WasteCollectionCard extends StatelessWidget {
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('Close'),
+              child: Text('إغلاق'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showPickers(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              PickerWidget(
+                onSelected: (int selectedId) async {
+                  SharedPreferences prefs = await SharedPreferences.getInstance();
+                  int userId = prefs.getInt('id') ?? 1;
+                  String userType = prefs.getString('role') ?? 'Generator';
+
+                  CollectionUpdateModel model = CollectionUpdateModel(
+                    collectionID: collectionID,
+                    collectionStatusID: 1,
+                    pickerID: selectedId
+                  );
+                  ApiService apiService = ApiService();
+                  await apiService.updateCollection(model);
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => ERecycleHub(id: userId, role: userType)),
+                    (route) => false, // Remove all previous routes
+                  );
+                }, 
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('إغلاق'),
               onPressed: () => Navigator.of(context).pop(),
             ),
           ],
@@ -156,7 +201,7 @@ class WasteCollectionCard extends StatelessWidget {
                       int userId = prefs.getInt('id') ?? 1;
                       String userType = prefs.getString('role') ?? 'Generator';
                       
-                        CollectionModel model = CollectionModel(
+                        CollectionUpdateModel model = CollectionUpdateModel(
                           collectionID: collectionID,
                           collectionStatusID: 2,
                         );
@@ -205,7 +250,7 @@ class WasteCollectionCard extends StatelessWidget {
                       int userId = prefs.getInt('id') ?? 1;
                       String userType = prefs.getString('role') ?? 'Generator';
                       // Create the updated model
-                      CollectionModel model = CollectionModel(
+                      CollectionUpdateModel model = CollectionUpdateModel(
                         collectionID: collectionID,
                         collectionStatusID: 3, // Assuming 3 is the new status
                       );
@@ -251,6 +296,49 @@ class WasteCollectionCard extends StatelessWidget {
                     ),
                   ],
                 ),
+              ],
+              if (role == "Generator" && statusID == 2) ...[
+                const SizedBox(height: 10),
+                Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      const SizedBox(width: 10), // Space between buttons
+                      ElevatedButton(
+                      onPressed: () async {
+                        _showPickers(context);
+                      },
+                        child: Text('تغيير بطل البيئة', style: TextStyle(color: Colors.white)),
+                        style: ButtonStyle(
+                          backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                            (Set<MaterialState> states) {
+                              if (states.contains(MaterialState.pressed)) {
+                                return Colors.green.withOpacity(0.9); // Light opacity when pressed
+                              }
+                              return Colors.green; // Default non-pressed state
+                            }
+                          ),
+                          foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
+                          padding: MaterialStateProperty.all<EdgeInsets>(
+                            const EdgeInsets.symmetric(horizontal: 75, vertical: 10)
+                          ),
+                          shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8), // Smaller border radius
+                              side: BorderSide(color: Colors.green, width: 0.8), // Matching border color
+                            )
+                          ),
+                          overlayColor: MaterialStateProperty.resolveWith<Color>(
+                            (Set<MaterialState> states) {
+                              if (states.contains(MaterialState.hovered) || states.contains(MaterialState.pressed)) {
+                                return Colors.green.withOpacity(0.1); // Hover and click effect color
+                              }
+                              return Colors.transparent; // Default is transparent
+                            }
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
               ]
             ],
           ),

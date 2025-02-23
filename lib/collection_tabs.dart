@@ -27,12 +27,13 @@ class _CollectionTabsState extends State<CollectionTabs>
   List<Tab> myTabs = [];
   List<Widget> myTabViews = [];
   int _refreshKey = 0; // Track refresh state
+  int _previousIndex = 0; 
+  bool _isInitialized = false; // Track initialization status
 
   @override
   void initState() {
     super.initState();
-    initializeTabs();
-    _tabController.addListener(_handleTabSelection);
+    _initializeTabs(); // Start async initialization
   }
 
   @override
@@ -47,7 +48,6 @@ class _CollectionTabsState extends State<CollectionTabs>
   @override
   void dispose() {
     routeObserver.unsubscribe(this);
-    _tabController.removeListener(_handleTabSelection);
     _tabController.dispose();
     super.dispose();
   }
@@ -63,19 +63,22 @@ class _CollectionTabsState extends State<CollectionTabs>
     refreshData();
   }
 
+  void _handleTabSelection() {
+    // Check if the current index has changed from the previous
+    if (_tabController.index != _previousIndex) {
+      refreshData();
+      _previousIndex = _tabController.index; // Update previous index
+    }
+  }
+
   void refreshData() {
     setState(() {
       _refreshKey++; // Increment to refresh FutureBuilders
     });
   }
 
-  void _handleTabSelection() {
-    if (_tabController.indexIsChanging) {
-      refreshData();
-    }
-  }
-
-  void initializeTabs() {
+ Future<void> _initializeTabs() async {
+    // Initialize tabs asynchronously
     myTabs = <Tab>[
       const Tab(text: 'بالانتظار'),
       const Tab(text: 'في الطريق'),
@@ -87,15 +90,31 @@ class _CollectionTabsState extends State<CollectionTabs>
     ];
 
     if (widget.showCompleted) {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String userType = prefs.getString('role') ?? 'Generator';
+
+      if (userType == 'Generator') {
+        myTabs.add(const Tab(text: 'ملغاه'));
+        myTabViews.add(createListViewCancelled());
+      }
+
       myTabs.add(const Tab(text: 'اكتملت'));
       myTabViews.add(createListViewCompleted());
     }
 
+    // Initialize controller AFTER tabs are fully configured
     _tabController = TabController(
       length: myTabs.length,
       vsync: this,
       initialIndex: widget.initialIndex,
     );
+
+    // Add listener only after controller exists
+    _tabController.addListener(_handleTabSelection);
+    _previousIndex = _tabController.index;
+
+    // Trigger rebuild now that everything is ready
+    setState(() => _isInitialized = true);
   }
 
   Future<ListView> createListView(int status) async {
@@ -189,8 +208,22 @@ class _CollectionTabsState extends State<CollectionTabs>
     },
   );
 
+  Widget createListViewCancelled() => FutureBuilder<ListView>(
+    key: ValueKey('cancelled$_refreshKey'),
+    future: createListView(2),
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return const Center(child: CircularProgressIndicator());
+      }
+      return snapshot.data ?? const Text('No cancelled collections');
+    },
+  );
+
   @override
   Widget build(BuildContext context) {
+    if (!_isInitialized) {
+      return const Center(child: CircularProgressIndicator());
+    }
     return Column(
       children: <Widget>[
         TabBar(
