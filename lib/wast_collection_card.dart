@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:eco_credit/e_recycle_hub.dart';
 import 'package:eco_credit/picker_widget.dart';
 import 'package:eco_credit/services/api_service.dart';
+import 'package:eco_credit/upload-photo-section.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -111,8 +113,17 @@ class WasteCollectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     return GestureDetector(
-      onTap: () => _showDetails(context),
+    onTap: () async {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String role = prefs.getString('role') ?? 'Generator';
+      if (statusID == 4 && role == 'Picker') {
+        _showInvoiceDialog(collectionID, context);
+      } else {
+        _showDetails(context);
+      }
+    },
       child: Card(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10.0),
@@ -339,6 +350,15 @@ class WasteCollectionCard extends StatelessWidget {
                       ),
                     ],
                   ),
+              ],
+              if (role == "Picker" && statusID == 3) ...[
+                const SizedBox(height: 10),
+                Row( // Remove const here
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    _SizeInputButton(collectionID: collectionID), // Now recognizes collectionID
+                  ],
+                ),
               ]
             ],
           ),
@@ -346,4 +366,180 @@ class WasteCollectionCard extends StatelessWidget {
       ),
     );
   }
+}
+
+class _SizeInputButton extends StatefulWidget {
+  final int collectionID;
+  const _SizeInputButton({required this.collectionID});
+
+  @override
+  State<_SizeInputButton> createState() => _SizeInputButtonState();
+}
+
+class _SizeInputButtonState extends State<_SizeInputButton> {
+  final TextEditingController _sizeController = TextEditingController();
+
+  @override
+  void dispose() {
+    _sizeController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        ElevatedButton(
+          onPressed: _sizeController.text.isNotEmpty
+              ? () async {
+                  try {
+                    final size = double.parse(_sizeController.text);
+                    SharedPreferences prefs = await SharedPreferences.getInstance();
+                    int userId = prefs.getInt('id') ?? 1;
+                    String userType = prefs.getString('role') ?? 'Generator';
+                    ApiService apiService = ApiService();
+                    CollectionUpdateModel model = CollectionUpdateModel(
+                      collectionID: widget.collectionID,
+                      collectionStatusID: 4,
+                      collectionSize: size,
+                    );
+                    await apiService.updateCollection(model);
+                    // Optional: Show success message or reset field
+                    _sizeController.clear();
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (context) => ERecycleHub(id: userId, role: userType)),
+                      (route) => false, // Remove all previous routes
+                    ); // Pass `true` to indicate success
+                    
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('أدخل قيمة رقمية صحيحة'),
+                      ),
+                    );
+                  }
+                }
+              : null,
+          style: ButtonStyle(
+            backgroundColor: MaterialStateProperty.resolveWith<Color>(
+              (Set<MaterialState> states) {
+                if (_sizeController.text.isEmpty) return Colors.grey;
+                if (states.contains(MaterialState.pressed)) {
+                  return Colors.green.withOpacity(0.9);
+                }
+                return Colors.green;
+              },
+            ),
+            // ... rest of the style
+          ),
+          child: const Text(
+            'اكتملت',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        SizedBox(
+          width: 120,
+          child: TextField(
+            controller: _sizeController,
+            onChanged: (value) => setState(() {}),
+            keyboardType: TextInputType.numberWithOptions(decimal: true),
+            textAlign: TextAlign.right,
+            decoration: const InputDecoration(
+              hintText: 'أدخل الحجم',
+              border: OutlineInputBorder(),
+              contentPadding: EdgeInsets.symmetric(horizontal: 12),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+void _showInvoiceDialog(int collectionID, BuildContext context) {
+  late TextEditingController invoiceSizeController = TextEditingController();;
+  late TextEditingController scarpyardOwnerController = TextEditingController();;
+  File? invoiceImage;
+  int? wasteTypeID;
+  showDialog(
+    context: context,
+    builder: (context) => Directionality(
+      textDirection: TextDirection.rtl,
+      child: AlertDialog(
+        title: const Text('إنشاء فاتورة'),
+        content: SingleChildScrollView(
+          child: StatefulBuilder(
+            builder: (context, setState) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  UploadPhotoSection(
+                    onImageSelected: (File image) {
+                      setState(() => invoiceImage = image);
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  TextField(
+                    controller: invoiceSizeController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: 'الحجم في الفاتورة',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  TextField(
+                    controller: scarpyardOwnerController,
+                    decoration: const InputDecoration(
+                      labelText: 'صاحب الساحة',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('إلغاء'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              if (invoiceImage != null &&
+                  invoiceSizeController.text.isNotEmpty &&
+                  scarpyardOwnerController.text.isNotEmpty) {
+                try {
+                  final invoiceData = {
+                    'CollectionID': collectionID,
+                    'InvoiceSize': invoiceSizeController.text,
+                    'wasteTypeID': wasteTypeID,
+                    'ScarpyardOwner': scarpyardOwnerController.text
+                  };
+                  
+                  await ApiService.createInvoice(invoiceData, invoiceImage!);
+                  Navigator.pop(context);
+                  // Show success message
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('تم إنشاء الفاتورة بنجاح')),
+                  );
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('خطأ في إنشاء الفاتورة: ${e.toString()}')),
+                  );
+                }
+              }
+            },
+            child: const Text('إرسال'),
+          ),
+        ],
+      ),
+    ),
+  );
 }

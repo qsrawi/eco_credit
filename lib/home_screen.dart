@@ -60,10 +60,38 @@ class _HomeScreenState extends State<HomeScreen> {
           FutureBuilder(
             future: SharedPreferences.getInstance(),
             builder: (BuildContext context, AsyncSnapshot<SharedPreferences> snapshot) {
-              if (snapshot.hasData && snapshot.data!.getString('role') == "Picker" && !widget.showCompleted) {
-                return roleBasedCards(); // Render the cards if role is "Picker"
+              if (snapshot.hasData && 
+                  snapshot.data!.getString('role') == "Admin" && 
+                  widget.showCompleted) {
+                return Container(
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _buildKpiButton(
+                        icon: Icons.location_on,
+                        label: 'النفايات حسب الموقع',
+                        onPressed: () => _handleLocationKpi(context),
+                      ),
+                      _buildKpiButton(
+                        icon: Icons.category,
+                        label: 'النفايات حسب النوع',
+                        onPressed: () => _handleCategoryKpi(context),
+                      ),
+                      _buildKpiButton(
+                        icon: Icons.check_circle,
+                        label: 'المجموع الناجح',
+                        onPressed: () => _handleSuccessfulKpi(context),
+                      ),
+                    ],
+                  ),
+                );
+              } else if (snapshot.hasData && 
+                        snapshot.data!.getString('role') == "Picker" && 
+                        !widget.showCompleted) {
+                return roleBasedCards();
               } else {
-                return SizedBox(); // Render nothing if role is not "Picker"
+                return SizedBox.shrink();
               }
             },
           ),
@@ -203,4 +231,207 @@ Widget getTitleWidget(String role) {
       Icon(iconData, size: 20, color: color), // You can adjust the size as needed
     ],
   );
+}
+
+// Add these helper methods
+Widget _buildKpiButton({required IconData icon, required String label, required VoidCallback onPressed}) {
+  return ElevatedButton(
+    onPressed: onPressed,
+    style: ElevatedButton.styleFrom(
+      padding: EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+    ),
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 30, color: Colors.blue),
+        SizedBox(height: 8),
+        Text(
+          label,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+Future<void> _handleLocationKpi(BuildContext context) async {
+  final apiService = ApiService();
+  
+  // First show location selection dialog
+  final selectedLocation = await showDialog<int>(
+    context: context,
+    builder: (context) => Directionality(
+      textDirection: TextDirection.rtl,
+      child: FutureBuilder<List<LookupsResource>>(
+        future: apiService.getLookups("Location"),
+        builder: (context, snapshot) {
+          return AlertDialog(
+            title: const Text('اختر الموقع'),
+            content: SizedBox(
+              width: double.maxFinite,
+              child: _buildLocationList(snapshot),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('إلغاء'),
+              ),
+            ],
+          );
+        },
+      ),
+    ),
+  );
+
+  if (selectedLocation != null) {
+    final wasteTypeStatus = await apiService.getLocationKpi(selectedLocation);
+    
+    if (context.mounted) {
+      _showKpiReportDialog(context, wasteTypeStatus);
+    }
+  }
+}
+
+Widget _buildLocationList(AsyncSnapshot<List<LookupsResource>> snapshot) {
+  if (snapshot.connectionState == ConnectionState.waiting) {
+    return const Center(child: CircularProgressIndicator());
+  }
+
+  if (snapshot.hasError) {
+    return Text('خطأ في تحميل المواقع: ${snapshot.error}');
+  }
+
+  if (!snapshot.hasData || snapshot.data!.isEmpty) {
+    return const Text('لا توجد مواقع متاحة');
+  }
+
+  final locations = snapshot.data!;
+
+  return ListView.builder(
+    shrinkWrap: true,
+    itemCount: locations.length,
+    itemBuilder: (context, index) {
+      final location = locations[index];
+      return ListTile(
+        title: Text(location.value ?? ''),
+        onTap: () => Navigator.pop(context, location.lkpID),
+      );
+    },
+  );
+}
+
+Future<void> _handleCategoryKpi(BuildContext context) async {
+  late final ApiService apiService = ApiService();
+  KpiResource wasteTypeStatus = KpiResource();
+
+  wasteTypeStatus = await apiService.getWasteCategoriesKpi();
+
+  // ignore: use_build_context_synchronously
+  _showKpiReportDialog(context, wasteTypeStatus);
+}
+
+Future<void> _handleSuccessfulKpi(BuildContext context) async {
+  late final ApiService apiService = ApiService();
+  KpiResource wasteTypeStatus = KpiResource();
+
+  wasteTypeStatus = await apiService.getSuccessfulCollectionsKpi();
+
+  // ignore: use_build_context_synchronously
+  _showKpiReportDialog(context, wasteTypeStatus);
+}
+
+
+// Add this to your WasteCollectorCard widget's onKpiPressed handler
+  Future<void> _showKpiReportDialog(BuildContext context, KpiResource wasteTypeStatus) async {
+    showDialog(
+      context: context,
+      builder: (context) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: AlertDialog(
+          title: const Text('تقرير مؤشرات الأداء'),
+          content: SingleChildScrollView(
+            child: Column(
+              children: wasteTypeStatus.wasteTypeStatus!.map((item) {
+                return _buildWasteTypeItem(
+                  item.wasteTypeID ?? 0 ,
+                  item.wasteTypeName ?? "" ,
+                  item.collectionsCount ?? 0 ,
+                  item.collectionAmount ?? 0.0 ,
+                );
+              }).toList(),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('إغلاق'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWasteTypeItem(int typeId, String name, int count, double amount) {
+    return ListTile(
+      leading: Icon(_getWasteTypeIcon(typeId), color: Colors.green),
+      title: Text(name),
+      subtitle: Row(
+        children: [
+          _buildMetricItem(Icons.format_list_numbered, 'العدد: $count'),
+          const SizedBox(width: 16),
+          _buildMetricItem(Icons.scale, 'الكمية: ${amount.toStringAsFixed(1)} كجم'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(IconData icon, String text) {
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: Colors.grey),
+        const SizedBox(width: 4),
+        Text(
+          text,
+          style: const TextStyle(color: Colors.grey),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMetricItem(IconData icon, String text) {
+    return Row(
+      children: [
+        Icon(icon, size: 16),
+        const SizedBox(width: 4),
+        Text(text),
+      ],
+    );
+  }
+
+IconData _getWasteTypeIcon(int typeId) {
+  switch (typeId) {
+    case 1: // بلاستك (Plastic)
+      return Icons.recycling;
+    case 2: // ورق (Paper)
+      return Icons.description;
+    case 3: // كرتون (Cardboard)
+      return Icons.archive;
+    case 4: // معادن (Metals)
+      return Icons.build;
+    case 5: // خشب (Wood)
+      return Icons.forest;
+    case 6: // زجاج (Glass)
+      return Icons.local_drink;
+    default:
+      return Icons.delete_outline;
+  }
 }

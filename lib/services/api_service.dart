@@ -61,6 +61,55 @@ class ApiService {
     }
   }
 
+  static Future<http.Response?> createInvoice(Map<String, dynamic> collectionData, File? imageFile) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('authToken');
+
+    var uri = Uri.parse('$baseUrl/collections/createInvoice');
+    var request = http.MultipartRequest('POST', uri);
+
+    request.headers.addAll({
+      'Authorization': 'Bearer $token'  // Include the token in the header
+    });
+
+    // Add fields only if they are not null
+    void addFieldIfNotNull(String key, dynamic value) {
+      if (value != null) {
+        request.fields[key] = value.toString();
+      }
+    }
+
+    addFieldIfNotNull('CollectionID', collectionData['CollectionID']);
+    addFieldIfNotNull('InvoiceSize', collectionData['InvoiceSize']);
+    addFieldIfNotNull('WasteTypeID', collectionData['WasteTypeID']);
+    addFieldIfNotNull('ScarpyardOwner', collectionData['ScarpyardOwner']);
+
+    if (imageFile != null) {
+      String fileName = imageFile.path.split('/').last;
+      request.files.add(
+        await http.MultipartFile.fromPath(
+          'InvoiceImage',
+          imageFile.path,
+          contentType: MediaType('image', fileName.split('.').last),
+        ),
+      );
+    }
+
+    try {
+      var streamedResponse = await request.send();
+      var response = await http.Response.fromStream(streamedResponse);
+      if (response.statusCode == 200) {
+        return response;
+      } else {
+        print('Failed to create collection: ${response.body}');
+        return null;
+      }
+    } catch (e) {
+      print('Exception when calling API: $e');
+      return null;
+    }
+  }
+
   Future<void> updateCollection(CollectionUpdateModel model) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('authToken');
@@ -75,6 +124,7 @@ class ApiService {
     var body = jsonEncode({
       'CollectionID': model.collectionID,
       'CollectionStatusID': model.collectionStatusID,
+      'CollectionSize': model.collectionSize,
       'PickerID': model.pickerID
     });
 
@@ -249,6 +299,75 @@ class ApiService {
     
     if (response.statusCode == 200) {
       return KpiResource.fromJson(json.decode(response.body));
+    } else {
+      throw Exception('Failed to load collections: ${response.statusCode} ${response.body}');
+    }
+  }
+
+  Future<KpiResource> getLocationKpi(int locationID) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('authToken');
+
+    final uri = Uri.parse('$baseUrl/kpi/locationKpi/${locationID.toString()}');
+
+    final response = await http.get(uri, headers: {
+      'Authorization': 'Bearer $token', // Use the token here
+    });
+    
+    if (response.statusCode == 200) {
+      return KpiResource.fromJson(json.decode(response.body));
+    } else {
+      throw Exception('Failed to load collections: ${response.statusCode} ${response.body}');
+    }
+  }
+
+  Future<KpiResource> getWasteCategoriesKpi() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('authToken');
+
+    final uri = Uri.parse('$baseUrl/kpi/wasteCategoriesKpi');
+
+    final response = await http.get(uri, headers: {
+      'Authorization': 'Bearer $token', // Use the token here
+    });
+    
+    if (response.statusCode == 200) {
+      return KpiResource.fromJson(json.decode(response.body));
+    } else {
+      throw Exception('Failed to load collections: ${response.statusCode} ${response.body}');
+    }
+  }
+
+  Future<KpiResource> getSuccessfulCollectionsKpi() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('authToken');
+
+    final uri = Uri.parse('$baseUrl/kpi/successfulCollectionsKpi');
+
+    final response = await http.get(uri, headers: {
+      'Authorization': 'Bearer $token', // Use the token here
+    });
+    
+    if (response.statusCode == 200) {
+      return KpiResource.fromJson(json.decode(response.body));
+    } else {
+      throw Exception('Failed to load collections: ${response.statusCode} ${response.body}');
+    }
+  }
+
+  Future<List<LookupsResource>> getLookups(String categoryCode) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('authToken');
+
+    final uri = Uri.parse('$baseUrl/lookups/$categoryCode');
+
+    final response = await http.get(uri, headers: {
+      'Authorization': 'Bearer $token', // Use the token here
+    });
+    
+    if (response.statusCode == 200) {
+      List<dynamic> data = json.decode(response.body);
+      return data.map((item) => LookupsResource.fromJson(item)).toList();
     } else {
       throw Exception('Failed to load collections: ${response.statusCode} ${response.body}');
     }
@@ -677,6 +796,30 @@ class WasteTypeStatus {
       wasteTypeName: json['wasteTypeName'] as String?,
       collectionAmount: (json['collectionAmount'] as num?)?.toDouble(),
       collectionsCount: json['collectionsCount'] as int? ?? 0
+    );
+  }
+}
+
+class LookupsResource {
+  int? lkpID;
+  String? lkpType;
+  String? value;
+  String? nearby;
+
+
+  LookupsResource({
+    this.lkpID,
+    this.lkpType,
+    this.value,
+    this.nearby
+  });
+
+  factory LookupsResource.fromJson(Map<String, dynamic> json) {
+    return LookupsResource(
+      lkpID: json['lkpID'] as int? ?? 0, // Handle null with default value
+      lkpType: json['lkpType'] as String?,
+      value: json['value'] as String?,
+      nearby: json['nearby'] as String?
     );
   }
 }
