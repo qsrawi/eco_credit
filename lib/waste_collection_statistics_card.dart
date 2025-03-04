@@ -22,9 +22,9 @@ class WasteCollectionStatisticsCard extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
-            _buildStatColumn('بالانتظار', pending, Colors.amber),
-            _buildStatColumn('اكتملت', completed, Colors.green),
-            _buildStatColumn('في الطريق', inProgress, Colors.blue),
+            _buildStatColumn('في الانتظار ♻️', pending, Colors.amber),
+            _buildStatColumn('في الطريق ♻️', inProgress, Colors.blue),
+            _buildStatColumn('اكتملت ♻️', completed, Colors.green),
             _buildStatColumn('ألغيت', cancelled, Colors.red),
           ],
         ),
@@ -66,11 +66,11 @@ class WasteCollectionStatisticsCard extends StatelessWidget {
 
   IconData _getIconForLabel(String label) {
     switch (label) {
-      case 'بالانتظار':
+      case 'في الانتظار ♻️':
         return Icons.hourglass_empty;
-      case 'اكتملت':
+      case 'اكتملت ♻️':
         return Icons.check_circle;
-      case 'في الطريق':
+      case 'في الطريق ♻️':
         return Icons.directions_car;
       case 'ألغيت':
         return Icons.cancel;

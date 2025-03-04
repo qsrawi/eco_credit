@@ -4,8 +4,13 @@ import 'package:image_picker/image_picker.dart';
 
 class UploadPhotoSection extends StatefulWidget {
   final Function(File) onImageSelected;
+  final String titleText; // New parameter for custom text
 
-  const UploadPhotoSection({Key? key, required this.onImageSelected}) : super(key: key);
+  const UploadPhotoSection({
+    Key? key, 
+    required this.onImageSelected,
+    this.titleText = 'ارفع صورة', // Default text remains 'ارفع صورة'
+  }) : super(key: key);
 
   @override
   _UploadPhotoSectionState createState() => _UploadPhotoSectionState();
@@ -58,7 +63,7 @@ class _UploadPhotoSectionState extends State<UploadPhotoSection> {
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         title: Text(
-          'ارفع صورة', // Arabic for "Upload a photo from waste collection"
+          widget.titleText, // Arabic for "Upload a photo from waste collection"
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w500,

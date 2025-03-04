@@ -442,7 +442,14 @@ class ApiService {
   }
 
   Future<GeneratorResource> fetchProfile(int id) async {
-    final response = await http.get(Uri.parse('$baseUrl/pickers/$id'));
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('authToken');
+
+    final uri = Uri.parse('$baseUrl/pickers/$id');
+
+    final response = await http.get(uri, headers: {
+      'Authorization': 'Bearer $token', // Use the token here
+    });
 
     if (response.statusCode == 200) {
       return GeneratorResource.fromJson(json.decode(response.body));
@@ -452,8 +459,14 @@ class ApiService {
   }
 
   Future<GeneratorResource> fetchGeneratorsProfile(int id) async {
-    final response = await http.get(Uri.parse('$baseUrl/generators/$id'));
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('authToken');
+    
+    final uri = Uri.parse('$baseUrl/generators/$id');
 
+    final response = await http.get(uri, headers: {
+      'Authorization': 'Bearer $token', // Use the token here
+    });
     if (response.statusCode == 200) {
       return GeneratorResource.fromJson(json.decode(response.body));
     } else {
@@ -462,13 +475,18 @@ class ApiService {
   }
 
   Future<List<NotificationListResource>> fetchNotifications(int? userId, String? userType) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('authToken');
+
     final uri = Uri.parse('$baseUrl/notifications')
       .replace(queryParameters: {
         'userID': userId?.toString(),
         'userType': userType,
       });
 
-    final response = await http.get(uri);
+    final response = await http.get(uri, headers: {
+      'Authorization': 'Bearer $token', // Use the token here
+    });
 
     if (response.statusCode == 200) {
       var data = json.decode(response.body);

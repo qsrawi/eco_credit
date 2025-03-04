@@ -153,8 +153,8 @@ class WasteCollectionCard extends StatelessWidget {
                   ),
                   Text(
                     status,
-                    style: TextStyle(
-                      color: status == 'بالانتظار' ? Colors.orange : Colors.green,
+                    style: const TextStyle(
+                      // color: status == 'بالانتظار' ? Colors.orange : Colors.green,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -195,8 +195,6 @@ class WasteCollectionCard extends StatelessWidget {
                 child: Text(
                   'الجمع: $pickerName',
                   style: const TextStyle(
-                    color: Colors.blue,
-                    fontWeight: FontWeight.bold,
                     fontSize: 14,
                   ),
                 ),
@@ -236,7 +234,7 @@ class WasteCollectionCard extends StatelessWidget {
                         ),
                         foregroundColor: MaterialStateProperty.all<Color>(Colors.red),
                         padding: MaterialStateProperty.all<EdgeInsets>(
-                          const EdgeInsets.symmetric(horizontal: 75, vertical: 10)
+                          const EdgeInsets.symmetric(horizontal: 55, vertical: 10)
                         ),
                         shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                           RoundedRectangleBorder(
@@ -287,7 +285,7 @@ class WasteCollectionCard extends StatelessWidget {
                         ),
                         foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
                         padding: MaterialStateProperty.all<EdgeInsets>(
-                          const EdgeInsets.symmetric(horizontal: 75, vertical: 10)
+                          const EdgeInsets.symmetric(horizontal: 55, vertical: 10)
                         ),
                         shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                           RoundedRectangleBorder(

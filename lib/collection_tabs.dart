@@ -80,8 +80,8 @@ class _CollectionTabsState extends State<CollectionTabs>
  Future<void> _initializeTabs() async {
     // Initialize tabs asynchronously
     myTabs = <Tab>[
-      const Tab(text: 'بالانتظار'),
-      const Tab(text: 'في الطريق'),
+      const Tab(text: '♻️ قيد الانتظار '),
+      const Tab(text: '♻️ تم الاستلام'),
     ];
 
     myTabViews = <Widget>[
@@ -94,11 +94,11 @@ class _CollectionTabsState extends State<CollectionTabs>
       String userType = prefs.getString('role') ?? 'Generator';
 
       if (userType == 'Generator') {
-        myTabs.add(const Tab(text: 'ملغاه'));
+        myTabs.add(const Tab(text: '♻️ رفض'));
         myTabViews.add(createListViewCancelled());
       }
 
-      myTabs.add(const Tab(text: 'اكتملت'));
+      myTabs.add(const Tab(text: '♻️ مكتمل'));
       myTabViews.add(createListViewCompleted());
     }
 
@@ -127,20 +127,23 @@ class _CollectionTabsState extends State<CollectionTabs>
       itemCount: collections.length,
       itemBuilder: (context, index) {
         final collection = collections[index];
-        return WasteCollectionCard(
-          role: userType,
-          collectionID: collection.collectionID,
-          statusID: collection.collectionStatusID,
-          status: collection.collectionStatusName ?? 'Unknown',
-          title: collection.wasteTypeName ?? 'Unknown',
-          collectionTypeName: collection.collectionTypeName ?? 'Unknown',
-          name: collection.generator?.name ?? 'Unknown',
-          pickerName: collection.picker?.name ?? 'Unknown',
-          imageUrl: collection.image ?? 'assets/images/default.jpg',
-          collectionSize: collection.collectionSize ?? 0.00,
-          timeAgo: _formatTimeAgo(collection.createdDate),
-          description: collection.description ?? 'Unknown'
-        );
+        return Container(
+              margin: EdgeInsets.all(8.0), // Adds vertical margin between cards
+              child: WasteCollectionCard(
+                role: userType,
+                collectionID: collection.collectionID,
+                statusID: collection.collectionStatusID,
+                status: collection.collectionStatusName ?? 'Unknown',
+                title: collection.wasteTypeName ?? 'Unknown',
+                collectionTypeName: collection.collectionTypeName ?? 'Unknown',
+                name: collection.generator?.name ?? 'Unknown',
+                pickerName: collection.picker?.name ?? 'Unknown',
+                imageUrl: collection.image ?? 'assets/images/default.jpg',
+                collectionSize: collection.collectionSize ?? 0.00,
+                timeAgo: _formatTimeAgo(collection.createdDate),
+                description: collection.description ?? 'Unknown'
+              ),
+            );
       },
     );
   }

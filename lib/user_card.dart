@@ -175,7 +175,7 @@ class UserCard extends StatelessWidget {
       subtitle: Row(
         children: [
           _buildMetricItem(Icons.format_list_numbered, 'العدد: $count'),
-          const SizedBox(width: 16),
+          const SizedBox(width: 4),
           _buildMetricItem(Icons.scale, 'الكمية: ${amount.toStringAsFixed(1)} كجم'),
         ],
       ),

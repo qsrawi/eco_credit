@@ -51,7 +51,7 @@ class _PickerWidgetState extends State<PickerWidget> {
         return StatefulBuilder(  // This builder allows for local state updates within the dialog
           builder: (context, setStateDialog) {
             return AlertDialog(
-              title: const Text('جميع أبطال البيئة', textAlign: TextAlign.right), // Right align the title
+              title: const Text('أبطال البيئة', textAlign: TextAlign.right), // Right align the title
               content: SizedBox(
                 width: double.maxFinite, // Ensure the dialog is wide enough
                 child: Column(

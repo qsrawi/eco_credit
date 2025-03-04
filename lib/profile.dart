@@ -3,6 +3,7 @@ import 'package:eco_credit/services/api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'waste_collection_statistics_card.dart';
+import 'dart:convert'; // Needed for base64 decode
 
 class ProfileScreen extends StatefulWidget {
   @override
@@ -10,7 +11,7 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  late Future<GeneratorResource> profile;
+  Future<GeneratorResource>? profile; // Remove 'late' and make nullable
   int? userId;
   String? userType;
 
@@ -22,15 +23,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   void loadInitialData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    int userId = prefs.getInt('id') ?? 1; // Default to 1 if not set
+    int userId = prefs.getInt('id') ?? 1;
     userType = prefs.getString('role') ?? 'Generator';
-    if(userType == "Generator") {
-      profile = ApiService().fetchGeneratorsProfile(userId);
-    } else {
-      profile = ApiService().fetchProfile(userId);
-    }
-    setState(() {}); // This is optional, depends on if you need to update the UI after data is fetched
+    
+    setState(() {  // Update state before async call
+      if(userType == "Generator") {
+        profile = ApiService().fetchGeneratorsProfile(userId);
+      } else {
+        profile = ApiService().fetchProfile(userId);
+      }
+    });
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -155,13 +159,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
         padding: const EdgeInsets.all(16.0),
         child: Row(
           children: <Widget>[
-          CircleAvatar(
-            radius: 50,
-            backgroundImage: profile.image != null 
-              ? NetworkImage(profile.image!) as ImageProvider<Object>
-              : const AssetImage('assets/images/default.jpg') as ImageProvider<Object>,
-          ),
-
+            CircleAvatar(
+              radius: 50,
+              backgroundImage: profile.image != null 
+                ? MemoryImage(base64Decode(profile.image!)) as ImageProvider<Object>
+                : const AssetImage('assets/images/default.jpg') as ImageProvider<Object>,
+            ),
+            const SizedBox(width: 20),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

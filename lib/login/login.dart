@@ -19,7 +19,7 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _passwordController = TextEditingController();
   bool _obscureText = true;
   String? _selectedOption;  // To keep track of the selected dropdown item
-  String message = 'امنح المواد حياة جديدة بإعادة تدويرها♻️';
+  String message = '♻️ امنح المواد حياة جديدة بإعادة تدويرها';
 
   List<Map<String, String>> _userOptions = [];
 
@@ -65,7 +65,7 @@ class _LoginPageState extends State<LoginPage> {
             Text(
               message,
               style: GoogleFonts.cairo(
-                textStyle: TextStyle(
+                textStyle: const TextStyle(
                   color: Colors.black, // Text color
                   fontSize: 14, // Font size
                 ),
@@ -180,10 +180,17 @@ class _LoginPageState extends State<LoginPage> {
               },
               style: ElevatedButton.styleFrom(
                 foregroundColor: Colors.black,
-                backgroundColor: Colors.blue,
+                backgroundColor: Colors.green,
                 minimumSize: Size.fromHeight(50),
               ),
-              child: const Text('تسجيل الدخول'),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,  // Minimize the row size to fit the content
+                children: <Widget>[
+                  Icon(Icons.open_in_browser, color: Colors.black),  // Add person icon, colored to match the text
+                  SizedBox(width: 8),  // Space between icon and text
+                  Text('تسجيل الدخول'),  // Button text
+                ],
+              ),
             ),
             SizedBox(height: 15),
             ElevatedButton(
@@ -192,10 +199,17 @@ class _LoginPageState extends State<LoginPage> {
               },
               style: ElevatedButton.styleFrom(
                 foregroundColor: Colors.black,
-                backgroundColor: Colors.green,
+                backgroundColor: Color.fromARGB(255, 73, 172, 76),
                 minimumSize: Size.fromHeight(50),
               ),
-              child: const Text('إنشاء حساب'),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,  // Minimize the row size to fit the content
+                children: <Widget>[
+                  Icon(Icons.person_add, color: Colors.black),  // Add person icon, colored to match the text
+                  SizedBox(width: 8),  // Space between icon and text
+                  Text('إنشاء حساب'),  // Button text
+                ],
+              ),
             ),
             if (widget.type == 'dry_clean')
               SizedBox(height: 15),

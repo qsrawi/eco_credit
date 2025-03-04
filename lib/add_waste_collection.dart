@@ -4,6 +4,7 @@ import 'package:eco_credit/sale-or-donation-selector.dart';
 import 'package:eco_credit/services/api_service.dart';
 import 'package:eco_credit/upload-photo-section.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'picker_widget.dart';  // Assuming you have this file
 import 'waste_type_widget.dart';  // Assuming you have this file
@@ -56,7 +57,18 @@ class _AddWasteCollectionScreenState extends State<AddWasteCollectionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('أضافة مجموعة جديدة'),
+        title: Text(
+          '♻️ خطوة صغيرة منك في التدوير، تصنع أثر كبير على البيئة',
+          style: GoogleFonts.cairo(
+            textStyle: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              height: 1.4,
+              letterSpacing: 0.5,
+            ),
+          ),
+          textAlign: TextAlign.right,
+        ),
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () async {
@@ -87,7 +99,7 @@ class _AddWasteCollectionScreenState extends State<AddWasteCollectionScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            UploadPhotoSection(onImageSelected: setImage),
+            UploadPhotoSection(onImageSelected: setImage, titleText: "إضافة صور المواد القابلة للتدوير"),
             PickerWidget(onSelected: setPickerId),
             WasteTypeWidget(onSelected: setWasteTypeId),
             SaleOrDonationSelector(onSelected: setCollectionTypeId),
@@ -145,7 +157,7 @@ class _AddWasteCollectionScreenState extends State<AddWasteCollectionScreen> {
                         children: [
                           Icon(Icons.check_circle, color: Colors.white), // Success icon
                           SizedBox(width: 8), // Spacing between icon and text
-                          Text('Collection added successfully!'),
+                          Text('♻️ معًا نجعل التدوير عادة، والبيئة أكثر نظافة !'),
                         ],
                       ),
                       backgroundColor: Colors.green, // Green for success

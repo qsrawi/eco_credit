@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:eco_credit/login/login.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 void main() {
  // Your code
@@ -22,40 +23,84 @@ class MyApp extends StatelessWidget {
 class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // Obtain screen size for responsive layout
-    var screenSize = MediaQuery.of(context).size;
+    final screenSize = MediaQuery.of(context).size;
 
     return Scaffold(
-      backgroundColor: Color(0xFFD5E4E1),
       appBar: AppBar(
-        title: Text('ecoCredit'),
-        backgroundColor: Color(0xFFD5E4E1),
+        title: Text(
+          'ecoCredit',
+          style: GoogleFonts.lato(  // Using Lato as an example; replace with your chosen font
+            textStyle: const TextStyle(
+              color: Colors.white,
+              fontSize: 20,  // Customize your font size here
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.teal.shade300, Colors.green.shade400],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+        backgroundColor: Colors.transparent,
         elevation: 0,
       ),
-      body: SingleChildScrollView(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              ImageCard(
-                imagePath: 'assets/images/dryclean.jpg', 
-                label: 'Dry Clean', 
-                onTap: () => navigateToLogin(context, 'dry_clean'),
-                height: screenSize.height * 0.3, // 30% of screen height
-              ),
-              ImageCard(
-                imagePath: 'assets/images/erecycleHUB.jpg', 
-                label: 'eRecycleHUB', 
-                onTap: () => navigateToLogin(context, 'erecycleHUB'),
-                height: screenSize.height * 0.3, // 30% of screen height
-              ),
-            ],
+      body: Container(
+        constraints: const BoxConstraints.expand(), // Force full-screen size
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.teal.shade300, Colors.green.shade400],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
+        ),
+        child: SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: screenSize.height, // Ensure minimum height = screen height
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min, // Allow vertical expansion
+              children: <Widget>[
+                ImageCard(
+                  imagePath: 'assets/images/dryclean.png',
+                  label: 'Dry Clean',
+                  onTap: () => navigateToLogin(context, 'dry_clean'),
+                  height: screenSize.height * 0.3,
+                ),
+                SizedBox(height: screenSize.height * 0.02), // Add spacing
+                ImageCard(
+                  imagePath: 'assets/images/erecycleHUB.png',
+                  label: 'eRecycleHUB',
+                  onTap: () => navigateToLogin(context, 'erecycleHUB'),
+                  height: screenSize.height * 0.3,
+                ),
+                SizedBox(height: screenSize.height * 0.4), // Bottom spacing
+              ],
+            ),
+          ),
+        ),
+      ),
+       bottomNavigationBar: Container(
+        color: Colors.white.withOpacity(0.5),  // Semi-transparent white background
+        padding: EdgeInsets.all(10),
+        child: const Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.copyright, size: 14),
+            SizedBox(width: 5),
+            Text('2025 All rights reserved', style: TextStyle(fontSize: 12)),
+          ],
         ),
       ),
     );
   }
 
+  
   void navigateToLogin(BuildContext context, String type) {
     Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage(type: type)));
   }
