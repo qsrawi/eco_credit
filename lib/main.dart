@@ -28,7 +28,7 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Color(0xFFD5E4E1),
       appBar: AppBar(
-        title: Text('EcoCredit'),
+        title: Text('ecoCredit'),
         backgroundColor: Color(0xFFD5E4E1),
         elevation: 0,
       ),

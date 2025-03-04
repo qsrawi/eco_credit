@@ -58,7 +58,7 @@ class _UploadPhotoSectionState extends State<UploadPhotoSection> {
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         title: Text(
-          'ارفع صورة من جمع النفايات', // Arabic for "Upload a photo from waste collection"
+          'ارفع صورة', // Arabic for "Upload a photo from waste collection"
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w500,

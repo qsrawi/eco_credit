@@ -3,6 +3,7 @@ import 'package:eco_credit/notification_icon.dart';
 import 'package:eco_credit/services/api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class HomeScreen extends StatefulWidget {
   final bool showCompleted;
@@ -57,6 +58,73 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: Column(
         children: [
+          FutureBuilder<SharedPreferences>(
+            future: SharedPreferences.getInstance(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData && 
+                        snapshot.data!.getString('role') != "Admin" && 
+                        !widget.showCompleted) {
+                      if (snapshot.hasData) {
+                        final userName = snapshot.data!.getString('name') ?? 'صديق البيئة';
+                        final role = snapshot.data!.getString('role') ?? '';
+                        
+                        String message;
+                        if (role == "Generator") {
+                          message = 'مرحبا $userName شكراً لقيامك بدورك في الحفاظ على البيئة ';
+                        } else if (role == "Picker") {
+                          message = 'مرحباً $userName، شكراً لتحملك مسؤولية حماية البيئة ';
+                        } else {
+                          message = 'مرحباً $userName، شكراً لانضمامك إلى مجتمعنا البيئي ';
+                        }
+
+                        return Container(
+                          margin: EdgeInsets.all(16),
+                          padding: EdgeInsets.symmetric(vertical: 24, horizontal: 20),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [Colors.teal.shade300, Colors.green.shade400],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.green.withOpacity(0.3),
+                                blurRadius: 10,
+                                offset: Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.eco, color: Colors.white, size: 40),
+                              SizedBox(width: 16),
+                              Expanded(
+                                child: Text(
+                                  message,
+                                  style: GoogleFonts.cairo(
+                                    textStyle: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.white,
+                                      height: 1.4,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                  textAlign: TextAlign.right,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+                      return SizedBox.shrink();
+                    }
+                    else {
+                return SizedBox.shrink();
+              }
+            }
+          ),
           FutureBuilder(
             future: SharedPreferences.getInstance(),
             builder: (BuildContext context, AsyncSnapshot<SharedPreferences> snapshot) {

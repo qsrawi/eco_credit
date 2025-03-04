@@ -1,7 +1,9 @@
 import 'package:eco_credit/dry-clean/dry_clean.dart';
 import 'package:eco_credit/e_recycle_hub.dart';
+import 'package:eco_credit/login/register.dart';
 import 'package:eco_credit/services/api_service.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class LoginPage extends StatefulWidget {
   final String type;
@@ -17,6 +19,7 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _passwordController = TextEditingController();
   bool _obscureText = true;
   String? _selectedOption;  // To keep track of the selected dropdown item
+  String message = 'امنح المواد حياة جديدة بإعادة تدويرها♻️';
 
   List<Map<String, String>> _userOptions = [];
 
@@ -50,13 +53,26 @@ class _LoginPageState extends State<LoginPage> {
           children: <Widget>[
             Padding(
               padding: const EdgeInsets.all(5),
-              child: Image.asset(
-                'assets/images/main.jpg', // Path to your image
-                width: 500, // Adjust the width as needed
-                height: 150, // Adjust the height as needed
-                fit: BoxFit.contain, // Ensures the image fits within the specified dimensions
+              child: ClipOval(
+                child: Image.asset(
+                  'assets/images/header2.png', // Path to your image
+                  width: 180, // Adjust the width as needed
+                  height: 180, // Adjust the height as needed to keep the circle aspect
+                  fit: BoxFit.cover, // Cover ensures the image covers the clip area
+                ),
               ),
             ),
+            Text(
+              message,
+              style: GoogleFonts.cairo(
+                textStyle: TextStyle(
+                  color: Colors.black, // Text color
+                  fontSize: 14, // Font size
+                ),
+              ),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 10),
             TextFormField(
               controller: _emailController,
               decoration: const InputDecoration(
@@ -171,7 +187,9 @@ class _LoginPageState extends State<LoginPage> {
             ),
             SizedBox(height: 15),
             ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => RegisterPage(type: widget.type)));
+              },
               style: ElevatedButton.styleFrom(
                 foregroundColor: Colors.black,
                 backgroundColor: Colors.green,

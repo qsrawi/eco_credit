@@ -110,6 +110,72 @@ class ApiService {
     }
   }
 
+  static Future<http.Response?> register(Map<String, dynamic> user, File? imageFile, String type) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('authToken');
+
+    var uri = Uri.parse('$baseUrl/admins/register');
+    var request = http.MultipartRequest('POST', uri);
+
+    request.headers.addAll({
+      'Authorization': 'Bearer $token'  // Include the token in the header
+    });
+
+    // Add fields only if they are not null
+    void addFieldIfNotNull(String key, dynamic value) {
+      if (value != null) {
+        if (value is List) {
+          // If the value is a list, add each item as a separate field
+          for (var i = 0; i < value.length; i++) {
+            request.fields['$key[$i]'] = value[i].toString();
+          }
+        } else {
+          // Otherwise, convert the value to a string as usual
+          request.fields[key] = value.toString();
+        }
+      }
+    }
+
+    // Add user fields
+    addFieldIfNotNull('Name', user['Name']);
+    addFieldIfNotNull('Password', user['Password']);
+    addFieldIfNotNull('Email', user['Email']);
+    addFieldIfNotNull('Phone', user['Phone']);
+    addFieldIfNotNull('LocationID', user['LocationID']);
+    addFieldIfNotNull('WasteTypeID', user['WasteTypeID']);
+    addFieldIfNotNull('PreferdWasteGroupID', user['PreferdWasteGroupID']);
+    addFieldIfNotNull('WasteGroupIDs', user['WasteGroupIDs']);
+
+    // Add the 'type' field
+    addFieldIfNotNull('type', type);
+
+    if (imageFile != null) {
+      String fileName = imageFile.path.split('/').last;
+      request.files.add(
+        await http.MultipartFile.fromPath(
+          'UserImage',
+          imageFile.path,
+          contentType: MediaType('UserImage', fileName.split('.').last),
+        ),
+      );
+    }
+
+    try {
+      var streamedResponse = await request.send();
+      var response = await http.Response.fromStream(streamedResponse);
+      if (response.statusCode == 200) {
+        return response;
+      } else {
+        print('Failed to create user: ${response.body}');
+        return null;
+      }
+    } catch (e) {
+      print('Exception when calling API: $e');
+      return null;
+    }
+  }
+
+
   Future<void> updateCollection(CollectionUpdateModel model) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('authToken');
@@ -163,12 +229,14 @@ class ApiService {
           int id = jsonResponse['id'];
           String role = jsonResponse['role'];
           int wasteTypeID = jsonResponse['wasteTypeID'];
+          String name = jsonResponse['name'];
 
           SharedPreferences prefs = await SharedPreferences.getInstance();
           await prefs.setString('authToken', token);
           await prefs.setInt('id', id);
           await prefs.setString('role', role);
           await prefs.setInt('wasteTypeID', wasteTypeID);
+          await prefs.setString('name', name);
 
           return { 'token': token, 'id': id, 'role': role };
         } else {
