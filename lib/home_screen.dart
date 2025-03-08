@@ -455,7 +455,7 @@ Future<void> _handleSuccessfulKpi(BuildContext context) async {
       subtitle: Row(
         children: [
           _buildMetricItem(Icons.format_list_numbered, 'العدد: $count'),
-          const SizedBox(width: 4),
+          const SizedBox(width: 2),
           _buildMetricItem(Icons.scale, 'الكمية: ${amount.toStringAsFixed(1)} كجم'),
         ],
       ),
@@ -465,8 +465,8 @@ Future<void> _handleSuccessfulKpi(BuildContext context) async {
   Widget _buildInfoRow(IconData icon, String text) {
     return Row(
       children: [
-        Icon(icon, size: 16, color: Colors.grey),
-        const SizedBox(width: 4),
+        Icon(icon, size: 14, color: Colors.grey),
+        const SizedBox(width: 2),
         Text(
           text,
           style: const TextStyle(color: Colors.grey),
@@ -478,8 +478,8 @@ Future<void> _handleSuccessfulKpi(BuildContext context) async {
   Widget _buildMetricItem(IconData icon, String text) {
     return Row(
       children: [
-        Icon(icon, size: 16),
-        const SizedBox(width: 4),
+        Icon(icon, size: 14),
+        const SizedBox(width: 2),
         Text(text),
       ],
     );

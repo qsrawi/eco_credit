@@ -5,6 +5,7 @@ import 'package:eco_credit/picker_widget.dart';
 import 'package:eco_credit/services/api_service.dart';
 import 'package:eco_credit/upload-photo-section.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class WasteCollectionCard extends StatelessWidget {
@@ -20,6 +21,10 @@ class WasteCollectionCard extends StatelessWidget {
   final String timeAgo; // منذ
   final double collectionSize; // حجم الجمع
   final String description;
+  final bool isInvoiced;
+  final double invoiceSize; // حجم الجمع
+  final String scarpyardOwner;
+  final String invoiceImage;
 
   const WasteCollectionCard({
     required this.collectionID,
@@ -34,6 +39,10 @@ class WasteCollectionCard extends StatelessWidget {
     required this.timeAgo,
     required this.collectionSize,
     required this.description,
+    required this.isInvoiced,
+    required this.invoiceSize,
+    required this.scarpyardOwner,
+    required this.invoiceImage,
   });
 
   void setWasteTypeId(int wasteTypeId) {
@@ -111,6 +120,134 @@ class WasteCollectionCard extends StatelessWidget {
     );
   }
 
+  
+    void _showInvoiceDialogView(BuildContext context) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return Directionality(
+            textDirection: TextDirection.rtl,
+            child: AlertDialog(
+              titlePadding: const EdgeInsets.all(16),
+              contentPadding: const EdgeInsets.all(16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
+              ),
+              title: Center(
+                child: Text(
+                  'تفاصيل الفاتورة',
+                  style: GoogleFonts.cairo(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.green[800],
+                  ),
+                ),
+              ),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      height: 200,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        image: DecorationImage(
+                          image: _getImageProvider(invoiceImage), // Use helper method
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    _buildInfoRow(
+                      icon: Icons.scale,
+                      label: 'الحجم بعد التوزين:',
+                      value: '$invoiceSize كغم',
+                    ),
+                    const Divider(height: 30, thickness: 0.5),
+                    _buildInfoRow(
+                      icon: Icons.person,
+                      label: 'اسم صاحب ساحة الخردة:',
+                      value: scarpyardOwner,
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text(
+                        'اغلاق',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    }
+
+    ImageProvider<Object> _getImageProvider(String? invoiceImage) {
+  if (invoiceImage != null && invoiceImage.isNotEmpty) {
+    try {
+      final cleanBase64 = invoiceImage.split(',').last;
+      return MemoryImage(
+        base64Decode(cleanBase64),
+        scale: 0.5,
+      ) as ImageProvider<Object>;
+    } catch (e) {
+      print('Error decoding base64: $e');
+    }
+  }
+  return const AssetImage('assets/images/default.jpg') as ImageProvider<Object>;
+}
+
+    Widget _buildInfoRow({required IconData icon, required String label, required String value}) {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: Colors.green, size: 24),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: GoogleFonts.cairo(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey[700],
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  value,
+                  style: GoogleFonts.cairo(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey[800],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      );
+    }
+
+
   @override
   Widget build(BuildContext context) {
 
@@ -118,7 +255,7 @@ class WasteCollectionCard extends StatelessWidget {
     onTap: () async {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String role = prefs.getString('role') ?? 'Generator';
-      if (statusID == 4 && role == 'Picker') {
+      if (statusID == 4 && role == 'Picker' && isInvoiced == false) {
         _showInvoiceDialog(collectionID, context);
       } else {
         _showDetails(context);
@@ -349,6 +486,49 @@ class WasteCollectionCard extends StatelessWidget {
                     ],
                   ),
               ],
+              if ((role == "Picker" && statusID == 4 && isInvoiced == true) || (role == "Admin" && statusID == 4 && isInvoiced == true)) ...[
+                const SizedBox(height: 10),
+                Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      const SizedBox(width: 10), // Space between buttons
+                      ElevatedButton(
+                      onPressed: () async {
+                        _showInvoiceDialogView(context);
+                      },
+                        style: ButtonStyle(
+                          backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                            (Set<MaterialState> states) {
+                              if (states.contains(MaterialState.pressed)) {
+                                return Colors.green.withOpacity(0.9); // Light opacity when pressed
+                              }
+                              return Colors.green; // Default non-pressed state
+                            }
+                          ),
+                          foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
+                          padding: MaterialStateProperty.all<EdgeInsets>(
+                            const EdgeInsets.symmetric(horizontal: 75, vertical: 10)
+                          ),
+                          shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8), // Smaller border radius
+                              side: BorderSide(color: Colors.green, width: 0.8), // Matching border color
+                            )
+                          ),
+                          overlayColor: MaterialStateProperty.resolveWith<Color>(
+                            (Set<MaterialState> states) {
+                              if (states.contains(MaterialState.hovered) || states.contains(MaterialState.pressed)) {
+                                return Colors.green.withOpacity(0.1); // Hover and click effect color
+                              }
+                              return Colors.transparent; // Default is transparent
+                            }
+                          ),
+                        ),
+                        child: const Text('عرض الفاتورة', style: TextStyle(color: Colors.white)),
+                      ),
+                    ],
+                  ),
+              ],
               if (role == "Picker" && statusID == 3) ...[
                 const SizedBox(height: 10),
                 Row( // Remove const here
@@ -510,6 +690,9 @@ void _showInvoiceDialog(int collectionID, BuildContext context) {
           ),
           ElevatedButton(
             onPressed: () async {
+              SharedPreferences prefs = await SharedPreferences.getInstance();
+              int userId = prefs.getInt('id') ?? 1;
+              String userType = prefs.getString('role') ?? 'Generator';
               if (invoiceImage != null &&
                   invoiceSizeController.text.isNotEmpty &&
                   scarpyardOwnerController.text.isNotEmpty) {
@@ -522,7 +705,11 @@ void _showInvoiceDialog(int collectionID, BuildContext context) {
                   };
                   
                   await ApiService.createInvoice(invoiceData, invoiceImage!);
-                  Navigator.pop(context);
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => ERecycleHub(id: userId, role: userType)),
+                    (route) => false, // Remove all previous routes
+                  ); // Pass `true` to i// Pass `true` to i
                   // Show success message
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('تم إنشاء الفاتورة بنجاح')),

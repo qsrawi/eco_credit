@@ -74,7 +74,7 @@ class _GeneratorsListWidget extends State<GeneratorsListWidget> {
               return UserCard(
                 id: picker.id,
                 role: "Generator",
-                imageUrl: picker.image ?? 'https://via.placeholder.com/80',
+                imageUrl: picker.image ?? 'assets/images/default.jpg',
                 name: picker.name ?? 'اسم غير معروف',
                 phone: picker.phone ?? 'لا يوجد رقم هاتف',
                 locationName: picker.locationName ?? 'موقع غير محدد',

@@ -636,8 +636,10 @@ class CollectionResponse {
   final double? collectionSize;
   final DateTime? createdDate;
   final String? image;
+  final bool? isInvoiced;
   final Generator? generator;
   final Generator? picker;
+  final Invoice? invoice;
 
   CollectionResponse({
     required this.collectionID,
@@ -652,9 +654,11 @@ class CollectionResponse {
     this.collectionSize,
     this.description,
     this.createdDate,
+    this.isInvoiced,
     this.image,
     this.generator,
     this.picker,
+    this.invoice,
   });
 
   factory CollectionResponse.fromJson(Map<String, dynamic> json) {
@@ -670,10 +674,12 @@ class CollectionResponse {
       wasteTypeID: json['wasteTypeID'],
       wasteTypeName: json['wasteTypeName'],
       description: json['description'],
+      isInvoiced: json['isInvoiced'],
       createdDate: DateTime.parse(json['createdDate']),
       image: json['image'],
       generator: json['generator'] != null ? Generator.fromJson(json['generator']) : null,
       picker: json['picker'] != null ? Generator.fromJson(json['picker']) : null,
+      invoice: json['invoice'] != null ? Invoice.fromJson(json['invoice']) : null,
     );
   }
 }
@@ -688,6 +694,35 @@ class Generator {
     return Generator(
       name: json['name'],
       imageUrl: json['imageUrl'],
+    );
+  }
+}
+
+class Invoice {
+  final int invoiceID;
+  final double? invoiceSize;
+  final int? wasteTypeID;
+  final int? collectionID;
+  final String? scarpyardOwner;
+  final String? image;
+
+  Invoice({
+    required this.invoiceID,
+     this.invoiceSize,
+     this.wasteTypeID,
+     this.collectionID,
+     this.scarpyardOwner,
+     this.image
+    });
+
+  factory Invoice.fromJson(Map<String, dynamic> json) {
+    return Invoice(
+      invoiceID: json['invoiceID'],
+      invoiceSize: (json['invoiceSize'] != null) ? json['invoiceSize'].toDouble() : null,
+      wasteTypeID: json['wasteTypeID'],
+      collectionID: json['collectionID'],
+      scarpyardOwner: json['scarpyardOwner'],
+      image: json['image']
     );
   }
 }

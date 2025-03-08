@@ -74,7 +74,7 @@ class _PickersListWidgetState extends State<PickersListWidget> {
               return UserCard(
                 id: picker.id,
                 role: "Picker",
-                imageUrl: picker.image ?? 'https://via.placeholder.com/80',
+                imageUrl: picker.image ?? 'assets/images/default.jpg',
                 name: picker.name ?? 'اسم غير معروف',
                 phone: picker.phone ?? 'لا يوجد رقم هاتف',
                 locationName: picker.locationName ?? 'موقع غير محدد',
