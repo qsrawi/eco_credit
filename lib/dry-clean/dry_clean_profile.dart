@@ -48,10 +48,10 @@ class _DryCleanProfileScreenState extends State<DryCleanProfileScreen> {
                 showMenu(
                   context: context,
                   position: RelativeRect.fromLTRB(
-                    MediaQuery.of(context).size.width, // Set the left side to the width of the screen
-                    100.0, // Adjust the top position as needed
-                    0.0, // Right side zero for aligning to the left edge
-                    0.0  // Bottom position (not relevant here)
+                    MediaQuery.of(context).size.width,
+                    100.0,
+                    0.0,
+                    0.0
                   ), 
                   items: [
                     const PopupMenuItem<String>(
@@ -64,10 +64,23 @@ class _DryCleanProfileScreenState extends State<DryCleanProfileScreen> {
                         ],
                       ),
                     ),
+                    PopupMenuItem<String>(
+                      value: 'delete_account',
+                      child: Row(
+                        children: <Widget>[
+                          Icon(Icons.delete, color: Colors.red),
+                          SizedBox(width: 8),
+                          const Text('Delete Account', 
+                            style: TextStyle(color: Colors.red)),
+                        ],
+                      ),
+                    ),
                   ],
                 ).then((value) {
                   if (value == 'logout') {
                     _logout(context);
+                  } else if (value == 'delete_account') {
+                    _showDeleteConfirmationDialog(context);
                   }
                 });
               },
@@ -209,4 +222,43 @@ void _logout(BuildContext context) async {
     MaterialPageRoute(builder: (context) => MyApp()), // Navigates back to the initial route
     (Route<dynamic> route) => false,
   );
+}
+
+// Add this function
+void _showDeleteConfirmationDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('تأكيد الحذف', textDirection: TextDirection.rtl),
+        content: const Text('هل انت متاكد من انك تريد حذف حسابك؟', 
+          textDirection: TextDirection.rtl),
+        actions: <Widget>[
+          TextButton(
+            child: const Text('إلغاء', 
+              style: TextStyle(color: Colors.grey)),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          TextButton(
+            child: const Text('حذف', 
+              style: TextStyle(color: Colors.red)),
+            onPressed: () {
+              Navigator.of(context).pop();
+              _deleteAccount(context);
+            },
+          ),
+        ],
+        actionsAlignment: MainAxisAlignment.start,
+        actionsPadding: const EdgeInsets.all(10),
+      );
+    },
+  );
+}
+
+// Add your delete account logic here
+void _deleteAccount(BuildContext context) async {
+  // Implement your delete account logic
+  // Example:
+  // await _apiService.deleteAccount();
+  // Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => LoginScreen()));
 }

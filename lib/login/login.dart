@@ -1,4 +1,5 @@
 import 'package:eco_credit/dry-clean/dry_clean.dart';
+import 'package:eco_credit/dry-clean/dry_clean_order_status_page.dart';
 import 'package:eco_credit/e_recycle_hub.dart';
 import 'package:eco_credit/login/register.dart';
 import 'package:eco_credit/services/api_service.dart';
@@ -78,6 +79,15 @@ class _LoginPageState extends State<LoginPage> {
               decoration: const InputDecoration(
                 labelText: 'الأيميل',
                 border: OutlineInputBorder(),
+                errorBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.red),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.green),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.green),
+                ),
               ),
               keyboardType: TextInputType.emailAddress,
             ),
@@ -215,12 +225,23 @@ class _LoginPageState extends State<LoginPage> {
               SizedBox(height: 15),
             if (widget.type == 'dry_clean')
               ElevatedButton(
-                onPressed: () {},
-                child: Text('حالة الطلب'),
-                style: ElevatedButton.styleFrom(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const OrderStatusPage()),
+                  );       
+                },style: ElevatedButton.styleFrom(
                   foregroundColor: Colors.black,
                   backgroundColor: Colors.grey,
                   minimumSize: Size.fromHeight(50),
+                ),
+                child:  const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Icon(Icons.list_alt, color: Colors.black),
+                    SizedBox(width: 8),  // Space between icon and text
+                    Text('حالة الطلب'),  // Button text
+                  ],
                 ),
               ),
           ],

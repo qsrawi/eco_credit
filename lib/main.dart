@@ -68,7 +68,7 @@ class HomePage extends StatelessWidget {
               children: <Widget>[
                 ImageCard(
                   imagePath: 'assets/images/dryclean.png',
-                  label: 'Dry Clean',
+                  label: 'FERRARI Dry Clean',
                   onTap: () => navigateToLogin(context, 'dry_clean'),
                   height: screenSize.height * 0.3,
                 ),

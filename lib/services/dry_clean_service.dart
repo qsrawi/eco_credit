@@ -113,6 +113,26 @@ class DryCleanApiService {
     }
   }
 
+  Future<OrderStatusResource> getOrderStatusByoOrderNumber(int? orderNumber) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('authToken');
+
+    final uri = Uri.parse('$baseUrl/orders/$orderNumber');
+
+    final response = await http.get(uri, headers: {
+      'Authorization': 'Bearer $token',  // Use the token here
+    });
+
+    if (response.statusCode == 404) {
+      return OrderStatusResource(id: 0);
+    }
+    if (response.statusCode == 200) {
+      return OrderStatusResource.fromJson(json.decode(response.body));
+    } else {
+      throw Exception('Failed to load collections: ${response.statusCode} ${response.body}');
+    }
+  }
+
   Future<DonaterResource> fetchDenatorProfile(int id) async {
     final uri = Uri.parse('$baseUrl/donaters/$id');
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -547,6 +567,34 @@ class OrderResource {
     'createdSince': createdSince,
     'orderNumber': orderNumber,
     'phone': phone
+  };
+}
+
+class OrderStatusResource {
+  final int id;
+  final int? orderStatusID;
+  final String? orderStatusName;
+  final int? orderNumber;
+
+  OrderStatusResource({
+    required this.id,
+    this.orderStatusID,
+    this.orderStatusName,
+    this.orderNumber
+  });
+
+  factory OrderStatusResource.fromJson(Map<String, dynamic> json) => OrderStatusResource(
+    id: json['id'] ?? 0,
+    orderStatusID: json['orderStatusID'],
+    orderStatusName: json['orderStatusName'],
+    orderNumber: json['orderNumber'],
+  );
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'orderStatusID': orderStatusID,
+    'orderStatusName': orderStatusName,
+    'orderNumber': orderNumber
   };
 }
 

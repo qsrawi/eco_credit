@@ -45,6 +45,7 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.6
   url_launcher: ^6.1.7
+  flutter_native_splash: ^2.4.0
 
 dev_dependencies:
   flutter_test:
@@ -56,9 +57,25 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^4.0.0
+  flutter_launcher_icons: ^0.13.1  # Use the latest available version
 
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/app_logo.png"  # Path to your new logo
+  adaptive_icon_background: "#ffffff"  # Optional for Android adaptive icons
+  adaptive_icon_foreground: "assets/images/app_logo.png"  # Optional
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
+
+flutter_native_splash:
+  color: "#3F9A25"  # Background color (use hex code or color name)
+  image: assets/images/rec.jpg  # Path to your splash screen image
+  android_12:
+    image: assets/images/rec.jpg  # Android 12+ requires a separate configuration
+    icon_background_color: "#3F9A25"
+
+  fullscreen: true  # Optional: makes splash screen full-screen
 
 # The following section is specific to Flutter packages.
 flutter:
