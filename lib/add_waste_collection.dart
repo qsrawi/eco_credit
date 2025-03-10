@@ -232,3 +232,4 @@ class _AddWasteCollectionScreenState extends State<AddWasteCollectionScreen> {
   }
 
 }
+

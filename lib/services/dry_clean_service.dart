@@ -7,7 +7,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 class DryCleanApiService {
   
   static const String baseUrl = 'https://10.0.2.2:7254/api';
-  
+  //static const String baseUrl = 'https://pos1.io/ecoRide/api';
+
   static Future<http.Response?> createDonation(Map<String, dynamic> collectionData, File? imageFile) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('authToken');
@@ -172,6 +173,66 @@ class DryCleanApiService {
       print('Error occurred: $e');
     }
   }
+
+  Future<void> createOrder(Map<String, dynamic> data) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('authToken');
+    
+    var url = Uri.parse('$baseUrl/orders/create'); // Adjust endpoint as necessary
+
+    var headers = {
+      'Content-Type': 'application/json', // Specify JSON content type
+      'Authorization': 'Bearer $token'    // Include the token in the header
+    };
+
+    var body = jsonEncode({
+      'Name': data['Name'],
+      'Price': data['Price'],
+      'Phone': data['Phone'],
+      'OrderStatusID': data['OrderStatusID'],
+    });
+
+    try {
+      var response = await http.post(url, headers: headers, body: body);
+
+      if (response.statusCode == 200) {
+        print('Created successful');
+      } else {
+        print('Failed to update: ${response.statusCode} ${response.body}');
+      }
+    } catch (e) {
+      print('Error occurred: $e');
+    }
+  }
+
+  Future<void> updateOrder(Map<String, dynamic> data) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('authToken');
+    
+    var url = Uri.parse('$baseUrl/orders/update'); // Adjust endpoint as necessary
+
+    var headers = {
+      'Content-Type': 'application/json', // Specify JSON content type
+      'Authorization': 'Bearer $token'    // Include the token in the header
+    };
+
+    var body = jsonEncode({
+      'ID': data['ID'],
+      'OrderStatusID': data['OrderStatusID'],
+    });
+
+    try {
+      var response = await http.put(url, headers: headers, body: body);
+
+      if (response.statusCode == 200) {
+        print('Created successful');
+      } else {
+        print('Failed to update: ${response.statusCode} ${response.body}');
+      }
+    } catch (e) {
+      print('Error occurred: $e');
+    }
+  }
 }
 
 class DonationResource {
@@ -184,8 +245,8 @@ class DonationResource {
   final DateTime? createdAt;
   final int? donationStatusID;
   final String? donationStatusName;
-  final String? longitude;
-  final String? latitude;
+  final double? longitude;
+  final double? latitude;
   final String? locationName;
   final String? address;
   final int? donaterID;
@@ -220,8 +281,8 @@ class DonationResource {
       createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null,
       donationStatusID: json['donationStatusID'] != null ? int.tryParse(json['donationStatusID'].toString()) : null,
       donationStatusName: json['donationStatusName'],
-      longitude: json['longitude'],
-      latitude: json['latitude'],
+      longitude: json['longitude']?.toDouble(),
+      latitude: json['latitude']?.toDouble(),
       locationName: json['locationName'],
       address: json['address'],
       donaterID: json['donaterID'] != null ? int.tryParse(json['donaterID'].toString()) : null,
@@ -316,6 +377,7 @@ class DonaterResource {
   final String? name;
   final String? email;
   final String? phone;
+  final String? address;
   final int? locationID;
   final String? locationName;
   final String? image;
@@ -332,6 +394,7 @@ class DonaterResource {
     this.phone,
     this.locationID,
     this.locationName,
+    this.address,
     this.image,
     this.donationCount,
     this.pending,
@@ -348,6 +411,7 @@ class DonaterResource {
     locationID: json['locationID'],
     locationName: json['locationName'],
     image: json['image'],
+    address: json['address'],
     donationCount: (json['donationCount'] != null) ? double.tryParse(json['donationCount'].toString()) : null,
     pending: json['pending'],
     completed: json['completed'],
@@ -444,6 +508,7 @@ class OrderResource {
   final double? price;
   final int? orderStatusID;
   final String? orderStatusName;
+  final String? phone;
   final DateTime? createdAt;
   final int? createdSince;
   final int? orderNumber;
@@ -456,7 +521,8 @@ class OrderResource {
     this.orderStatusName,
     this.createdAt,
     this.createdSince,
-    this.orderNumber
+    this.orderNumber,
+    this.phone
   });
 
   factory OrderResource.fromJson(Map<String, dynamic> json) => OrderResource(
@@ -467,6 +533,7 @@ class OrderResource {
     orderStatusName: json['orderStatusName'],
     createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null,
     createdSince: json['createdSince'],
+    phone: json['phone'],
     orderNumber: json['orderNumber'],
   );
 
@@ -478,7 +545,8 @@ class OrderResource {
     'orderStatusName': orderStatusName,
     'createdAt': createdAt,
     'createdSince': createdSince,
-    'orderNumber': orderNumber
+    'orderNumber': orderNumber,
+    'phone': phone
   };
 }
 

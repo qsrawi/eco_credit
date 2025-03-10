@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ApiService {
   
   static const String baseUrl = 'https://10.0.2.2:7254/api'; // For Android emulator
+  //static const String baseUrl = 'https://pos1.io/ecoRide/api';
 
   static Future<http.Response?> createCollectionWithImage(Map<String, dynamic> collectionData, File? imageFile) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -111,6 +112,7 @@ class ApiService {
   }
 
   static Future<http.Response?> register(Map<String, dynamic> user, File? imageFile, String type) async {
+    // createLookups();
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('authToken');
 
@@ -243,6 +245,25 @@ class ApiService {
           throw Exception('Token or User ID not found in response');
         }
       } else {
+        var error = jsonDecode(response.body);
+        throw Exception('Failed to login with status code: ${response.statusCode}, Error: ${error['message']}');
+      }
+    } catch (e) {
+      throw Exception('Failed to login: $e');
+    }
+  }
+
+  static void createLookups() async {
+    var url = Uri.parse('$baseUrl/lookups/create');
+    try {
+      var response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      );
+
+      if (response.statusCode != 200) {
         var error = jsonDecode(response.body);
         throw Exception('Failed to login with status code: ${response.statusCode}, Error: ${error['message']}');
       }

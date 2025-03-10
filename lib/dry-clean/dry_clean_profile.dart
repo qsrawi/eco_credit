@@ -136,12 +136,12 @@ class _DryCleanProfileScreenState extends State<DryCleanProfileScreen> {
           leading: const Icon(Icons.phone, color: Colors.blue),
         ),
         ListTile(
-          title: const Text('الموقع'),
-          subtitle: Text(profile.locationName ?? 'Unknown'),
+          title: const Text('العنوان'),
+          subtitle: Text(profile.address ?? 'Unknown'),
           leading: const Icon(Icons.map, color: Colors.blue),
         ),
         ListTile(
-          title: const Text('عدد المجموعات'),
+          title: const Text('عدد التبرعات'),
           subtitle: Text('${profile.donationCount ?? 0}'),
           leading: const Icon(Icons.list, color: Colors.blue),
         ),

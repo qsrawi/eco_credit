@@ -116,7 +116,8 @@ class _CollectionTabsState extends State<DryCleanCollectionTabs>
           donationStatusName: collection.donationStatusName ?? 'Unknown',
           donaterName: collection.donater?.name ?? 'Unknown',
           timeAgo: _formatTimeAgo(collection.createdAt),
-          description: ' '
+          description: ' ',
+          donaterPhone: collection.donater?.phone ?? ''
         );
       },
     );

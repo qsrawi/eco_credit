@@ -125,51 +125,51 @@ class _RegisterPageState extends State<RegisterPage> {
           children: <Widget>[
             UploadPhotoSection(onImageSelected: setImage),
             SizedBox(height: 10),
-            DropdownButtonFormField<String>(
-              decoration: const InputDecoration(
-                labelText: 'اختر قسم',
-                border: OutlineInputBorder(),
-                hintText: 'اختر من القائمة', // Add hint text
-              ),
-              value: _selectedOption,
-              onChanged: (String? newValue) {
-                setState(() {
-                  _selectedOption = newValue;
-                  // Reset preferred waste group when option changes to '1'
-                  if (newValue == 'Generator') {
-                    _selectedPreferdWasteGroup = null;
-                  }
-                });
-              },
-              items: [
-                // Default option
-                DropdownMenuItem<String>(
-                  value: null,
-                  child: Container(
-                    height: 40,
-                    alignment: Alignment.centerLeft,
-                    child: const Text(
-                      'اختر من القائمة',
-                      style: TextStyle(color: Colors.grey),
-                    ),
+            widget.type == 'erecycleHUB'
+              ? DropdownButtonFormField<String>(
+                  decoration: const InputDecoration(
+                    labelText: 'اختر قسم',
+                    border: OutlineInputBorder(),
+                    hintText: 'اختر من القائمة',
                   ),
-                ),
-                ..._userOptions.map<DropdownMenuItem<String>>((Map<String, String> option) {
-                  return DropdownMenuItem<String>(
-                    value: option['value'],
-                    child: Container(
-                      height: 40,
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        option['label'] ?? 'غير معروف',
-                        style: const TextStyle(fontSize: 16),
+                  value: _selectedOption,
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      _selectedOption = newValue;
+                      if (newValue == 'Generator') {
+                        _selectedPreferdWasteGroup = null;
+                      }
+                    });
+                  },
+                  items: [
+                    DropdownMenuItem<String>(
+                      value: null,
+                      child: Container(
+                        height: 40,
+                        alignment: Alignment.centerLeft,
+                        child: const Text(
+                          'اختر من القائمة',
+                          style: TextStyle(color: Colors.grey),
+                        ),
                       ),
                     ),
-                  );
-                }).toList(),
-              ],
-              validator: (value) => value == null ? 'يجب اختيار قسم' : null,
-            ),
+                    ..._userOptions.map<DropdownMenuItem<String>>((Map<String, String> option) {
+                      return DropdownMenuItem<String>(
+                        value: option['value'],
+                        child: Container(
+                          height: 40,
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            option['label'] ?? 'غير معروف',
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ],
+                  validator: (value) => value == null ? 'يجب اختيار قسم' : null,
+                )
+              : SizedBox.shrink(),
             SizedBox(height: 10),
             TextFormField(
               controller: _nameController,
@@ -224,26 +224,27 @@ class _RegisterPageState extends State<RegisterPage> {
               keyboardType: TextInputType.streetAddress,
             ),
             SizedBox(height: 10),
-            DropdownButtonFormField<String>(
-              value: _selectedLocation,
-              onChanged: (String? newValue) {
-                setState(() {
-                  _selectedLocation = newValue;
-                });
-              },
-              items: _locationOptions.map<DropdownMenuItem<String>>((Map<String, String> option) {
-                return DropdownMenuItem<String>(
-                  value: option['value'],
-                  child: Container(
-                          height: 40, // Set a fixed height for each dropdown item
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            option['label'] ?? 'Unknown', // Handle null case
-                            style: TextStyle(fontSize: 16),
+            widget.type == 'erecycleHUB'
+              ? DropdownButtonFormField<String>(
+                value: _selectedLocation,
+                onChanged: (String? newValue) {
+                  setState(() {
+                    _selectedLocation = newValue;
+                  });
+                },
+                items: _locationOptions.map<DropdownMenuItem<String>>((Map<String, String> option) {
+                  return DropdownMenuItem<String>(
+                    value: option['value'],
+                    child: Container(
+                            height: 40, // Set a fixed height for each dropdown item
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              option['label'] ?? 'Unknown', // Handle null case
+                              style: TextStyle(fontSize: 16),
+                            ),
                           ),
-                        ),
-                );
-              }).toList(),
+                  );
+                }).toList(),
               decoration: InputDecoration(
                 filled: true,
                 fillColor: Colors.green.withOpacity(0.1),
@@ -271,9 +272,10 @@ class _RegisterPageState extends State<RegisterPage> {
               borderRadius: BorderRadius.circular(10),
               menuMaxHeight: 400, // Set a fixed maximum height for the dropdown menu
 
-            ),
+            )
+            : SizedBox.shrink(),
             SizedBox(height: 10),
-            if (_selectedOption != 'Generator') // Changed condition here
+            if ( widget.type == 'erecycleHUB' && _selectedOption != 'Generator') // Changed condition here
               Column(
                 children: [
                   DropdownButtonFormField<String>(
@@ -325,7 +327,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   SizedBox(height: 10),
                 ],
               ),
-            if ((_selectedOption == 'Generator') || (_selectedOption == 'Picker' && _selectedPreferdWasteGroup == '1')) // Changed condition here
+            if (widget.type == 'erecycleHUB' && ((_selectedOption == 'Generator') || (_selectedOption == 'Picker' && _selectedPreferdWasteGroup == '1'))) // Changed condition here
               Column(
                 children: [
                   DropdownButtonFormField<String>(
@@ -377,7 +379,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   SizedBox(height: 10),
                 ]
               ),
-            if ((_selectedOption == 'Picker' && _selectedPreferdWasteGroup == '2')) // Changed condition here
+            if (widget.type == 'erecycleHUB' && (_selectedOption == 'Picker' && _selectedPreferdWasteGroup == '2')) // Changed condition here
               Column(
                 children: [
                   MultiSelectDialogField(
@@ -474,6 +476,10 @@ class _RegisterPageState extends State<RegisterPage> {
                   'WasteGroupIDs': _selectedPreferdWasteGroup == '1' ? [_selectedWasteType] : _selectedValues,
                 };
 
+                widget.type == "dry_clean"
+                ? _selectedOption = "Donater"
+                : _selectedOption;
+
                 var response = await ApiService.register(collectionData, _collectionImage, _selectedOption.toString());
                 if (response != null && response.statusCode == 200) {
                   print('Collection created successfully!');
@@ -483,7 +489,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         children: [
                           Icon(Icons.check_circle, color: Colors.white), // Success icon
                           SizedBox(width: 8), // Spacing between icon and text
-                          Text('Collection added successfully!'),
+                          Text('تم إنشاء الحساب بنجاح'),
                         ],
                       ),
                       backgroundColor: Colors.green, // Green for success

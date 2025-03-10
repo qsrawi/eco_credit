@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:eco_credit/dry-clean/dry_clean.dart';
 import 'package:eco_credit/dry-clean/dry_clean_donation_type.dart';
-import 'package:eco_credit/e_recycle_hub.dart';
 import 'package:eco_credit/services/dry_clean_service.dart';
 import 'package:eco_credit/upload-photo-section.dart';
 import 'package:flutter/material.dart';
@@ -65,7 +64,7 @@ class _DryCleanAddDonationScreenState extends State<DryCleanAddDonationScreen> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => ERecycleHub(id: someId, role: someRole),
+                builder: (context) => DryClean(id: someId, role: someRole),
               ),
             );
           },
@@ -226,7 +225,7 @@ Widget _buildSizeInput() {
     child: TextFormField(
               controller: _sizeController,
               decoration: const InputDecoration(
-                labelText: 'حجم', // Arabic for 'Size'
+                labelText: 'عدد', // Arabic for 'Size'
                 suffixText: 'قطع ملابس', 
                 border: OutlineInputBorder(),
               ),

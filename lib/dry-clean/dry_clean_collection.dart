@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:eco_credit/dry-clean/dry_clean.dart';
 import 'package:eco_credit/services/dry_clean_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class dryCleanCollectionCard extends StatelessWidget {
@@ -16,6 +17,7 @@ class dryCleanCollectionCard extends StatelessWidget {
   final String description;
   final String donationStatusName;
   final String donaterName;
+  final String donaterPhone;
 
   const dryCleanCollectionCard({
     required this.id,
@@ -28,6 +30,7 @@ class dryCleanCollectionCard extends StatelessWidget {
     required this.donationStatusName,
     required this.description,
     required this.donaterName,
+    required this.donaterPhone,
   });
 
   void _showDetails(BuildContext context) {
@@ -46,7 +49,28 @@ class dryCleanCollectionCard extends StatelessWidget {
                 'عدد الملابس: $size حبة تقريبا',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.right,
-              )
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'رقم الهاتف: $donaterPhone',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.right,
+              ),
+              IconButton(
+                icon: Icon(Icons.copy),
+                onPressed: () {
+                  Clipboard.setData(ClipboardData(text: donaterPhone));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('تم نسخ رقم الهاتف')),
+                  );
+                },
+              ),
+              const SizedBox(height: 10),
+              Text(
+                ' الموقع: $locationName',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.right,
+              ),
             ],
           ),
           actions: <Widget>[
@@ -129,7 +153,7 @@ class dryCleanCollectionCard extends StatelessWidget {
                 ],
               ),
               // Conditional button block here
-              if (role == "DCAdmin" && donationStatusName == 'بانتظار الاستلام') ...[
+              if (role == "DCAdmin" && donationStatusName == 'بالانتظار') ...[
                 const SizedBox(height: 10),// Add space before the buttons
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
