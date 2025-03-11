@@ -270,17 +270,17 @@ Widget getTitleWidget(String role) {
   switch (role) {
     case "Generator":
       iconData = Icons.business;
-      color = Colors.red;
+      color = const Color(0xFF3F9A25);
       text = "منشأة";
       break;
     case "Picker":
       iconData = Icons.eco;
-      color = Colors.green;
+      color = const Color(0xFF3F9A25);
       text = "بطل البيئة";
       break;
    case "Admin":
       iconData = Icons.admin_panel_settings;
-      color = Colors.red;
+      color = const Color(0xFF3F9A25);
       text = "آدمن";
       break;
     default:

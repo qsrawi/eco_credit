@@ -138,27 +138,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ListTile(
           title: const Text('الاسم الكامل'),
           subtitle: Text(profile.name ?? 'Unknown'),
-          leading: const Icon(Icons.person, color: Colors.blue),
+          leading: const Icon(Icons.person, color: Color(0xFF3F9A25)),
         ),
         ListTile(
           title: const Text('الأيميل'),
           subtitle: Text(profile.email ?? 'Unknown'),
-          leading: const Icon(Icons.email, color: Colors.blue),
+          leading: const Icon(Icons.email, color: Color(0xFF3F9A25)),
         ),
         ListTile(
           title: const Text('الموبايل'),
           subtitle: Text(profile.phone ?? 'Unknown'),
-          leading: const Icon(Icons.phone, color: Colors.blue),
+          leading: const Icon(Icons.phone, color: Color(0xFF3F9A25)),
         ),
         ListTile(
           title: const Text('الموقع'),
           subtitle: Text(profile.locationName ?? 'Unknown'),
-          leading: const Icon(Icons.map, color: Colors.blue),
+          leading: const Icon(Icons.map, color: Color(0xFF3F9A25)),
         ),
         ListTile(
           title: const Text('عدد المجموعات'),
           subtitle: Text('${profile.collectionCount ?? 0}'),
-          leading: const Icon(Icons.list, color: Colors.blue),
+          leading: const Icon(Icons.list, color: Color(0xFF3F9A25)),
         ),
       ],
     );

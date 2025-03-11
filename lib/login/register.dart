@@ -130,6 +130,12 @@ class _RegisterPageState extends State<RegisterPage> {
                   decoration: const InputDecoration(
                     labelText: 'اختر قسم',
                     border: OutlineInputBorder(),
+                    enabledBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: Color(0xFF3F9A25)),
+                    ),
+                    focusedBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: Color(0xFF3F9A25)),
+                    ),
                     hintText: 'اختر من القائمة',
                   ),
                   value: _selectedOption,
@@ -176,6 +182,12 @@ class _RegisterPageState extends State<RegisterPage> {
               decoration: const InputDecoration(
                 labelText: 'أسم المستخدم',
                 border: OutlineInputBorder(),
+                enabledBorder: const OutlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xFF3F9A25)),
+                ),
+                focusedBorder: const OutlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xFF3F9A25)),
+                ),
               ),
               keyboardType: TextInputType.emailAddress,
             ),
@@ -185,6 +197,12 @@ class _RegisterPageState extends State<RegisterPage> {
               decoration: const InputDecoration(
                 labelText: 'الأيميل',
                 border: OutlineInputBorder(),
+                enabledBorder: const OutlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xFF3F9A25)),
+                ),
+                focusedBorder: const OutlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xFF3F9A25)),
+                ),
               ),
               keyboardType: TextInputType.emailAddress,
             ),
@@ -194,6 +212,12 @@ class _RegisterPageState extends State<RegisterPage> {
               decoration: InputDecoration(
                 labelText: 'رقم السر',
                 border: OutlineInputBorder(),
+                enabledBorder: const OutlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xFF3F9A25)),
+                ),
+                focusedBorder: const OutlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xFF3F9A25)),
+                ),
                 suffixIcon: IconButton(
                   icon: Icon(_obscureText ? Icons.visibility_off : Icons.visibility),
                   onPressed: () {
@@ -211,6 +235,12 @@ class _RegisterPageState extends State<RegisterPage> {
               decoration: const InputDecoration(
                 labelText: 'رقم الهاتف',
                 border: OutlineInputBorder(),
+                enabledBorder: const OutlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xFF3F9A25)),
+                ),
+                focusedBorder: const OutlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xFF3F9A25)),
+                ),
               ),
               keyboardType: TextInputType.phone,
             ),
@@ -220,6 +250,12 @@ class _RegisterPageState extends State<RegisterPage> {
               decoration: const InputDecoration(
                 labelText: 'العنوان',
                 border: OutlineInputBorder(),
+                enabledBorder: const OutlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xFF3F9A25)),
+                ),
+                focusedBorder: const OutlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xFF3F9A25)),
+                ),
               ),
               keyboardType: TextInputType.streetAddress,
             ),

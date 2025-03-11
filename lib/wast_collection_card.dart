@@ -5,6 +5,7 @@ import 'package:eco_credit/picker_widget.dart';
 import 'package:eco_credit/services/api_service.dart';
 import 'package:eco_credit/upload-photo-section.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -25,6 +26,8 @@ class WasteCollectionCard extends StatelessWidget {
   final double invoiceSize; // حجم الجمع
   final String scarpyardOwner;
   final String invoiceImage;
+  final String generatorPhone;
+  final String pickerPhone;
 
   const WasteCollectionCard({
     required this.collectionID,
@@ -43,6 +46,8 @@ class WasteCollectionCard extends StatelessWidget {
     required this.invoiceSize,
     required this.scarpyardOwner,
     required this.invoiceImage,
+    required this.generatorPhone,
+    required this.pickerPhone,
   });
 
   void setWasteTypeId(int wasteTypeId) {
@@ -65,7 +70,50 @@ class WasteCollectionCard extends StatelessWidget {
                 'حجم الجمع: $collectionSize كغ', // "كغ" stands for kilograms in Arabic
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.right,
-              )
+              ),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      'رقم هاتف المنشأه: $generatorPhone', // Phone number
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.right,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.copy, color: Colors.green), // Copy icon
+                    onPressed: () {
+                      Clipboard.setData(ClipboardData(text: generatorPhone));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('تم نسخ رقم الهاتف!')), // "Phone number copied!"
+                      );
+                    },
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      'رقم هاتف بطل البيئة: $pickerPhone', // Phone number
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.right,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.copy, color: Colors.green), // Copy icon
+                    onPressed: () {
+                      Clipboard.setData(ClipboardData(text: pickerPhone));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('تم نسخ رقم الهاتف!')), // "Phone number copied!"
+                      );
+                    },
+                  ),
+                ],
+              ),
             ],
           ),
           actions: <Widget>[
@@ -161,13 +209,13 @@ class WasteCollectionCard extends StatelessWidget {
                     const SizedBox(height: 20),
                     _buildInfoRow(
                       icon: Icons.scale,
-                      label: 'الحجم بعد التوزين:',
+                      label: 'الوزن الحقيقي:',
                       value: '$invoiceSize كغم',
                     ),
                     const Divider(height: 30, thickness: 0.5),
                     _buildInfoRow(
                       icon: Icons.person,
-                      label: 'اسم صاحب ساحة الخردة:',
+                      label: 'اسم صاحب الساحة:',
                       value: scarpyardOwner,
                     ),
                     const SizedBox(height: 20),
@@ -640,10 +688,11 @@ class _SizeInputButtonState extends State<_SizeInputButton> {
 }
 
 void _showInvoiceDialog(int collectionID, BuildContext context) {
-  late TextEditingController invoiceSizeController = TextEditingController();;
-  late TextEditingController scarpyardOwnerController = TextEditingController();;
+  late TextEditingController invoiceSizeController = TextEditingController();
+  late TextEditingController scarpyardOwnerController = TextEditingController();
   File? invoiceImage;
   int? wasteTypeID;
+
   showDialog(
     context: context,
     builder: (context) => Directionality(
@@ -653,32 +702,47 @@ void _showInvoiceDialog(int collectionID, BuildContext context) {
         content: SingleChildScrollView(
           child: StatefulBuilder(
             builder: (context, setState) {
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  UploadPhotoSection(
-                    onImageSelected: (File image) {
-                      setState(() => invoiceImage = image);
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  TextField(
-                    controller: invoiceSizeController,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: 'الحجم في الفاتورة',
-                      border: OutlineInputBorder(),
+              return SizedBox(
+                width: 800, // Increased width
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    UploadPhotoSection(
+                      onImageSelected: (File image) {
+                        setState(() => invoiceImage = image);
+                      },
                     ),
-                  ),
-                  const SizedBox(height: 20),
-                  TextField(
-                    controller: scarpyardOwnerController,
-                    decoration: const InputDecoration(
-                      labelText: 'صاحب الساحة',
-                      border: OutlineInputBorder(),
+                    const SizedBox(height: 20),
+                    TextField(
+                      controller: invoiceSizeController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'الوزن الحقيقي',
+                        border: OutlineInputBorder(),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Color(0xFF3F9A25)),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Color(0xFF3F9A25)),
+                        ),
+                      ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 20),
+                    TextField(
+                      controller: scarpyardOwnerController,
+                      decoration: const InputDecoration(
+                        labelText: 'صاحب الساحة',
+                        border: OutlineInputBorder(),
+                         enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Color(0xFF3F9A25)),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Color(0xFF3F9A25)),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               );
             },
           ),
@@ -689,6 +753,10 @@ void _showInvoiceDialog(int collectionID, BuildContext context) {
             child: const Text('إلغاء'),
           ),
           ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green,
+              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+            ),
             onPressed: () async {
               SharedPreferences prefs = await SharedPreferences.getInstance();
               int userId = prefs.getInt('id') ?? 1;
@@ -703,13 +771,16 @@ void _showInvoiceDialog(int collectionID, BuildContext context) {
                     'wasteTypeID': wasteTypeID,
                     'ScarpyardOwner': scarpyardOwnerController.text
                   };
-                  
+
                   await ApiService.createInvoice(invoiceData, invoiceImage!);
                   Navigator.pushAndRemoveUntil(
                     context,
-                    MaterialPageRoute(builder: (context) => ERecycleHub(id: userId, role: userType)),
+                    MaterialPageRoute(
+                      builder: (context) => ERecycleHub(id: userId, role: userType),
+                    ),
                     (route) => false, // Remove all previous routes
-                  ); // Pass `true` to i// Pass `true` to i
+                  );
+
                   // Show success message
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('تم إنشاء الفاتورة بنجاح')),
@@ -721,7 +792,7 @@ void _showInvoiceDialog(int collectionID, BuildContext context) {
                 }
               }
             },
-            child: const Text('إرسال'),
+            child: const Text('إرسال', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),

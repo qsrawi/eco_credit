@@ -7,7 +7,7 @@ class UploadPhotoSection extends StatefulWidget {
   final String titleText;
 
   const UploadPhotoSection({
-    Key? key, 
+    Key? key,
     required this.onImageSelected,
     this.titleText = 'ارفع صورة',
   }) : super(key: key);
@@ -43,7 +43,7 @@ class _UploadPhotoSectionState extends State<UploadPhotoSection> {
                 padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
               ),
               child: const Text('إغلاق', style: TextStyle(color: Colors.white)),
-            )
+            ),
           ],
         ),
       ),
@@ -77,14 +77,16 @@ class _UploadPhotoSectionState extends State<UploadPhotoSection> {
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        title: Text(
-          widget.titleText,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: Colors.grey[800],
-          ),
-        ),
+        title: _image == null
+            ? Text(
+                widget.titleText,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.grey[800],
+                ),
+              )
+            : null, // Hide title when an image is uploaded
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [

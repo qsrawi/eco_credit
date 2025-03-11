@@ -83,10 +83,10 @@ class _LoginPageState extends State<LoginPage> {
                   borderSide: BorderSide(color: Colors.red),
                 ),
                 enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.green),
+                  borderSide: BorderSide(color: Color(0xFF3F9A25)),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.green),
+                  borderSide: BorderSide(color: Color(0xFF3F9A25)),
                 ),
               ),
               keyboardType: TextInputType.emailAddress,
@@ -97,6 +97,12 @@ class _LoginPageState extends State<LoginPage> {
               decoration: InputDecoration(
                 labelText: 'رقم السر',
                 border: OutlineInputBorder(),
+                enabledBorder: const OutlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xFF3F9A25)),
+                ),
+                focusedBorder: const OutlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xFF3F9A25)),
+                ),
                 suffixIcon: IconButton(
                   icon: Icon(_obscureText ? Icons.visibility_off : Icons.visibility),
                   onPressed: () {
@@ -110,9 +116,15 @@ class _LoginPageState extends State<LoginPage> {
             ),
             SizedBox(height: 20),
             DropdownButtonFormField<String>(
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'اختر قسم',
                 border: OutlineInputBorder(),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xFF3F9A25)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xFF3F9A25)),
+                ),
               ),
               value: _selectedOption,
               onChanged: (String? newValue) {
@@ -190,7 +202,7 @@ class _LoginPageState extends State<LoginPage> {
               },
               style: ElevatedButton.styleFrom(
                 foregroundColor: Colors.black,
-                backgroundColor: Colors.green,
+                backgroundColor: Color(0xFF3F9A25),
                 minimumSize: Size.fromHeight(50),
               ),
               child: const Row(
@@ -209,7 +221,7 @@ class _LoginPageState extends State<LoginPage> {
               },
               style: ElevatedButton.styleFrom(
                 foregroundColor: Colors.black,
-                backgroundColor: Color.fromARGB(255, 73, 172, 76),
+                backgroundColor: Color(0xFF3F9A25),
                 minimumSize: Size.fromHeight(50),
               ),
               child: const Row(
@@ -232,7 +244,7 @@ class _LoginPageState extends State<LoginPage> {
                   );       
                 },style: ElevatedButton.styleFrom(
                   foregroundColor: Colors.black,
-                  backgroundColor: Colors.grey,
+                  backgroundColor: Color(0xFF3F9A25),
                   minimumSize: Size.fromHeight(50),
                 ),
                 child:  const Row(

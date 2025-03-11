@@ -11,7 +11,8 @@ class NotificationIcon extends StatelessWidget {
       alignment: Alignment.center,
       children: [
         IconButton(
-          icon: Icon(Icons.notifications),
+          icon: const Icon(Icons.notifications),
+          color: const Color(0xFF3F9A25),
           onPressed: () {
             // Handle notifications
           },
@@ -26,13 +27,13 @@ class NotificationIcon extends StatelessWidget {
                     color: Colors.red,
                     borderRadius: BorderRadius.circular(8.5),
                   ),
-                  constraints: BoxConstraints(
+                  constraints: const BoxConstraints(
                     minWidth: 17,
                     minHeight: 17,
                   ),
                   child: Text(
                     notificationCount.toString(),
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 10,
                     ),

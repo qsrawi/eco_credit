@@ -145,7 +145,9 @@ class _CollectionTabsState extends State<CollectionTabs>
                 isInvoiced: collection.isInvoiced ?? false,
                 invoiceSize: collection.invoice?.invoiceSize ?? 0.00,
                 scarpyardOwner: collection.invoice?.scarpyardOwner ?? '',
-                invoiceImage: collection.invoice?.image ?? ''
+                invoiceImage: collection.invoice?.image ?? '',
+                generatorPhone: collection.generator?.phone ?? '',
+                pickerPhone: collection.picker?.phone ?? '',
               ),
             );
       },
@@ -236,6 +238,9 @@ class _CollectionTabsState extends State<CollectionTabs>
         TabBar(
           controller: _tabController,
           tabs: myTabs,
+          labelColor: Color(0xFF3F9A25), // Active tab text color
+          unselectedLabelColor: Colors.grey, // Unselected tab text color
+          indicatorColor: Color(0xFF3F9A25), 
         ),
         Expanded(
           child: TabBarView(

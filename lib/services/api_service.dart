@@ -707,13 +707,15 @@ class CollectionResponse {
 
 class Generator {
   final String name;
+  final String? phone;
   final String? imageUrl;
 
-  Generator({required this.name, this.imageUrl});
+  Generator({required this.name, this.phone, this.imageUrl});
 
   factory Generator.fromJson(Map<String, dynamic> json) {
     return Generator(
       name: json['name'],
+      phone: json['phone'],
       imageUrl: json['imageUrl'],
     );
   }
