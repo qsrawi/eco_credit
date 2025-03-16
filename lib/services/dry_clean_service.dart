@@ -92,13 +92,14 @@ class DryCleanApiService {
     }
   }
 
-  Future<List<OrderResource>> getAllOrders(int? orderStatus) async {
+  Future<List<OrderResource>> getAllOrders(int? orderStatus, String strsearch) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('authToken');
 
     final uri = Uri.parse('$baseUrl/orders')
       .replace(queryParameters: {
-        'orderStatus': orderStatus.toString()
+        'orderStatus': orderStatus.toString(),
+        'strsearch': strsearch.toString()
       });
 
     final response = await http.get(uri, headers: {

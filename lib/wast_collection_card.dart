@@ -229,7 +229,7 @@ class WasteCollectionCard extends StatelessWidget {
                         ),
                       ),
                       child: const Text(
-                        'اغلاق',
+                        'إغلاق',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -346,8 +346,8 @@ class WasteCollectionCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 10),
-              Image.memory(
-                base64Decode(imageUrl),
+              Image.network(
+                imageUrl, // Adjust the URL accordingly
                 width: double.infinity,
                 height: 100,
                 fit: BoxFit.cover,

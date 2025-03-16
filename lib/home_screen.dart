@@ -314,12 +314,12 @@ Widget _buildKpiButton({required IconData icon, required String label, required 
     child: Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 30, color: Colors.blue),
+        Icon(icon, size: 30, color: const Color(0xFF3F9A25)),
         SizedBox(height: 8),
         Text(
           label,
           textAlign: TextAlign.center,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.bold,
             color: Colors.black87,
@@ -359,13 +359,19 @@ Future<void> _handleLocationKpi(BuildContext context) async {
     ),
   );
 
-  if (selectedLocation != null) {
-    final wasteTypeStatus = await apiService.getLocationKpi(selectedLocation);
-    
-    if (context.mounted) {
-      _showKpiReportDialog(context, wasteTypeStatus);
-    }
+  if (selectedLocation != null && context.mounted) {
+    _showKpiReportDialog(
+      context,
+      (months) => apiService.getLocationKpi(selectedLocation, months),
+    );
   }
+  // if (selectedLocation != null) {
+  //   final wasteTypeStatus = await apiService.getLocationKpi(selectedLocation);
+    
+  //   if (context.mounted) {
+  //     _showKpiReportDialog(context, wasteTypeStatus);
+  //   }
+  // }
 }
 
 Widget _buildLocationList(AsyncSnapshot<List<LookupsResource>> snapshot) {
@@ -398,64 +404,108 @@ Widget _buildLocationList(AsyncSnapshot<List<LookupsResource>> snapshot) {
 
 Future<void> _handleCategoryKpi(BuildContext context) async {
   late final ApiService apiService = ApiService();
-  KpiResource wasteTypeStatus = KpiResource();
+  // KpiResource wasteTypeStatus = KpiResource();
 
-  wasteTypeStatus = await apiService.getWasteCategoriesKpi();
+  // wasteTypeStatus = await apiService.getWasteCategoriesKpi();
 
+  _showKpiReportDialog(
+    context,
+    (months) => apiService.getWasteCategoriesKpi(months),
+  );
   // ignore: use_build_context_synchronously
-  _showKpiReportDialog(context, wasteTypeStatus);
+  // _showKpiReportDialog(context, wasteTypeStatus);
 }
 
 Future<void> _handleSuccessfulKpi(BuildContext context) async {
   late final ApiService apiService = ApiService();
-  KpiResource wasteTypeStatus = KpiResource();
+  // KpiResource wasteTypeStatus = KpiResource();
 
-  wasteTypeStatus = await apiService.getSuccessfulCollectionsKpi();
+  // wasteTypeStatus = await apiService.getSuccessfulCollectionsKpi();
 
+  _showKpiReportDialog(
+    context,
+    (months) => apiService.getSuccessfulCollectionsKpi(months),
+  );
   // ignore: use_build_context_synchronously
-  _showKpiReportDialog(context, wasteTypeStatus);
+  // _showKpiReportDialog(context, wasteTypeStatus);
 }
 
 
 // Add this to your WasteCollectorCard widget's onKpiPressed handler
-  Future<void> _showKpiReportDialog(BuildContext context, KpiResource wasteTypeStatus) async {
-    showDialog(
-      context: context,
-      builder: (context) => Directionality(
+Future<void> _showKpiReportDialog(
+  BuildContext context,
+  Future<KpiResource> Function(int) fetcher,
+) async {
+  final TextEditingController lastMonthsController = TextEditingController(text: '12');
+
+  await showDialog(
+    context: context,
+    builder: (context) {
+      return Directionality(
         textDirection: TextDirection.rtl,
         child: AlertDialog(
           title: const Text('تقرير مؤشرات الأداء'),
-          content: SingleChildScrollView(
-            child: Column(
-              children: wasteTypeStatus.wasteTypeStatus!.map((item) {
-                return _buildWasteTypeItem(
-                  item.wasteTypeID ?? 0 ,
-                  item.wasteTypeName ?? "" ,
-                  item.collectionsCount ?? 0 ,
-                  item.collectionAmount ?? 0.0 ,
-                );
-              }).toList(),
-            ),
+          content: StatefulBuilder(
+            builder: (context, setState) {
+              return FutureBuilder<KpiResource>(
+                future: fetcher(int.tryParse(lastMonthsController.text) ?? 12),
+                builder: (context, snapshot) {
+                  final isLoading = snapshot.connectionState == ConnectionState.waiting;
+                  final error = snapshot.error;
+                  final data = snapshot.data ?? KpiResource();
+
+                  return Column(
+                    children: [
+                      TextField(
+                        controller: lastMonthsController,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          labelText: 'في آخر شهور',
+                          border: OutlineInputBorder(),
+                          suffixIcon: Icon(Icons.calendar_today),
+                        ),
+                        onChanged: (value) => setState(() {}),
+                      ),
+                      const SizedBox(height: 20),
+                      if (isLoading)
+                        const Center(child: CircularProgressIndicator())
+                      else if (error != null)
+                        Text('خطأ في التحميل: $error')
+                      else
+                        ...data.wasteTypeStatus!.map((item) => _buildWasteTypeItem(
+                  item.wasteTypeID ?? 0,
+                  item.wasteTypeName ?? "",
+                  item.collectionsCount ?? 0,
+                  item.collectionAmount ?? 0.0,
+                )).toList(),
+                    ],
+                  );
+                },
+              );
+            },
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: Navigator.of(context).pop,
               child: const Text('إغلاق'),
             ),
           ],
         ),
-      ),
-    );
-  }
+      );
+    },
+  );
+}
+
 
   Widget _buildWasteTypeItem(int typeId, String name, int count, double amount) {
     return ListTile(
       leading: Icon(_getWasteTypeIcon(typeId), color: Colors.green),
       title: Text(name),
-      subtitle: Row(
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start, // Align items to the start
         children: [
           _buildMetricItem(Icons.format_list_numbered, 'العدد: $count'),
-          const SizedBox(width: 2),
+          const SizedBox(height: 4), // Add vertical spacing between items
           _buildMetricItem(Icons.scale, 'الكمية: ${amount.toStringAsFixed(1)} كجم'),
         ],
       ),

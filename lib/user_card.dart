@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:eco_credit/services/api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';  // For AssetImage
@@ -36,18 +38,25 @@ class UserCard extends StatelessWidget {
           child: Row(
             textDirection: TextDirection.rtl,
             children: [
+
+            CircleAvatar(
+              radius: 35,
+              backgroundImage: imageUrl != 'assets/images/default.jpg' 
+                ? MemoryImage(base64Decode(imageUrl)) as ImageProvider<Object>
+                : const AssetImage('assets/images/default.jpg') as ImageProvider<Object>,
+            ),
               // Image section
-              Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
-                  image: DecorationImage(
-                    image: NetworkImage(imageUrl),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
+              // Container(
+              //   width: 80,
+              //   height: 80,
+              //   decoration: BoxDecoration(
+              //     borderRadius: BorderRadius.circular(8),
+              //     image: DecorationImage(
+              //       image: NetworkImage(imageUrl),
+              //       fit: BoxFit.cover,
+              //     ),
+              //   ),
+              // ),
               const SizedBox(width: 16),
 
               // Details section
@@ -135,9 +144,9 @@ class UserCard extends StatelessWidget {
     late final ApiService _apiService = ApiService();
     KpiResource wasteTypeStatus = KpiResource();
     if(role == "Generator") {
-      wasteTypeStatus = await _apiService.getGeneratorKpi(id);
+      wasteTypeStatus = await _apiService.getGeneratorKpi(id, null);
     } else {
-      wasteTypeStatus = await _apiService.getPickerKpi(id);
+      wasteTypeStatus = await _apiService.getPickerKpi(id, null);
     }
 
     showDialog(
@@ -173,10 +182,11 @@ class UserCard extends StatelessWidget {
     return ListTile(
       leading: Icon(_getWasteTypeIcon(typeId), color: Colors.green),
       title: Text(name),
-      subtitle: Row(
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start, // Align items to the start
         children: [
           _buildMetricItem(Icons.format_list_numbered, 'العدد: $count'),
-          const SizedBox(width: 2),
+          const SizedBox(height: 4), // Add vertical spacing between items
           _buildMetricItem(Icons.scale, 'الكمية: ${amount.toStringAsFixed(1)} كجم'),
         ],
       ),

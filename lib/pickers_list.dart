@@ -78,7 +78,7 @@ class _PickersListWidgetState extends State<PickersListWidget> {
                 name: picker.name ?? 'اسم غير معروف',
                 phone: picker.phone ?? 'لا يوجد رقم هاتف',
                 locationName: picker.locationName ?? 'موقع غير محدد',
-                wasteCollectionCount: picker.collectionCount?.toInt() ?? 0,
+                wasteCollectionCount: picker.collectionsCount?.toInt() ?? 0,
                 onKpiPressed: () => _handleKpiPress(picker.id),
               );
             },

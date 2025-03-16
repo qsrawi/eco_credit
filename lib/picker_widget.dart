@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:eco_credit/services/api_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PickerWidget extends StatefulWidget {
   final Function(int) onSelected;
@@ -27,8 +28,11 @@ class _PickerWidgetState extends State<PickerWidget> {
 
   Future<void> fetchPickers({String query = ''}) async {
     try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      int? id = prefs.getInt('id'); 
+      
       final pickersList = await ApiService().getPickers(null, null, query);
-      final pickersList2 = await ApiService().getPickers(null, 1, null);
+      final pickersList2 = await ApiService().getPickers(null, id, null);
       setState(() {
         if (query.isEmpty) {
           pickers = pickersList2;

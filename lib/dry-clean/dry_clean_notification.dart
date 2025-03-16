@@ -13,7 +13,7 @@ class DryCleanNotificationsScreen extends StatefulWidget {
 
 class _DryCleanNotificationsScreenState extends State<DryCleanNotificationsScreen> {
   late final ApiService _apiService = ApiService();
-  late Future<List<NotificationListResource>> _notificationsFuture;
+  Future<List<NotificationListResource>> _notificationsFuture = Future.value([]); // Initialize with empty future
 
   @override
   void initState() {
@@ -25,8 +25,9 @@ class _DryCleanNotificationsScreenState extends State<DryCleanNotificationsScree
     SharedPreferences prefs = await SharedPreferences.getInstance();
     int userId = prefs.getInt('id') ?? 1; // Default to 1 if not set
     String userType = prefs.getString('role') ?? 'Donater';
-    _notificationsFuture = _apiService.fetchNotifications(userId, userType);
-    setState(() {}); // This is optional, depends on if you need to update the UI after data is fetched
+    setState(() {
+      _notificationsFuture = _apiService.fetchNotifications(userId, userType);
+    });
   }
 
   Map<String, List<Widget>> grouped = {
@@ -106,7 +107,7 @@ class _DryCleanNotificationsScreenState extends State<DryCleanNotificationsScree
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('إشعارات'),
+        title: const Text('إشعارات'),
       ),
       body: FutureBuilder<List<NotificationListResource>>(
         future: _notificationsFuture,

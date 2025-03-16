@@ -116,7 +116,7 @@ class ApiService {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('authToken');
 
-    var uri = Uri.parse('$baseUrl/admins/register');
+    var uri = Uri.parse('$baseUrl/users/register');
     var request = http.MultipartRequest('POST', uri);
 
     request.headers.addAll({
@@ -210,7 +210,7 @@ class ApiService {
   }
   
   static Future<Map<String, dynamic>> login(String email, String password, String? type) async {
-    var url = Uri.parse('$baseUrl/admins/login');
+    var url = Uri.parse('$baseUrl/users/login');
     try {
       var response = await http.post(
         url,
@@ -278,6 +278,8 @@ class ApiService {
 
     final uri = Uri.parse('$baseUrl/collections')
       .replace(queryParameters: {
+        'page': '1',
+        'pageSize': '-1',
         'collectionStatus': status.toString(),
         'userID': userId?.toString(),
         'userType': userType,
@@ -324,6 +326,8 @@ class ApiService {
 
     final uri = Uri.parse('$baseUrl/pickers')
       .replace(queryParameters: {
+        'page': '1',
+        'pageSize': '-1',
         'wasteGroupID': wasteGroupID?.toString(),
         'generatorID': generatorID?.toString(),
         'strSearch': strSearch,
@@ -359,12 +363,14 @@ class ApiService {
     }
   }
 
-  Future<KpiResource> getGeneratorKpi(int generatorID) async {
+  Future<KpiResource> getGeneratorKpi(int generatorID, int? months) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('authToken');
 
-    final uri = Uri.parse('$baseUrl/kpi/generatorKpi/${generatorID.toString()}');
-
+    var uri = Uri.parse('$baseUrl/kpi/generatorKpi/${generatorID.toString()}');
+    if (months != null) {
+      uri = uri.replace(queryParameters: {...uri.queryParameters, 'months': months.toString()});
+    }
     final response = await http.get(uri, headers: {
       'Authorization': 'Bearer $token', // Use the token here
     });
@@ -376,12 +382,14 @@ class ApiService {
     }
   }
 
-  Future<KpiResource> getPickerKpi(int pickerID) async {
+  Future<KpiResource> getPickerKpi(int pickerID, int? months) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('authToken');
 
-    final uri = Uri.parse('$baseUrl/kpi/pickerKpi/${pickerID.toString()}');
-
+    var uri = Uri.parse('$baseUrl/kpi/pickerKpi/${pickerID.toString()}');
+    if (months != null) {
+      uri = uri.replace(queryParameters: {...uri.queryParameters, 'months': months.toString()});
+    }
     final response = await http.get(uri, headers: {
       'Authorization': 'Bearer $token', // Use the token here
     });
@@ -393,12 +401,14 @@ class ApiService {
     }
   }
 
-  Future<KpiResource> getLocationKpi(int locationID) async {
+  Future<KpiResource> getLocationKpi(int locationID, int? months) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('authToken');
 
-    final uri = Uri.parse('$baseUrl/kpi/locationKpi/${locationID.toString()}');
-
+    var uri = Uri.parse('$baseUrl/kpi/locationKpi/${locationID.toString()}');
+    if (months != null) {
+      uri = uri.replace(queryParameters: {...uri.queryParameters, 'months': months.toString()});
+    }
     final response = await http.get(uri, headers: {
       'Authorization': 'Bearer $token', // Use the token here
     });
@@ -410,12 +420,14 @@ class ApiService {
     }
   }
 
-  Future<KpiResource> getWasteCategoriesKpi() async {
+  Future<KpiResource> getWasteCategoriesKpi(int? months) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('authToken');
 
-    final uri = Uri.parse('$baseUrl/kpi/wasteCategoriesKpi');
-
+    var uri = Uri.parse('$baseUrl/kpi/wasteCategoriesKpi');
+    if (months != null) {
+      uri = uri.replace(queryParameters: {...uri.queryParameters, 'months': months.toString()});
+    }
     final response = await http.get(uri, headers: {
       'Authorization': 'Bearer $token', // Use the token here
     });
@@ -427,12 +439,14 @@ class ApiService {
     }
   }
 
-  Future<KpiResource> getSuccessfulCollectionsKpi() async {
+  Future<KpiResource> getSuccessfulCollectionsKpi(int? months) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('authToken');
 
-    final uri = Uri.parse('$baseUrl/kpi/successfulCollectionsKpi');
-
+    var uri = Uri.parse('$baseUrl/kpi/successfulCollectionsKpi');
+    if (months != null) {
+      uri = uri.replace(queryParameters: {...uri.queryParameters, 'months': months.toString()});
+    }
     final response = await http.get(uri, headers: {
       'Authorization': 'Bearer $token', // Use the token here
     });
@@ -697,7 +711,7 @@ class CollectionResponse {
       description: json['description'],
       isInvoiced: json['isInvoiced'],
       createdDate: DateTime.parse(json['createdDate']),
-      image: json['image'],
+      image: json['image'] != null ? 'https://10.0.2.2:7254/${json['image']}' : null,
       generator: json['generator'] != null ? Generator.fromJson(json['generator']) : null,
       picker: json['picker'] != null ? Generator.fromJson(json['picker']) : null,
       invoice: json['invoice'] != null ? Invoice.fromJson(json['invoice']) : null,
@@ -786,7 +800,7 @@ class PickerListResource {
   final String? phone;
   final int? locationId;
   final String? locationName;
-  final double? collectionCount;
+  final double? collectionsCount;
   final String? image;
   final List<CollectionPickerResource>? collections;  // Add this line
 
@@ -798,7 +812,7 @@ class PickerListResource {
     this.phone,
     this.locationId,
     this.locationName,
-    this.collectionCount,
+    this.collectionsCount,
     this.image,
     this.collections, // Add this line
   });
@@ -811,7 +825,7 @@ class PickerListResource {
       email: json['email'] as String?,
       phone: json['phone'] as String?,
       locationName: json['locationName'] as String?,
-      collectionCount: (json['collectionCount'] as num?)?.toDouble(),
+      collectionsCount: (json['collectionsCount'] as num?)?.toDouble(),
       locationId: json['locationID'] as int? ?? 0,
       image: json['image'] as String?,
       collections: json['Collections'] != null
@@ -849,7 +863,7 @@ class GeneratorListResource {
   final String? phone;
   final int? locationId;
   final String? locationName;
-  final double? collectionCount;
+  final double? collectionsCount;
   final String? image;
 
   GeneratorListResource({
@@ -860,7 +874,7 @@ class GeneratorListResource {
     this.phone,
     this.locationId,
     this.locationName,
-    this.collectionCount,
+    this.collectionsCount,
     this.image,
   });
 
@@ -872,7 +886,7 @@ class GeneratorListResource {
       email: json['email'] as String?,
       phone: json['phone'] as String?,
       locationName: json['locationName'] as String?,
-      collectionCount: (json['collectionCount'] as num?)?.toDouble(),
+      collectionsCount: (json['collectionsCount'] as num?)?.toDouble(),
       locationId: json['locationID'] as int? ?? 0,
       image: json['image'] as String?
     );

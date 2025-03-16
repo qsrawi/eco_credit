@@ -10,7 +10,7 @@ class NotificationsScreen extends StatefulWidget {
 
 class _NotificationsScreenState extends State<NotificationsScreen> {
   late final ApiService _apiService = ApiService();
-  late Future<List<NotificationListResource>> _notificationsFuture;
+  Future<List<NotificationListResource>>? _notificationsFuture;
 
   @override
   void initState() {
@@ -22,8 +22,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     int userId = prefs.getInt('id') ?? 1; // Default to 1 if not set
     String userType = prefs.getString('role') ?? 'Generator';
-    _notificationsFuture = _apiService.fetchNotifications(userId, userType);
-    setState(() {}); // This is optional, depends on if you need to update the UI after data is fetched
+    setState(() {
+      _notificationsFuture = _apiService.fetchNotifications(userId, userType);
+    });
   }
 
   Map<String, List<Widget>> grouped = {

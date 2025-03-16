@@ -12,7 +12,7 @@ class DryCleanProfileScreen extends StatefulWidget {
 }
 
 class _DryCleanProfileScreenState extends State<DryCleanProfileScreen> {
-  late Future<DonaterResource> profile;
+  Future<DonaterResource>? profile;
   int? userId;
   String? userType;
 
