@@ -23,8 +23,7 @@ class WasteCollectionCard extends StatelessWidget {
   final double collectionSize; // حجم الجمع
   final String description;
   final bool isInvoiced;
-  final double invoiceSize; // حجم الجمع
-  final String scarpyardOwner;
+  final int invoiceID; // حالة الجمع
   final String invoiceImage;
   final String generatorPhone;
   final String pickerPhone;
@@ -34,6 +33,7 @@ class WasteCollectionCard extends StatelessWidget {
     required this.role,
     required this.status,
     required this.statusID,
+    required this.invoiceID,
     required this.title,
     required this.collectionTypeName,
     required this.name,
@@ -43,8 +43,6 @@ class WasteCollectionCard extends StatelessWidget {
     required this.collectionSize,
     required this.description,
     required this.isInvoiced,
-    required this.invoiceSize,
-    required this.scarpyardOwner,
     required this.invoiceImage,
     required this.generatorPhone,
     required this.pickerPhone,
@@ -54,7 +52,6 @@ class WasteCollectionCard extends StatelessWidget {
   }
 
   void _showDetails(BuildContext context) {
-    final imageBytes = base64Decode(imageUrl);
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -62,7 +59,12 @@ class WasteCollectionCard extends StatelessWidget {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Image.memory(imageBytes, width: 300, height: 300, fit: BoxFit.cover),
+              Image.network(
+                imageUrl, // Adjust the URL accordingly
+                height: 100,
+                width: 100,
+                fit: BoxFit.cover,
+              ),
               const SizedBox(height: 20),
               Text(description, style: TextStyle(fontSize: 16)),
               const SizedBox(height: 10),
@@ -168,83 +170,92 @@ class WasteCollectionCard extends StatelessWidget {
     );
   }
 
-  
-    void _showInvoiceDialogView(BuildContext context) {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return Directionality(
-            textDirection: TextDirection.rtl,
-            child: AlertDialog(
-              titlePadding: const EdgeInsets.all(16),
-              contentPadding: const EdgeInsets.all(16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15),
-              ),
-              title: Center(
-                child: Text(
-                  'تفاصيل الفاتورة',
-                  style: GoogleFonts.cairo(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.green[800],
-                  ),
-                ),
-              ),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      height: 200,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        image: DecorationImage(
-                          image: _getImageProvider(invoiceImage), // Use helper method
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    _buildInfoRow(
-                      icon: Icons.scale,
-                      label: 'الوزن الحقيقي:',
-                      value: '$invoiceSize كغم',
-                    ),
-                    const Divider(height: 30, thickness: 0.5),
-                    _buildInfoRow(
-                      icon: Icons.person,
-                      label: 'اسم صاحب الساحة:',
-                      value: scarpyardOwner,
-                    ),
-                    const SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: const Text(
-                        'إغلاق',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+void _showInvoiceDialogView(BuildContext context, InvoiceResource invoice) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return Directionality(
+        textDirection: TextDirection.rtl,
+        child: AlertDialog(
+          titlePadding: const EdgeInsets.all(16),
+          contentPadding: const EdgeInsets.all(16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          title: Center(
+            child: Text(
+              'تفاصيل الفاتورة',
+              style: GoogleFonts.cairo(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Colors.green[800],
               ),
             ),
-          );
-        },
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  height: 200,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    image: DecorationImage(
+                      image: _getImageProvider(invoice.image), // Use helper method
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  child: invoice.image == null
+                      ? Center(child: Text('لا توجد صورة متاحة'))
+                      : null,
+                ),
+                const SizedBox(height: 20),
+                _buildInfoRow(
+                  icon: Icons.person,
+                  label: 'اسم صاحب الساحة:',
+                  value: invoice.scarpyardOwner?? '',
+                ),
+                const Divider(height: 30, thickness: 0.5),
+                _buildInfoRow(
+                  icon: Icons.scale,
+                  label: 'الوزن الحقيقي:',
+                  value: '${invoice.invoiceSize?.toStringAsFixed(2) ?? 'N/A'} كغم',
+                ),
+                const Divider(height: 30, thickness: 0.5),
+                _buildInfoRow(
+                  icon: Icons.category,
+                  label: 'نوع النفايات:',
+                  value: invoice.wasteTypeName?? '',
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 40, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text(
+                    'إغلاق',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       );
-    }
+    },
+  );
+}
 
     ImageProvider<Object> _getImageProvider(String? invoiceImage) {
   if (invoiceImage != null && invoiceImage.isNotEmpty) {
@@ -542,7 +553,9 @@ class WasteCollectionCard extends StatelessWidget {
                       const SizedBox(width: 10), // Space between buttons
                       ElevatedButton(
                       onPressed: () async {
-                        _showInvoiceDialogView(context);
+                        final apiService = ApiService();
+                        final invoice = await apiService.getInvoiceById(invoiceID);
+                        _showInvoiceDialogView(context, invoice);
                       },
                         style: ButtonStyle(
                           backgroundColor: MaterialStateProperty.resolveWith<Color>(

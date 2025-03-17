@@ -1,4 +1,5 @@
 import 'package:eco_credit/main.dart';
+import 'package:eco_credit/services/api_service.dart';
 import 'package:eco_credit/services/dry_clean_service.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -257,8 +258,13 @@ void _showDeleteConfirmationDialog(BuildContext context) {
 
 // Add your delete account logic here
 void _deleteAccount(BuildContext context) async {
-  // Implement your delete account logic
-  // Example:
-  // await _apiService.deleteAccount();
-  // Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => LoginScreen()));
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  int userId = prefs.getInt('id') ?? 1;
+  String userType = prefs.getString('role') ?? 'Generator';
+
+  ApiService.deleteUser(userId, userType);
+  Navigator.of(context).pushAndRemoveUntil(
+    MaterialPageRoute(builder: (context) => MyApp()), // Navigates back to the initial route
+    (Route<dynamic> route) => false,
+  );
 }

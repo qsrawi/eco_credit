@@ -102,6 +102,57 @@ class _CollectionTabsState extends State<DryCleanCollectionTabs>
 
   // Make the API call with conditional userId
   final collections = await _apiService.getAllDonations(status, apiUserId);
+
+    if (collections.isEmpty) {
+      return ListView(
+        physics: const NeverScrollableScrollPhysics(),
+        shrinkWrap: true,
+        children: [
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Card(
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.inbox_outlined, 
+                          size: 64, 
+                          color: Colors.grey.withOpacity(0.5)),
+                      const SizedBox(height: 16),
+                      Text(
+                        'لا توجد مجموعات',
+                        style: TextStyle(
+                          fontSize: 20,
+                          color: Colors.grey[600],
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'لا توجد أي مجموعات لعرضها في هذا القسم',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[500],
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
     return ListView.builder(
       itemCount: collections.length,
       itemBuilder: (context, index) {

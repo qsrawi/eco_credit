@@ -62,17 +62,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         children: <Widget>[
                           Icon(Icons.exit_to_app),
                           SizedBox(width: 8),
-                          Text('Logout')
+                          Text('تسجيل الخروج')
                         ],
                       ),
                     ),
-                    PopupMenuItem<String>(
+                    const PopupMenuItem<String>(
                       value: 'delete_account',
                       child: Row(
                         children: <Widget>[
                           Icon(Icons.delete, color: Colors.red),
                           SizedBox(width: 8),
-                          const Text('Delete Account', 
+                          Text('حذف الحساب', 
                             style: TextStyle(color: Colors.red)),
                         ],
                       ),
@@ -259,8 +259,13 @@ void _showDeleteConfirmationDialog(BuildContext context) {
 
 // Add your delete account logic here
 void _deleteAccount(BuildContext context) async {
-  // Implement your delete account logic
-  // Example:
-  // await _apiService.deleteAccount();
-  // Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => LoginScreen()));
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  int userId = prefs.getInt('id') ?? 1;
+  String userType = prefs.getString('role') ?? 'Generator';
+
+  ApiService.deleteUser(userId, userType);
+  Navigator.of(context).pushAndRemoveUntil(
+    MaterialPageRoute(builder: (context) => MyApp()), // Navigates back to the initial route
+    (Route<dynamic> route) => false,
+  );
 }

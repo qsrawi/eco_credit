@@ -272,6 +272,34 @@ class ApiService {
     }
   }
 
+  static void deleteUser(int id, String type) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('authToken');
+    var url = Uri.parse('$baseUrl/users/$id/delete?type=$type'); // Add type as a query parameter
+    
+    try {
+      var response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token', // Include the authorization token
+        }
+      );
+
+      if (response.statusCode != 200) {
+        var error = jsonDecode(response.body);
+        throw Exception('Failed to delete user with status code: ${response.statusCode}, Error: ${error['message']}');
+      }
+
+      // If the request is successful, you can handle the response here
+      var responseData = jsonDecode(response.body);
+      print('User deleted successfully: $responseData');
+
+    } catch (e) {
+      throw Exception('Failed to delete user: $e');
+    }
+  }
+
   Future<List<CollectionResponse>> getCollections(int status, {int? userId, String? userType}) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('authToken');
@@ -292,6 +320,23 @@ class ApiService {
     if (response.statusCode == 200) {
       List<dynamic> data = json.decode(response.body);
       return data.map((item) => CollectionResponse.fromJson(item)).toList();
+    } else {
+      throw Exception('Failed to load collections: ${response.statusCode} ${response.body}');
+    }
+  }
+
+  Future<InvoiceResource> getInvoiceById(int id) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('authToken');
+
+    final uri = Uri.parse('$baseUrl/collections/invoice/$id');
+
+    final response = await http.get(uri, headers: {
+      'Authorization': 'Bearer $token',  // Use the token here
+    });
+
+    if (response.statusCode == 200) {
+      return InvoiceResource.fromJson(json.decode(response.body));
     } else {
       throw Exception('Failed to load collections: ${response.statusCode} ${response.body}');
     }
@@ -661,6 +706,7 @@ class CollectionResponse {
   final int collectionID;
   final int generatorID;
   final int? pickerID;
+  final int? invoiceID;
   final int? notificationID;
   final int collectionStatusID;
   final int wasteTypeID;
@@ -681,6 +727,7 @@ class CollectionResponse {
     required this.generatorID,
     this.pickerID,
     this.notificationID,
+    this.invoiceID,
     this.collectionStatusName,
     this.collectionTypeName,
     required this.collectionStatusID,
@@ -702,6 +749,7 @@ class CollectionResponse {
       generatorID: json['generatorID'],
       pickerID: json['pickerID'],
       notificationID: json['notificationID'],
+      invoiceID: json['invoiceID'],
       collectionStatusID: json['collectionStatusID'],
       collectionTypeName: json['collectionTypeName'],
       collectionStatusName: json['collectionStatusName'],
@@ -978,6 +1026,35 @@ class LookupsResource {
       lkpType: json['lkpType'] as String?,
       value: json['value'] as String?,
       nearby: json['nearby'] as String?
+    );
+  }
+}
+
+class InvoiceResource {
+  int invoiceID;
+  double? invoiceSize;
+  int? wasteTypeID;
+  String? wasteTypeName;
+  String? scarpyardOwner;
+  String? image;
+
+  InvoiceResource({
+    required this.invoiceID,
+    this.invoiceSize,
+    this.wasteTypeID,
+    this.wasteTypeName,
+    this.scarpyardOwner,
+    this.image
+  });
+
+  factory InvoiceResource.fromJson(Map<String, dynamic> json) {
+    return InvoiceResource(
+      invoiceID: json['invoiceID'] as int? ?? 0, // Handle null with default value
+      invoiceSize: (json['invoiceSize'] as num?)?.toDouble(),
+      wasteTypeID: json['wasteTypeID'] as int? ?? 0,
+      wasteTypeName: json['wasteTypeName'] as String?,
+      scarpyardOwner: json['scarpyardOwner'] as String?,
+      image: json['image'] as String?
     );
   }
 }

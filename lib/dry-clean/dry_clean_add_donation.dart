@@ -303,25 +303,28 @@ void _openMap(BuildContext context) async {
 Future<Position> _determinePosition() async {
   bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
   if (!serviceEnabled) {
-    _showDialog('Location services are disabled.');
-    return Future.error('Location services are disabled.');
+    _showDialog('الرجاء تفعيل خدمة الموقع');
+    return Future.error('Location services disabled');
   }
 
   LocationPermission permission = await Geolocator.checkPermission();
   if (permission == LocationPermission.denied) {
     permission = await Geolocator.requestPermission();
     if (permission == LocationPermission.denied) {
-      _showDialog('Location permissions are denied');
-      return Future.error('Location permissions are denied');
+      _showDialog('تم رفض إذن الموقع');
+      return Future.error('Location permissions denied');
     }
   }
 
   if (permission == LocationPermission.deniedForever) {
-    _showDialog('Location permissions are permanently denied, we cannot request permissions.');
-    return Future.error('Location permissions are permanently denied, we cannot request permissions.');
+    _showDialog('الإذن مرفوض بشكل دائم');
+    return Future.error('Permanent location permission denial');
   }
 
-  return await Geolocator.getCurrentPosition();
+  return await Geolocator.getCurrentPosition(
+    desiredAccuracy: LocationAccuracy.low, // Reduced accuracy requirement
+    timeLimit: const Duration(seconds: 10), // Add timeout
+  );
 }
 
 void _showDialog(String message) {

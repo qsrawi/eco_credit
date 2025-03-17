@@ -64,6 +64,10 @@ class _MainScreenState extends State<MainScreen> {
       _widgetOptions.insert(1, const DryCleanOrders());  // Insert at the correct position
       _navBarItems.insert(1, const BottomNavigationBarItem(icon: Icon(Icons.receipt), label: 'Orders'));
     }
+    if (widget.role == "DCAdmin") {
+      _widgetOptions.insert(2, const DryCleanOrders());  // Insert at the correct position
+      _navBarItems.insert(2, const BottomNavigationBarItem(icon: Icon(Icons.history), label: 'History'));
+    }
   }
 
   void _onItemTapped(int index) {

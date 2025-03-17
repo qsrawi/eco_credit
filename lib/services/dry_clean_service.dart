@@ -76,6 +76,8 @@ class DryCleanApiService {
 
     final uri = Uri.parse('$baseUrl/donations')
       .replace(queryParameters: {
+        'page': '1',
+        'pageSize': '-1',
         'donationStatus': donationStatus.toString(),
         'userID': userId?.toString()
       });

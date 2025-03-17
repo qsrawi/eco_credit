@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:eco_credit/services/dry_clean_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -13,7 +14,8 @@ class DryCleanOrders extends StatefulWidget {
 
 class _DryCleanOrdersState extends State<DryCleanOrders> {
   late Future<List<OrderResource>> futureOrders;
-
+  Timer? _searchDebounce;
+  String _searchQuery = '';
   @override
   void initState() {
     super.initState();
@@ -22,7 +24,7 @@ class _DryCleanOrdersState extends State<DryCleanOrders> {
 
   void _loadOrders() {
     DryCleanApiService apiService = DryCleanApiService();
-    futureOrders = apiService.getAllOrders(1).catchError((error) {
+        futureOrders = apiService.getAllOrders(1, _searchQuery).catchError((error) {
       throw Exception('فشل تحميل الطلبات: $error');
     });
   }
@@ -96,6 +98,46 @@ class _DryCleanOrdersState extends State<DryCleanOrders> {
         ),
       ),
     ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          child: TextField(
+            onChanged: (value) {
+              // Debounce search input
+              if (_searchDebounce?.isActive ?? false) _searchDebounce?.cancel();
+              _searchDebounce = Timer(const Duration(milliseconds: 500), () {
+                setState(() {
+                  _searchQuery = value;
+                  _loadOrders();
+                });
+              });
+            },
+            decoration: InputDecoration(
+              hintText: 'ابحث عن الطلبات...',
+              prefixIcon: const Icon(Icons.search, color: Colors.grey),
+              filled: true,
+              fillColor: Colors.grey[200],
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12.0),
+                borderSide: BorderSide.none,
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                vertical: 14.0,
+                horizontal: 20.0,
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12.0),
+                borderSide: const BorderSide(
+                  color: Colors.green,
+                  width: 1.5,
+                ),
+              ),
+            ),
+            style: const TextStyle(
+              fontSize: 16.0,
+              color: Colors.black87,
+            ),
+          ),
+        ),
     Expanded(
       child:
         FutureBuilder<List<OrderResource>>(
