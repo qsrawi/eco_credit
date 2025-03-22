@@ -1,3 +1,4 @@
+import 'package:eco_credit/notification.dart';
 import 'package:flutter/material.dart';
 
 class NotificationIcon extends StatelessWidget {
@@ -14,7 +15,11 @@ class NotificationIcon extends StatelessWidget {
           icon: const Icon(Icons.notifications),
           color: const Color(0xFF3F9A25),
           onPressed: () {
-            // Handle notifications
+            // Navigate to the NotificationsScreen
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => NotificationsScreen()),
+            );
           },
         ),
         notificationCount > 0

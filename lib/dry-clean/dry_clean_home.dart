@@ -1,5 +1,6 @@
 import 'package:eco_credit/dry-clean/dry_clean_collections.dart';
 import 'package:eco_credit/notification_icon.dart';
+import 'package:eco_credit/services/api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -14,19 +15,26 @@ class DryCleanHomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<DryCleanHomeScreen> {
-  int notificationCount = 5; // Example count, replace with actual data source
-  // late final ApiService _apiService = ApiService();
+  late final ApiService _apiService = ApiService();
+  int notificationCount = 0;
 
   @override
   void initState() {
     super.initState();
+    _fetchUnreadNotificationCount();
   }
 
-  // Future<void> _fetchStatistics() async {
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   int? pickerId = prefs.getInt('id');
-  //   String role = prefs.getString('role') ?? '';
-  // }
+  Future<void> _fetchUnreadNotificationCount() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    int? id = prefs.getInt('id');
+    String role = prefs.getString('role') ?? '';
+    if (id != null && role != '') {
+      int fetchedCount = await _apiService.getAllUnreadNotificationCount(id, role);
+      setState(() {
+        notificationCount = fetchedCount;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

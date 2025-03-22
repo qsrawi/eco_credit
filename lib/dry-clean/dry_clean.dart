@@ -15,6 +15,7 @@ class DryClean extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: MainScreen(id: id, role: role),
+      debugShowCheckedModeBanner: false,  // Add this line to remove the debug banner
     );
   }
 }

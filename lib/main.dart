@@ -14,6 +14,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: HomePage(),
+      debugShowCheckedModeBanner: false,  // Add this line to remove the debug banner
     );
   }
 }

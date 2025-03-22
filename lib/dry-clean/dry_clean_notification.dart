@@ -74,17 +74,19 @@ class _DryCleanNotificationsScreenState extends State<DryCleanNotificationsScree
     String title;
 
     switch (notification.notificationTypeID) {
-      case 1:
+      case 6:
+      case 8:
         icon = Icons.error;
         color = Colors.red;
         title = 'مجموعة مرفوضة';
         break;
-      case 2:
+      case 7:
+      case 9:
         icon = Icons.timelapse;
         color = Colors.blue;
         title = 'مجموعة مقبولة';
         break;
-      case 5:
+      case 10:
         icon = Icons.check_circle;
         color = Colors.green;
         title = 'مجموعة اكتملت';

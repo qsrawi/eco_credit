@@ -587,6 +587,28 @@ class ApiService {
       throw Exception('Failed to load notifications: ${response.statusCode} ${response.body}');
     }
   }
+
+  Future<int> getAllUnreadNotificationCount(int? userId, String? userType) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('authToken');
+
+    final uri = Uri.parse('$baseUrl/notifications/getAllUnreadNotifications')
+      .replace(queryParameters: {
+        'userID': userId?.toString(),
+        'userType': userType,
+      });
+
+    final response = await http.get(uri, headers: {
+      'Authorization': 'Bearer $token', // Use the token here
+    });
+
+    if (response.statusCode == 200) {
+      var data = json.decode(response.body);
+      return data;
+    } else {
+      throw Exception('Failed to load notifications: ${response.statusCode} ${response.body}');
+    }
+  }
 }
 
 class GeneratorResource {
