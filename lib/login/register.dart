@@ -35,7 +35,7 @@ class _RegisterPageState extends State<RegisterPage> {
   List<Map<String, String>> _locationOptions = [];
   final List<Map<String, String>> _typesOptions = [
     {'label': 'كرتون', 'value': '3'},
-    {'label': 'بلاستك', 'value': '1'},
+    {'label': 'بلاستيك', 'value': '1'},
     {'label': 'ورق', 'value': '2'},
     {'label': 'معادن', 'value': '4'},
     {'label': 'خشب', 'value': '5'},

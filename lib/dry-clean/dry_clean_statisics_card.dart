@@ -22,7 +22,7 @@
 //         child: Row(
 //           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
 //           children: <Widget>[
-//             _buildStatColumn('بالانتظار', pending, Colors.amber),
+//             _buildStatColumn('قيد الإنتظار', pending, Colors.amber),
 //             _buildStatColumn('اكتملت', completed, Colors.green),
 //             _buildStatColumn('في الطريق', inProgress, Colors.blue),
 //             _buildStatColumn('ألغيت', cancelled, Colors.red),
@@ -66,7 +66,7 @@
 
 //   IconData _getIconForLabel(String label) {
 //     switch (label) {
-//       case 'بالانتظار':
+//       case 'قيد الإنتظار':
 //         return Icons.hourglass_empty;
 //       case 'اكتملت':
 //         return Icons.check_circle;

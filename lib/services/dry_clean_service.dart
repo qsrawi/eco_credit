@@ -70,14 +70,14 @@ class DryCleanApiService {
     }
   }
   
-  Future<List<DonationResource>> getAllDonations(int donationStatus, int? userId) async {
+  Future<DonationMainResource> getAllDonations(int donationStatus, int? userId, int page, int pageSize) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('authToken');
 
     final uri = Uri.parse('$baseUrl/donations')
       .replace(queryParameters: {
-        'page': '1',
-        'pageSize': '-1',
+        'page': page.toString(),
+        'pageSize': pageSize.toString(),
         'donationStatus': donationStatus.toString(),
         'userID': userId?.toString()
       });
@@ -87,19 +87,20 @@ class DryCleanApiService {
     });
 
     if (response.statusCode == 200) {
-      List<dynamic> data = json.decode(response.body);
-      return data.map((item) => DonationResource.fromJson(item)).toList();
+      return DonationMainResource.fromJson(json.decode(response.body));
     } else {
       throw Exception('Failed to load collections: ${response.statusCode} ${response.body}');
     }
   }
 
-  Future<List<OrderResource>> getAllOrders(int? orderStatus, String strsearch) async {
+  Future<OrderMainResource> getAllOrders(int? orderStatus, String strsearch, int page, int pageSize) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('authToken');
 
     final uri = Uri.parse('$baseUrl/orders')
       .replace(queryParameters: {
+        'page': page.toString(),
+        'pageSize': pageSize.toString(),
         'orderStatus': orderStatus.toString(),
         'strsearch': strsearch.toString()
       });
@@ -109,8 +110,7 @@ class DryCleanApiService {
     });
 
     if (response.statusCode == 200) {
-      List<dynamic> data = json.decode(response.body);
-      return data.map((item) => OrderResource.fromJson(item)).toList();
+      return OrderMainResource.fromJson(json.decode(response.body));
     } else {
       throw Exception('Failed to load collections: ${response.statusCode} ${response.body}');
     }
@@ -256,6 +256,26 @@ class DryCleanApiService {
       print('Error occurred: $e');
     }
   }
+}
+
+class DonationMainResource {
+  final List<DonationResource> lstData;
+  final int? rowsCount;
+
+  DonationMainResource({
+    required this.lstData,
+    this.rowsCount
+  });
+
+  factory DonationMainResource.fromJson(Map<String, dynamic> json) => DonationMainResource(
+    lstData: List<DonationResource>.from(json['lstData'].map((x) => DonationResource.fromJson(x))),
+    rowsCount: json['rowsCount'] ?? 0,
+  );
+
+  Map<String, dynamic> toJson() => {
+    'lstData': lstData,
+    'rowsCount': rowsCount,
+  };
 }
 
 class DonationResource {
@@ -522,6 +542,26 @@ class DonaterDonationResource {
     'id': id,
     'donationStatusID': donationStatusID,
     'donationStatusName': donationStatusName,
+  };
+}
+
+class OrderMainResource {
+  final List<OrderResource> lstData;
+  final int? rowsCount;
+
+  OrderMainResource({
+    required this.lstData,
+    this.rowsCount
+  });
+
+  factory OrderMainResource.fromJson(Map<String, dynamic> json) => OrderMainResource(
+    lstData: List<OrderResource>.from(json['lstData'].map((x) => OrderResource.fromJson(x))),
+    rowsCount: json['rowsCount'] ?? 0,
+  );
+
+  Map<String, dynamic> toJson() => {
+    'lstData': lstData,
+    'rowsCount': rowsCount,
   };
 }
 

@@ -6,7 +6,12 @@ import 'package:flutter_svg/svg.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class DryCleanOrders extends StatefulWidget {
-  const DryCleanOrders({super.key});
+  final bool isEditable;
+
+  const DryCleanOrders({
+    super.key,
+    this.isEditable = true, // Default to editable
+  });
 
   @override
   _DryCleanOrdersState createState() => _DryCleanOrdersState();
@@ -16,6 +21,10 @@ class _DryCleanOrdersState extends State<DryCleanOrders> {
   late Future<List<OrderResource>> futureOrders;
   Timer? _searchDebounce;
   String _searchQuery = '';
+  int currentPage = 1;
+  int totalPages = 1;
+  int pageSize = 10;
+
   @override
   void initState() {
     super.initState();
@@ -24,7 +33,19 @@ class _DryCleanOrdersState extends State<DryCleanOrders> {
 
   void _loadOrders() {
     DryCleanApiService apiService = DryCleanApiService();
-        futureOrders = apiService.getAllOrders(1, _searchQuery).catchError((error) {
+    futureOrders = apiService
+        .getAllOrders(
+      widget.isEditable ? 1 : 2,
+      _searchQuery,
+      currentPage,
+      pageSize,
+    )
+    .then((res) {
+      // Calculate total pages based on your API response
+      // Assuming your API returns total count in the response
+      totalPages = ((res.rowsCount ?? 0) / pageSize).ceil();
+      return res.lstData;
+    }).catchError((error) {
       throw Exception('فشل تحميل الطلبات: $error');
     });
   }
@@ -55,6 +76,43 @@ class _DryCleanOrdersState extends State<DryCleanOrders> {
     }
   }
 
+  Widget _buildPaginationControls() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.chevron_left),
+            onPressed: currentPage > 1
+                ? () {
+                    setState(() {
+                      currentPage--;
+                      _loadOrders();
+                    });
+                  }
+                : null,
+          ),
+          Text(
+            'الصفحة $currentPage من $totalPages',
+            style: const TextStyle(fontSize: 16),
+          ),
+          IconButton(
+            icon: const Icon(Icons.chevron_right),
+            onPressed: currentPage < totalPages
+                ? () {
+                    setState(() {
+                      currentPage++;
+                      _loadOrders();
+                    });
+                  }
+                : null,
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,225 +121,250 @@ class _DryCleanOrdersState extends State<DryCleanOrders> {
         centerTitle: true,
       ),
       body: Column(
-  children: [
-    Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: SizedBox(
-        width: double.infinity, // Makes the button span full width
-        child: ElevatedButton.icon(
-        onPressed: () async {
-          bool? result = await showDialog<bool>(
-            context: context,
-            builder: (BuildContext context) {
-              return AddRequestDialog();
-            },
-          );
+        children: [
+          if (widget.isEditable)
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: SizedBox(
+                width: double.infinity, // Makes the button span full width
+                child: ElevatedButton.icon(
+                  onPressed: () async {
+                    bool? result = await showDialog<bool>(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AddRequestDialog();
+                      },
+                    );
 
-          if (result == true) {
-            _loadOrders(); // Reload the orders if a new one was added
-            setState(() {}); // Ensure UI refresh
-          }
-        },
-          icon: const Icon(Icons.add, color: Colors.white),
-          label: const Text(
-            'اضافة طلب',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.green, // Green color
-            padding: EdgeInsets.symmetric(vertical: 14), // Adjust height
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10), // Rounded corners
-            ),
-            elevation: 5, // Adds a slight shadow for better design
-          ),
-        ),
-      ),
-    ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          child: TextField(
-            onChanged: (value) {
-              // Debounce search input
-              if (_searchDebounce?.isActive ?? false) _searchDebounce?.cancel();
-              _searchDebounce = Timer(const Duration(milliseconds: 500), () {
-                setState(() {
-                  _searchQuery = value;
-                  _loadOrders();
-                });
-              });
-            },
-            decoration: InputDecoration(
-              hintText: 'ابحث عن الطلبات...',
-              prefixIcon: const Icon(Icons.search, color: Colors.grey),
-              filled: true,
-              fillColor: Colors.grey[200],
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12.0),
-                borderSide: BorderSide.none,
-              ),
-              contentPadding: const EdgeInsets.symmetric(
-                vertical: 14.0,
-                horizontal: 20.0,
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12.0),
-                borderSide: const BorderSide(
-                  color: Colors.green,
-                  width: 1.5,
+                    if (result == true) {
+                      _loadOrders(); // Reload the orders if a new one was added
+                      setState(() {}); // Ensure UI refresh
+                    }
+                  },
+                  icon: const Icon(Icons.add, color: Colors.white),
+                  label: const Text(
+                    'اضافة طلب',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green, // Green color
+                    padding:
+                        EdgeInsets.symmetric(vertical: 14), // Adjust height
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(10), // Rounded corners
+                    ),
+                    elevation: 5, // Adds a slight shadow for better design
+                  ),
                 ),
               ),
             ),
-            style: const TextStyle(
-              fontSize: 16.0,
-              color: Colors.black87,
+          Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: TextField(
+              onChanged: (value) {
+                // Debounce search input
+                if (_searchDebounce?.isActive ?? false)
+                  _searchDebounce?.cancel();
+                _searchDebounce = Timer(const Duration(milliseconds: 500), () {
+                  setState(() {
+                    _searchQuery = value;
+                    _loadOrders();
+                  });
+                });
+              },
+              decoration: InputDecoration(
+                hintText: 'ابحث عن الطلبات...',
+                prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                filled: true,
+                fillColor: Colors.grey[200],
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                  borderSide: BorderSide.none,
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  vertical: 14.0,
+                  horizontal: 20.0,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                  borderSide: const BorderSide(
+                    color: Colors.green,
+                    width: 1.5,
+                  ),
+                ),
+              ),
+              style: const TextStyle(
+                fontSize: 16.0,
+                color: Colors.black87,
+              ),
             ),
           ),
-        ),
-    Expanded(
-      child:
-        FutureBuilder<List<OrderResource>>(
-            future: futureOrders,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              
-              if (snapshot.hasError) {
-                return Center(child: Text('خطأ: ${snapshot.error}'));
-              }
+          Expanded(
+            child: FutureBuilder<List<OrderResource>>(
+              future: futureOrders,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-              if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                return const Center(child: Text('لا توجد طلبات متاحة'));
-              }
+                if (snapshot.hasError) {
+                  return Center(child: Text('خطأ: ${snapshot.error}'));
+                }
 
-              return ListView.builder(
-                itemCount: snapshot.data!.length,
-                itemBuilder: (context, index) {
-                  OrderResource order = snapshot.data![index];
-                return Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Card(
-                    elevation: 5,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Directionality(
-                        textDirection: TextDirection.rtl,
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Icon(Icons.receipt_long, size: 40),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'طلب #${order.orderNumber ?? order.id}',
-                                    style: const TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    order.name ?? 'طلب بدون اسم',
-                                    style: const TextStyle(fontSize: 16),
-                                  ),
-                                 Text(
-                                    order.phone ?? '+970',
-                                    style: const TextStyle(fontSize: 16),
-                                  ),
-                                  Row(
-                                    children: [
-                                  // WhatsApp Button
-                                    GestureDetector(
-                                      onTap: () {
-                                        final phone = order.phone ?? '+970';
-                                        _launchWhatsApp(phone);
-                                      },
-                                      child: SvgPicture.asset(
-                                        "assets/icons/whatsapp.svg",
-                                        height: 30,
-                                      ),
-                                    ),
-                                    // Copy Button
-                                    IconButton(
-                                      icon: Icon(Icons.content_copy, color: Colors.grey),
-                                      iconSize: 20,
-                                      onPressed: () {
-                                        final phone = order.phone ?? '+970';
-                                        _copyToClipboard(phone);
-                                      },
-                                    ),
-                                      
-                                    ],
-                                  ),
-                                  Text(
-                                    '${order.price?.toStringAsFixed(2) ?? '0.00'} ILS',
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      color: Colors.green,
-                                    ),
-                                  ),
-                                ],
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(child: Text('لا توجد طلبات متاحة'));
+                }
+
+                return Column(
+                  children: [
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: snapshot.data!.length,
+                        itemBuilder: (context, index) {
+                          OrderResource order = snapshot.data![index];
+                          return Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Card(
+                              elevation: 5,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
                               ),
-                            ),
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Text(
-                                  _formatTimeAgo(order.createdAt),
-                                  style: const TextStyle(
-                                    color: Colors.grey,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                                const SizedBox(height: 12),
-                                ElevatedButton(
-                                  onPressed: () => _markOrderAsReady(order.id),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.green,
-                                    foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 16,
-                                      vertical: 10,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                  ),
-                                  child: const Row(
-                                    mainAxisSize: MainAxisSize.min,
+                              child: Padding(
+                                padding: const EdgeInsets.all(12.0),
+                                child: Directionality(
+                                  textDirection: TextDirection.rtl,
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      Icon(Icons.check_circle, size: 20),
-                                      SizedBox(width: 8),
-                                      Text(
-                                        'جاهز',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w500,
+                                      const Icon(Icons.receipt_long, size: 40),
+                                      const SizedBox(width: 16),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'طلب #${order.orderNumber ?? order.id}',
+                                              style: const TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 8),
+                                            Text(
+                                              order.name ?? 'طلب بدون اسم',
+                                              style:
+                                                  const TextStyle(fontSize: 16),
+                                            ),
+                                            Text(
+                                              order.phone ?? '+970',
+                                              style:
+                                                  const TextStyle(fontSize: 16),
+                                            ),
+                                            Row(
+                                              children: [
+                                                // WhatsApp Button
+                                                GestureDetector(
+                                                  onTap: () {
+                                                    final phone =
+                                                        order.phone ?? '+970';
+                                                    _launchWhatsApp(phone);
+                                                  },
+                                                  child: SvgPicture.asset(
+                                                    "assets/icons/whatsapp.svg",
+                                                    height: 30,
+                                                  ),
+                                                ),
+                                                // Copy Button
+                                                IconButton(
+                                                  icon: Icon(Icons.content_copy,
+                                                      color: Colors.grey),
+                                                  iconSize: 20,
+                                                  onPressed: () {
+                                                    final phone =
+                                                        order.phone ?? '+970';
+                                                    _copyToClipboard(phone);
+                                                  },
+                                                ),
+                                              ],
+                                            ),
+                                            Text(
+                                              '${order.price?.toStringAsFixed(2) ?? '0.00'} ILS',
+                                              style: const TextStyle(
+                                                fontSize: 16,
+                                                color: Colors.green,
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ),
+                                      Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.end,
+                                        children: [
+                                          Text(
+                                            _formatTimeAgo(order.createdAt),
+                                            style: const TextStyle(
+                                              color: Colors.grey,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 12),
+                                          if (widget.isEditable)
+                                            ElevatedButton(
+                                              onPressed: () =>
+                                                  _markOrderAsReady(order.id),
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: Colors.green,
+                                                foregroundColor: Colors.white,
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                  horizontal: 16,
+                                                  vertical: 10,
+                                                ),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(20),
+                                                ),
+                                              ),
+                                              child: const Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Icon(Icons.check_circle,
+                                                      size: 20),
+                                                  SizedBox(width: 8),
+                                                  Text(
+                                                    'جاهز',
+                                                    style: TextStyle(
+                                                      fontSize: 16,
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                        ],
+                                      ),
                                     ],
                                   ),
                                 ),
-                              ],
+                              ),
                             ),
-                          ],
-                        ),
+                          );
+                        },
                       ),
                     ),
-                  ),
+                    if (!widget.isEditable) _buildPaginationControls(),
+                  ],
                 );
-                },
-              );
-            },
-          ),
+              },
+            ),
           ),
         ],
       ),
@@ -289,32 +372,31 @@ class _DryCleanOrdersState extends State<DryCleanOrders> {
   }
 
   void _copyToClipboard(String text) {
-  Clipboard.setData(ClipboardData(text: text));
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text('تم نسخ الرقم: $text'),
-      duration: Duration(seconds: 1),
-    ),
-  );
-}
-
-Future<void> _launchWhatsApp(String phone) async {
-  final cleanedNumber = phone.replaceAll(RegExp(r'[^0-9+]'), '');
-  final url = "https://wa.me/${cleanedNumber.replaceFirst('+', '')}";
-  
-  if (await canLaunch(url)) {
-    await launch(url);
-  } else {
+    Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('تطبيق واتساب غير مثبت'),
-        backgroundColor: Colors.red,
+        content: Text('تم نسخ الرقم: $text'),
+        duration: Duration(seconds: 1),
       ),
     );
   }
-}
-}
 
+  Future<void> _launchWhatsApp(String phone) async {
+    final cleanedNumber = phone.replaceAll(RegExp(r'[^0-9+]'), '');
+    final url = "https://wa.me/${cleanedNumber.replaceFirst('+', '')}";
+
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('تطبيق واتساب غير مثبت'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+}
 
 class AddRequestDialog extends StatefulWidget {
   @override
@@ -331,7 +413,7 @@ class _AddRequestDialogState extends State<AddRequestDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('إضافة طلب جديد', 
+      title: const Text('إضافة طلب جديد',
           textAlign: TextAlign.center,
           style: TextStyle(fontWeight: FontWeight.bold)),
       shape: RoundedRectangleBorder(
@@ -419,9 +501,9 @@ class _AddRequestDialogState extends State<AddRequestDialog> {
                       labelText: 'رقم الهاتف',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
+                      ),
                     ),
-                    ),
-                    validator: (value) {  
+                    validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'الرجاء إدخال رقم الهاتف';
                       }
@@ -451,7 +533,8 @@ class _AddRequestDialogState extends State<AddRequestDialog> {
               onPressed: () async {
                 if (_formKey.currentState!.validate()) {
                   // Process data
-                  final fullPhone = _selectedCountryCode + _phoneController.text;
+                  final fullPhone =
+                      _selectedCountryCode + _phoneController.text;
 
                   Map<String, dynamic> model = {
                     'Name': _nameController.text,
@@ -466,8 +549,7 @@ class _AddRequestDialogState extends State<AddRequestDialog> {
                     Navigator.pop(context, true); // Indicate success
                   }).catchError((error) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('فشل في إضافة الطلب: $error'))
-                    );
+                        SnackBar(content: Text('فشل في إضافة الطلب: $error')));
                   });
                 }
               },

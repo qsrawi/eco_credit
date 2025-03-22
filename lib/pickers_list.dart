@@ -12,7 +12,7 @@ class PickersListWidget extends StatefulWidget {
 }
 
 class _PickersListWidgetState extends State<PickersListWidget> {
-  late Future<List<PickerListResource>> _pickersFuture;
+  late Future<PickerMainResource> _pickersFuture;
 
   @override
   void initState() {
@@ -49,7 +49,7 @@ class _PickersListWidgetState extends State<PickersListWidget> {
       ),
       body: Directionality(
       textDirection: TextDirection.rtl,
-      child: FutureBuilder<List<PickerListResource>>(
+      child: FutureBuilder<PickerMainResource>(
         future: _pickersFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -60,11 +60,11 @@ class _PickersListWidgetState extends State<PickersListWidget> {
             return Center(child: Text('حدث خطأ: ${snapshot.error}'));
           }
 
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          if (!snapshot.hasData || snapshot.data!.lstData.isEmpty) {
             return const Center(child: Text('لا توجد بيانات متاحة'));
           }
 
-          final pickers = snapshot.data!;
+          final pickers = snapshot.data!.lstData;
           
           return ListView.builder(
             padding: const EdgeInsets.all(16),

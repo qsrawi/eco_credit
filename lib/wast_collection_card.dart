@@ -276,7 +276,7 @@ void _showInvoiceDialogView(BuildContext context, InvoiceResource invoice) {
       return Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: Colors.green, size: 24),
+          Icon(icon, color: const Color(0xFF3F9A25), size: 24),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -287,7 +287,7 @@ void _showInvoiceDialogView(BuildContext context, InvoiceResource invoice) {
                   style: GoogleFonts.cairo(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: Colors.grey[700],
+                    color: Colors.black,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -296,7 +296,7 @@ void _showInvoiceDialogView(BuildContext context, InvoiceResource invoice) {
                   style: GoogleFonts.cairo(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Colors.grey[800],
+                    color: Colors.black,
                   ),
                 ),
               ],
@@ -350,7 +350,7 @@ void _showInvoiceDialogView(BuildContext context, InvoiceResource invoice) {
                   Text(
                     status,
                     style: const TextStyle(
-                      // color: status == 'بالانتظار' ? Colors.orange : Colors.green,
+                      // color: status == 'قيد الإنتظار' ? Colors.orange : Colors.green,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -672,12 +672,19 @@ class _SizeInputButtonState extends State<_SizeInputButton> {
             ),
             // ... rest of the style
           ),
-          child: const Text(
-            'اكتملت',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 14,
-            ),
+          child: const Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.check_circle, color: Colors.white), // Choose an icon that fits your design
+              SizedBox(width: 4), // Space between icon and text
+              Text(
+                'اكتملت',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                ),
+              ),
+            ],
           ),
         ),
         const SizedBox(width: 10),
@@ -690,7 +697,15 @@ class _SizeInputButtonState extends State<_SizeInputButton> {
             textAlign: TextAlign.right,
             decoration: const InputDecoration(
               hintText: 'أدخل الحجم',
-              border: OutlineInputBorder(),
+              border: OutlineInputBorder(
+                borderSide: BorderSide(color: Color(0xFF3F9A25)), // Default border color
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: Color(0xFF3F9A25)), // Green color when TextField is enabled
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: Color(0xFF3F9A25)), // Green color when TextField is focused
+              ),
               contentPadding: EdgeInsets.symmetric(horizontal: 12),
             ),
           ),
@@ -731,6 +746,7 @@ void _showInvoiceDialog(int collectionID, BuildContext context) {
                       keyboardType: TextInputType.number,
                       decoration: const InputDecoration(
                         labelText: 'الوزن الحقيقي',
+                        labelStyle: TextStyle(color: Colors.black), // Set label text color to black
                         border: OutlineInputBorder(),
                         enabledBorder: OutlineInputBorder(
                           borderSide: BorderSide(color: Color(0xFF3F9A25)),
@@ -744,7 +760,8 @@ void _showInvoiceDialog(int collectionID, BuildContext context) {
                     TextField(
                       controller: scarpyardOwnerController,
                       decoration: const InputDecoration(
-                        labelText: 'صاحب الساحة',
+                        labelText: 'ساحة الخردة',
+                        labelStyle: TextStyle(color: Colors.black), // Set label text color to black
                         border: OutlineInputBorder(),
                          enabledBorder: OutlineInputBorder(
                           borderSide: BorderSide(color: Color(0xFF3F9A25)),
@@ -763,7 +780,13 @@ void _showInvoiceDialog(int collectionID, BuildContext context) {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('إلغاء'),
+            child: const Text(
+                'إلغاء',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(

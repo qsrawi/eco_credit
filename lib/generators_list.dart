@@ -12,7 +12,7 @@ class GeneratorsListWidget extends StatefulWidget {
 }
 
 class _GeneratorsListWidget extends State<GeneratorsListWidget> {
-  late Future<List<GeneratorListResource>> _pickersFuture;
+  late Future<GeneratorMainResource> _pickersFuture;
 
   @override
   void initState() {
@@ -49,7 +49,7 @@ class _GeneratorsListWidget extends State<GeneratorsListWidget> {
       ),
       body: Directionality(
       textDirection: TextDirection.rtl,
-      child: FutureBuilder<List<GeneratorListResource>>(
+      child: FutureBuilder<GeneratorMainResource>(
         future: _pickersFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -60,11 +60,11 @@ class _GeneratorsListWidget extends State<GeneratorsListWidget> {
             return Center(child: Text('حدث خطأ: ${snapshot.error}'));
           }
 
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          if (!snapshot.hasData || snapshot.data!.lstData.isEmpty) {
             return const Center(child: Text('لا توجد بيانات متاحة'));
           }
 
-          final pickers = snapshot.data!;
+          final pickers = snapshot.data!.lstData;
 
           return ListView.builder(
             padding: const EdgeInsets.all(16),

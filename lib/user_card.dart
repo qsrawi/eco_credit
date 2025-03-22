@@ -88,28 +88,35 @@ class UserCard extends StatelessWidget {
                         ElevatedButton(
                           onPressed: () => _showKpiReportDialog(context, id, role),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue,
+                            backgroundColor: const Color(0xFF3F9A25),
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 8),
+                                horizontal: 12, vertical: 6),
                           ),
-                          child: const Text(
-                            'مؤشر الأداء',
-                            style: TextStyle(color: Colors.white),
-                          ),
+                          child: const Row(
+                              children: [
+                                Icon(Icons.assessment, size: 16, color: Colors.white),
+                                SizedBox(width: 4),
+                                Text(
+                                  'مؤشر الأداء',
+                                  style: TextStyle(color: Colors.white, fontSize: 12,),
+                                ),
+                              ],
+                            ),
                         ),
                         const Spacer(),
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 6),
+                              horizontal: 6, vertical: 4),
                           decoration: BoxDecoration(
                             color: Colors.green[100],
                             borderRadius: BorderRadius.circular(16),
                           ),
                           child: Text(
-                            'عدد المجموعات: $wasteCollectionCount',
+                            ' عدد الطلبات المكتملة: $wasteCollectionCount',
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
-                              color: Colors.green,
+                              color:  Color(0xFF3F9A25),
+                              fontSize: 12,
                             ),
                           ),
                         ),

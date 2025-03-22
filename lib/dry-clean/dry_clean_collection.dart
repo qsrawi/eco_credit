@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:eco_credit/dry-clean/dry_clean.dart';
 import 'package:eco_credit/services/dry_clean_service.dart';
 import 'package:flutter/material.dart';
@@ -153,7 +152,7 @@ class dryCleanCollectionCard extends StatelessWidget {
                 ],
               ),
               // Conditional button block here
-              if (role == "DCAdmin" && donationStatusName == 'بالانتظار') ...[
+              if (role == "DCAdmin" && donationStatusName == 'قيد الإنتظار') ...[
                 const SizedBox(height: 10),// Add space before the buttons
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,

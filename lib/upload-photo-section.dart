@@ -92,16 +92,16 @@ class _UploadPhotoSectionState extends State<UploadPhotoSection> {
           children: [
             if (_image != null)
               IconButton(
-                icon: Icon(Icons.visibility, size: 30, color: Colors.orange),
+                icon: const Icon(Icons.visibility, size: 30, color:  Color.fromARGB(255, 83, 207, 49)),
                 onPressed: _showImageDialog,
               ),
             IconButton(
-              icon: Icon(Icons.camera_alt, size: 30, color: Colors.green),
+              icon: const Icon(Icons.camera_alt, size: 30, color: Color.fromARGB(255, 72, 177, 42)),
               onPressed: () => _pickImage(ImageSource.camera),
             ),
             const SizedBox(width: 8),
             IconButton(
-              icon: Icon(Icons.photo_library, size: 30, color: Colors.blue),
+              icon: const Icon(Icons.photo_library, size: 30, color:  Color(0xFF3F9A25)),
               onPressed: () => _pickImage(ImageSource.gallery),
             ),
           ],

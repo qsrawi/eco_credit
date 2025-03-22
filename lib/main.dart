@@ -5,10 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 void main() {
- // Your code
- 
   runApp(MyApp());
-   HttpOverrides.global = MyHttpOverrides();
+  HttpOverrides.global = MyHttpOverrides();
 }
 
 class MyApp extends StatelessWidget {
@@ -29,42 +27,33 @@ class HomePage extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           'ecoCredit',
-          style: GoogleFonts.lato(  // Using Lato as an example; replace with your chosen font
+          style: GoogleFonts.lato(
             textStyle: const TextStyle(
               color: Colors.white,
-              fontSize: 20,  // Customize your font size here
+              fontSize: 20,
               fontWeight: FontWeight.bold,
             ),
           ),
-        ),        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.teal.shade300, Colors.green.shade400],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+        ),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            color: Color(0xFF3F9A25), // Solid green color
           ),
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
       body: Container(
-        constraints: const BoxConstraints.expand(), // Force full-screen size
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Colors.teal.shade300, Colors.green.shade400],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
+        constraints: const BoxConstraints.expand(),
+        color: const Color(0xFF3F9A25), // Solid green background
         child: SingleChildScrollView(
           child: ConstrainedBox(
             constraints: BoxConstraints(
-              minHeight: screenSize.height, // Ensure minimum height = screen height
+              minHeight: screenSize.height,
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min, // Allow vertical expansion
+              mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 ImageCard(
                   imagePath: 'assets/images/dryclean.png',
@@ -72,22 +61,22 @@ class HomePage extends StatelessWidget {
                   onTap: () => navigateToLogin(context, 'dry_clean'),
                   height: screenSize.height * 0.3,
                 ),
-                SizedBox(height: screenSize.height * 0.02), // Add spacing
+                SizedBox(height: screenSize.height * 0.02),
                 ImageCard(
                   imagePath: 'assets/images/erecycleHUB.png',
                   label: 'eRecycleHUB',
                   onTap: () => navigateToLogin(context, 'erecycleHUB'),
                   height: screenSize.height * 0.3,
                 ),
-                SizedBox(height: screenSize.height * 0.4), // Bottom spacing
+                SizedBox(height: screenSize.height * 0.4),
               ],
             ),
           ),
         ),
       ),
-       bottomNavigationBar: Container(
-        color: Colors.white.withOpacity(0.5),  // Semi-transparent white background
-        padding: EdgeInsets.all(10),
+      bottomNavigationBar: Container(
+        color: Colors.white.withOpacity(0.5),
+        padding: const EdgeInsets.all(10),
         child: const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -100,7 +89,6 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  
   void navigateToLogin(BuildContext context, String type) {
     Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage(type: type)));
   }
@@ -112,31 +100,31 @@ class ImageCard extends StatelessWidget {
   final VoidCallback onTap;
   final double height;
 
-  ImageCard({
-    required this.imagePath, 
-    required this.label, 
-    required this.onTap, 
-    required this.height
+  const ImageCard({
+    required this.imagePath,
+    required this.label,
+    required this.onTap,
+    required this.height,
   });
 
   @override
   Widget build(BuildContext context) {
     return Card(
       color: Colors.white,
-      margin: EdgeInsets.all(16),
+      margin: const EdgeInsets.all(16),
       child: InkWell(
         onTap: onTap,
         child: Container(
           height: height,
-          padding: EdgeInsets.all(20),
+          padding: const EdgeInsets.all(20),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Expanded(
-                child: Image.asset(imagePath, fit: BoxFit.contain),  // Adjust image fitting
+                child: Image.asset(imagePath, fit: BoxFit.contain),
               ),
-              SizedBox(height: 8),
-              Text(label, style: TextStyle(fontSize: 16)),
+              const SizedBox(height: 8),
+              Text(label, style: const TextStyle(fontSize: 16)),
             ],
           ),
         ),
@@ -145,11 +133,10 @@ class ImageCard extends StatelessWidget {
   }
 }
 
-
-class MyHttpOverrides extends HttpOverrides{
+class MyHttpOverrides extends HttpOverrides {
   @override
-  HttpClient createHttpClient(SecurityContext? context){
+  HttpClient createHttpClient(SecurityContext? context) {
     return super.createHttpClient(context)
-      ..badCertificateCallback = (X509Certificate cert, String host, int port)=> true;
+      ..badCertificateCallback = (X509Certificate cert, String host, int port) => true;
   }
 }

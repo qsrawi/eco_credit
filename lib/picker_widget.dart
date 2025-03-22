@@ -35,9 +35,9 @@ class _PickerWidgetState extends State<PickerWidget> {
       final pickersList2 = await ApiService().getPickers(null, id, null);
       setState(() {
         if (query.isEmpty) {
-          pickers = pickersList2;
+          pickers = pickersList2.lstData;
         }
-        dialogPickers = pickersList;
+        dialogPickers = pickersList.lstData;
         isLoading = false;
       });
     } catch (e) {
@@ -135,7 +135,7 @@ class _PickerWidgetState extends State<PickerWidget> {
     try {
       final pickersList = await ApiService().getPickers(null, null, query);
       setStateDialog(() {  // Use the dialog's setState to ensure UI updates
-        dialogPickers = pickersList;
+        dialogPickers = pickersList.lstData;
         isLoading = false;
       });
     } catch (e) {

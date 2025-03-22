@@ -156,7 +156,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           leading: const Icon(Icons.map, color: Color(0xFF3F9A25)),
         ),
         ListTile(
-          title: const Text('عدد المجموعات'),
+          title: const Text('الطلبات المكتملة'),
           subtitle: Text('${profile.collectionCount ?? 0}'),
           leading: const Icon(Icons.list, color: Color(0xFF3F9A25)),
         ),

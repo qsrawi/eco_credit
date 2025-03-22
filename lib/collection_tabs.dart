@@ -124,7 +124,7 @@ class _CollectionTabsState extends State<CollectionTabs>
 
     final collections = await _apiService.getCollections(status, userId: userId, userType: userType);
 
-     if (collections.isEmpty) {
+     if (collections.lstData.isEmpty) {
       return ListView(
         physics: const NeverScrollableScrollPhysics(),
         shrinkWrap: true,
@@ -175,9 +175,9 @@ class _CollectionTabsState extends State<CollectionTabs>
     }
     
     return ListView.builder(
-      itemCount: collections.length,
+      itemCount: collections.lstData.length,
       itemBuilder: (context, index) {
-        final collection = collections[index];
+        final collection = collections.lstData[index];
         return Container(
               margin: EdgeInsets.all(8.0), // Adds vertical margin between cards
               child: WasteCollectionCard(

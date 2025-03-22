@@ -136,22 +136,31 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      _buildKpiButton(
-                        icon: Icons.location_on,
-                        label: 'النفايات حسب الموقع',
-                        onPressed: () => _handleLocationKpi(context),
-                      ),
-                      _buildKpiButton(
-                        icon: Icons.category,
-                        label: 'النفايات حسب النوع',
-                        onPressed: () => _handleCategoryKpi(context),
-                      ),
-                      _buildKpiButton(
-                        icon: Icons.check_circle,
-                        label: 'المجموع الناجح',
-                        onPressed: () => _handleSuccessfulKpi(context),
-                      ),
-                    ],
+                        SizedBox(
+                          width: 140,
+                          child: _buildKpiButton(
+                            icon: Icons.location_on,
+                            label: 'المواد القابلة للتدوير حسب الموقع',
+                            onPressed: () => _handleLocationKpi(context),
+                          ),
+                        ),
+                        SizedBox(
+                          width: 140,
+                          child: _buildKpiButton(
+                            icon: Icons.category,
+                            label: 'المواد القابلة للتدوير حسب النوع',
+                            onPressed: () => _handleCategoryKpi(context),
+                          ),
+                        ),
+                        SizedBox(
+                          width: 80,
+                          child: _buildKpiButton(
+                            icon: Icons.check_circle,
+                            label: 'الطلبات المنجزة',
+                            onPressed: () => _handleSuccessfulKpi(context),
+                          ),
+                        ),
+                      ],
                   ),
                 );
               } else if (snapshot.hasData && 
@@ -303,29 +312,62 @@ Widget getTitleWidget(String role) {
 
 // Add these helper methods
 Widget _buildKpiButton({required IconData icon, required String label, required VoidCallback onPressed}) {
-  return ElevatedButton(
-    onPressed: onPressed,
-    style: ElevatedButton.styleFrom(
-      padding: EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
+  return Card(
+    elevation: 4,
+    shadowColor: Colors.grey.withOpacity(0.3),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(12),
     ),
-    child: Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 30, color: const Color(0xFF3F9A25)),
-        SizedBox(height: 8),
-        Text(
-          label,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
+    child: Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: const Color(0xFF3F9A25),
+          width: 1,
         ),
-      ],
+      ),
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+          backgroundColor: Colors.white,
+          foregroundColor: const Color(0xFF3F9A25), // Splash/overlay color
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          elevation: 0,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: const Color(0xFF3F9A25).withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                icon,
+                size: 28,
+                color: const Color(0xFF3F9A25),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+                height: 1.3,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.visible,
+            ),
+          ],
+        ),
+      ),
     ),
   );
 }
@@ -459,7 +501,7 @@ Future<void> _showKpiReportDialog(
                       TextField(
                         controller: lastMonthsController,
                         keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           labelText: 'في آخر شهور',
                           border: OutlineInputBorder(),
                           suffixIcon: Icon(Icons.calendar_today),
@@ -487,7 +529,13 @@ Future<void> _showKpiReportDialog(
           actions: [
             TextButton(
               onPressed: Navigator.of(context).pop,
-              child: const Text('إغلاق'),
+              child: const Text(
+                'إغلاق',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ],
         ),

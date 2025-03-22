@@ -15,7 +15,7 @@ class _WasteTypeWidgetState extends State<WasteTypeWidget> {
   int? selectedWasteTypeId;
 
   final List<Map<String, dynamic>> wasteTypes = [
-    {'id': 1, 'icon': 'assets/icons/Plastic.svg', 'label': 'بلاستك', 'color': Colors.green},
+    {'id': 1, 'icon': 'assets/icons/Plastic.svg', 'label': 'بلاستيك', 'color': Colors.green},
     {'id': 2, 'icon': 'assets/icons/Paper.svg', 'label': 'ورق', 'color': Colors.green},
     {'id': 3, 'icon': 'assets/icons/Cartoon.svg', 'label': 'كرتون', 'color': Colors.green},
     {'id': 4, 'icon': 'assets/icons/Iron.svg', 'label': 'معادن', 'color': Colors.green},

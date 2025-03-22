@@ -147,7 +147,7 @@ class _OrderStatusPageState extends State<OrderStatusPage> {
         ),
         const SizedBox(height: 20),
         Text(
-          isApproved ? 'جاهز' : 'بالانتظار',
+          isApproved ? 'جاهز' : 'قيد الإنتظار',
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,

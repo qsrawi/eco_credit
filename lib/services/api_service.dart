@@ -300,14 +300,14 @@ class ApiService {
     }
   }
 
-  Future<List<CollectionResponse>> getCollections(int status, {int? userId, String? userType}) async {
+  Future<CollectionMainResource> getCollections(int status, { int? userId, String? userType, int page = 1, int pageSize = 5 }) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('authToken');
 
     final uri = Uri.parse('$baseUrl/collections')
       .replace(queryParameters: {
-        'page': '1',
-        'pageSize': '-1',
+        'page': page.toString(),
+        'pageSize': pageSize.toString(),
         'collectionStatus': status.toString(),
         'userID': userId?.toString(),
         'userType': userType,
@@ -318,8 +318,7 @@ class ApiService {
     });
 
     if (response.statusCode == 200) {
-      List<dynamic> data = json.decode(response.body);
-      return data.map((item) => CollectionResponse.fromJson(item)).toList();
+      return CollectionMainResource.fromJson(json.decode(response.body));
     } else {
       throw Exception('Failed to load collections: ${response.statusCode} ${response.body}');
     }
@@ -365,7 +364,7 @@ class ApiService {
     }
   }
 
-  Future<List<PickerListResource>> getPickers(int? wasteGroupID, int? generatorID, String? strSearch) async {
+  Future<PickerMainResource> getPickers(int? wasteGroupID, int? generatorID, String? strSearch) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('authToken');
 
@@ -383,26 +382,28 @@ class ApiService {
     });
     
     if (response.statusCode == 200) {
-      List<dynamic> data = json.decode(response.body);
-      return data.map((item) => PickerListResource.fromJson(item)).toList();
+      return PickerMainResource.fromJson(json.decode(response.body));
     } else {
       throw Exception('Failed to load collections: ${response.statusCode} ${response.body}');
     }
   }
 
-  Future<List<GeneratorListResource>> getAllGenerators() async {
+  Future<GeneratorMainResource> getAllGenerators() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('authToken');
 
-    final uri = Uri.parse('$baseUrl/generators');
+    final uri = Uri.parse('$baseUrl/generators')
+      .replace(queryParameters: {
+        'page': '1',
+        'pageSize': '-1'
+      });
 
     final response = await http.get(uri, headers: {
       'Authorization': 'Bearer $token', // Use the token here
     });
     
     if (response.statusCode == 200) {
-      List<dynamic> data = json.decode(response.body);
-      return data.map((item) => GeneratorListResource.fromJson(item)).toList();
+      return GeneratorMainResource.fromJson(json.decode(response.body));
     } else {
       throw Exception('Failed to load collections: ${response.statusCode} ${response.body}');
     }
@@ -702,6 +703,26 @@ class CollectionLightResource {
   }
 }
 
+class CollectionMainResource {
+  final List<CollectionResponse> lstData;
+  final int? rowsCount;
+
+  CollectionMainResource({
+    required this.lstData,
+    this.rowsCount
+  });
+
+  factory CollectionMainResource.fromJson(Map<String, dynamic> json) => CollectionMainResource(
+    lstData: List<CollectionResponse>.from(json['lstData'].map((x) => CollectionResponse.fromJson(x))),
+    rowsCount: json['rowsCount'] ?? 0,
+  );
+
+  Map<String, dynamic> toJson() => {
+    'lstData': lstData,
+    'rowsCount': rowsCount,
+  };
+}
+
 class CollectionResponse {
   final int collectionID;
   final int generatorID;
@@ -840,6 +861,26 @@ class NotificationListResource {
   }
 }
 
+class PickerMainResource {
+  final List<PickerListResource> lstData;
+  final int? rowsCount;
+
+  PickerMainResource({
+    required this.lstData,
+    this.rowsCount
+  });
+
+  factory PickerMainResource.fromJson(Map<String, dynamic> json) => PickerMainResource(
+    lstData: List<PickerListResource>.from(json['lstData'].map((x) => PickerListResource.fromJson(x))),
+    rowsCount: json['rowsCount'] ?? 0,
+  );
+
+  Map<String, dynamic> toJson() => {
+    'lstData': lstData,
+    'rowsCount': rowsCount,
+  };
+}
+
 class PickerListResource {
   final int id;
   final String? manualId;
@@ -902,6 +943,25 @@ class CollectionPickerResource {
   }
 }
 
+class GeneratorMainResource {
+  final List<GeneratorListResource> lstData;
+  final int? rowsCount;
+
+  GeneratorMainResource({
+    required this.lstData,
+    this.rowsCount
+  });
+
+  factory GeneratorMainResource.fromJson(Map<String, dynamic> json) => GeneratorMainResource(
+    lstData: List<GeneratorListResource>.from(json['lstData'].map((x) => GeneratorListResource.fromJson(x))),
+    rowsCount: json['rowsCount'] ?? 0,
+  );
+
+  Map<String, dynamic> toJson() => {
+    'lstData': lstData,
+    'rowsCount': rowsCount,
+  };
+}
 
 class GeneratorListResource {
   final int id;
