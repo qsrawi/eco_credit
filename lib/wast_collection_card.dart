@@ -135,46 +135,67 @@ class WasteCollectionCard extends StatelessWidget {
     );
   }
 
-  void _showPickers(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          content: Column(
+void _showPickers(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return Dialog(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.8,
+            minWidth: MediaQuery.of(context).size.width * 0.9,
+          ),
+          child: Column(
             mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              PickerWidget(
-                onSelected: (int selectedId) async {
-                  SharedPreferences prefs = await SharedPreferences.getInstance();
-                  int userId = prefs.getInt('id') ?? 1;
-                  String userType = prefs.getString('role') ?? 'Generator';
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  'اختر بطل البيئة',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: PickerWidget(
+                    onSelected: (int selectedId) async {
+                      SharedPreferences prefs = await SharedPreferences.getInstance();
+                      int userId = prefs.getInt('id') ?? 1;
+                      String userType = prefs.getString('role') ?? 'Generator';
 
-                  CollectionUpdateModel model = CollectionUpdateModel(
-                    collectionID: collectionID,
-                    collectionStatusID: 1,
-                    pickerID: selectedId
-                  );
-                  ApiService apiService = ApiService();
-                  await apiService.updateCollection(model);
-                  Navigator.pushAndRemoveUntil(
+                      CollectionUpdateModel model = CollectionUpdateModel(
+                        collectionID: collectionID,
+                        collectionStatusID: 1,
+                        pickerID: selectedId
+                      );
+                      
+                      await ApiService().updateCollection(model);
+                      
+                      Navigator.of(context).pop(); // Close dialog first
+                          Navigator.pushAndRemoveUntil(
                     context,
                     MaterialPageRoute(builder: (context) => ERecycleHub(id: userId, role: userType)),
                     (route) => false, // Remove all previous routes
                   );
-                }, 
+                    },
+                  ),
+                ),
+              ),
+              Divider(height: 1),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('إغلاق'),
               ),
             ],
           ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('إغلاق'),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-          ],
-        );
-      },
-    );
-  }
+        ),
+      );
+    },
+  );
+}
 
 void _showInvoiceDialogView(BuildContext context, InvoiceResource invoice) {
   showDialog(

@@ -152,42 +152,50 @@ class _PickerWidgetState extends State<PickerWidget> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'اختر بطل البيئة',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+@override
+Widget build(BuildContext context) {
+  return Directionality(
+    textDirection: TextDirection.rtl,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 16.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'اختر بطل البيئة',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
+              ElevatedButton(
+                onPressed: showAllPickersDialog,
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.blue,
                 ),
-                ElevatedButton(
-                  onPressed: showAllPickersDialog,
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    backgroundColor: Colors.blue,
-                  ),
-                  child: const Text('عرض الكل'),
-                ),
-              ],
-            ),
+                child: const Text('عرض الكل'),
+              ),
+            ],
           ),
-          if (isLoading)
-            const Center(child: CircularProgressIndicator())
-          else
-            ...pickers.map((picker) => Card(
+        ),
+        if (isLoading)
+          const Center(child: CircularProgressIndicator())
+        else
+          SizedBox(
+            height: 200, // Fixed height for the list
+            child: ListView(
+              shrinkWrap: true,
+              physics: const ClampingScrollPhysics(),
+              children: [
+                ...pickers.map((picker) => Card(
                   child: ListTile(
                     leading: CircleAvatar(
                       backgroundImage: picker.image != null
                           ? MemoryImage(base64Decode(picker.image!))
-                          : const AssetImage('assets/images/default.jpg') as ImageProvider,
+                          : const AssetImage('assets/images/default.jpg') 
+                            as ImageProvider,
                     ),
                     title: Text('${picker.name} (${picker.manualId})'),
                     subtitle: Column(
@@ -201,18 +209,18 @@ class _PickerWidgetState extends State<PickerWidget> {
                       setState(() {
                         selectedPicker = picker.name;
                         selectedPickerId = picker.id;
-                        setState(() {
-                            selectedPickerId = picker.id;
-                          });
-                          widget.onSelected(picker.id);
+                        widget.onSelected(picker.id);
                       });
                     },
                     selected: selectedPicker == picker.name,
                     selectedTileColor: Colors.blue.shade100,
                   ),
                 )).toList(),
-        ],
-      ),
-    );
-  }
+              ],
+            ),
+          ),
+      ],
+    ),
+  );
+}
 }

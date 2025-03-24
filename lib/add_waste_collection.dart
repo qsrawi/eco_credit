@@ -87,24 +87,42 @@ class _AddWasteCollectionScreenState extends State<AddWasteCollectionScreen> {
           },
         ),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: LinearProgressIndicator(
-                value: 0.33,  // Adjust value based on current step
-                backgroundColor: Colors.grey[300],
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+body: LayoutBuilder(
+  builder: (context, constraints) {
+    return SingleChildScrollView(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          minHeight: constraints.maxHeight,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: LinearProgressIndicator(
+                  value: 0.33,
+                  backgroundColor: Colors.grey[300],
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
-            UploadPhotoSection(onImageSelected: setImage, titleText: "إضافة صور المواد القابلة للتدوير"),
-            PickerWidget(onSelected: setPickerId),
-            WasteTypeWidget(onSelected: setWasteTypeId),
-            SaleOrDonationSelector(onSelected: setCollectionTypeId),
-            _buildDescriptionInput(),
-            Padding(
+              const SizedBox(height: 20),
+              UploadPhotoSection(
+                onImageSelected: setImage,
+                titleText: "إضافة صور المواد القابلة للتدوير",
+              ),
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(context).size.height * 0.4,
+                  minHeight: 100,
+                ),
+                child: PickerWidget(onSelected: setPickerId),
+              ),
+              WasteTypeWidget(onSelected: setWasteTypeId),
+              SaleOrDonationSelector(onSelected: setCollectionTypeId),
+              _buildDescriptionInput(),
+                         Padding(
               padding: const EdgeInsets.symmetric(vertical: 20.0),
               child: ElevatedButton(
               onPressed: () async {
@@ -205,9 +223,13 @@ class _AddWasteCollectionScreenState extends State<AddWasteCollectionScreen> {
                 ),
               ),
             ),
-          ],
+            ],
+          ),
         ),
       ),
+    );
+  },
+),
     );
   }
 
