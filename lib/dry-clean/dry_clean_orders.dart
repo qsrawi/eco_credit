@@ -34,7 +34,7 @@ class _DryCleanOrdersState extends State<DryCleanOrders> {
   void _loadOrders() {
     DryCleanApiService apiService = DryCleanApiService();
     futureOrders = apiService
-        .getAllOrders(
+    .getAllOrders(
       widget.isEditable ? 1 : 2,
       _searchQuery,
       currentPage,

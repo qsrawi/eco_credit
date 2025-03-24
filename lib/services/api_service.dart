@@ -364,14 +364,14 @@ class ApiService {
     }
   }
 
-  Future<PickerMainResource> getPickers(int? wasteGroupID, int? generatorID, String? strSearch) async {
+  Future<PickerMainResource> getPickers(int? wasteGroupID, int? generatorID, String? strSearch, int? page, int? pageSize) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('authToken');
 
     final uri = Uri.parse('$baseUrl/pickers')
       .replace(queryParameters: {
-        'page': '1',
-        'pageSize': '-1',
+        'page': page?.toString() ?? '1',
+        'pageSize': pageSize?.toString() ?? '-1',
         'wasteGroupID': wasteGroupID?.toString(),
         'generatorID': generatorID?.toString(),
         'strSearch': strSearch,
@@ -388,14 +388,15 @@ class ApiService {
     }
   }
 
-  Future<GeneratorMainResource> getAllGenerators() async {
+  Future<GeneratorMainResource> getAllGenerators(String? strSearch, int? page, int? pageSize) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('authToken');
 
     final uri = Uri.parse('$baseUrl/generators')
       .replace(queryParameters: {
-        'page': '1',
-        'pageSize': '-1'
+        'page': page?.toString() ?? '1',
+        'pageSize': pageSize?.toString() ?? '-1',
+        'strSearch': strSearch,
       });
 
     final response = await http.get(uri, headers: {

@@ -31,8 +31,8 @@ class _PickerWidgetState extends State<PickerWidget> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       int? id = prefs.getInt('id'); 
       
-      final pickersList = await ApiService().getPickers(null, null, query);
-      final pickersList2 = await ApiService().getPickers(null, id, null);
+      final pickersList = await ApiService().getPickers(null, null, query, null, null);
+      final pickersList2 = await ApiService().getPickers(null, id, null, null, null);
       setState(() {
         if (query.isEmpty) {
           pickers = pickersList2.lstData;
@@ -139,7 +139,7 @@ class _PickerWidgetState extends State<PickerWidget> {
 
   Future<void> fetchPickersInDialog(void Function(void Function()) setStateDialog, String query) async {
     try {
-      final pickersList = await ApiService().getPickers(null, null, query);
+      final pickersList = await ApiService().getPickers(null, null, query, null, null);
       setStateDialog(() {  // Use the dialog's setState to ensure UI updates
         dialogPickers = pickersList.lstData;
         isLoading = false;
