@@ -65,13 +65,13 @@ class _DryCleanProfileScreenState extends State<DryCleanProfileScreen> {
                         ],
                       ),
                     ),
-                    PopupMenuItem<String>(
+                    const PopupMenuItem<String>(
                       value: 'delete_account',
                       child: Row(
                         children: <Widget>[
                           Icon(Icons.delete, color: Colors.red),
                           SizedBox(width: 8),
-                          const Text('Delete Account', 
+                          Text('Delete Account', 
                             style: TextStyle(color: Colors.red)),
                         ],
                       ),

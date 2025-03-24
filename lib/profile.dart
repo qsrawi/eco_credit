@@ -133,12 +133,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return ListView(
       children: <Widget>[
         _buildProfileHeader(profile), // Assuming this is defined elsewhere
-        WasteCollectionStatisticsCard(
+        userType != 'Admin'
+        ? WasteCollectionStatisticsCard(
           pending: profile.pending ?? 0,
           completed: profile.completed ?? 0,
           inProgress: profile.picked ?? 0,
           cancelled: profile.ignored ?? 0,
-        ),
+        )
+        : const SizedBox(width: 8),
         ListTile(
           title: const Text('الاسم الكامل'),
           subtitle: Text(profile.name ?? 'Unknown'),
