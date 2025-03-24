@@ -72,11 +72,13 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
     switch (notification.notificationTypeID) {
       case 1:
+      case 3:
         icon = Icons.error;
         color = Colors.red;
         title = 'مجموعة مرفوضة';
         break;
       case 2:
+      case 4:
         icon = Icons.timelapse;
         color = Colors.blue;
         title = 'مجموعة مقبولة';

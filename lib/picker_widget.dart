@@ -121,7 +121,13 @@ class _PickerWidgetState extends State<PickerWidget> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('إغلاق', textAlign: TextAlign.right),
+                  child:const Text(
+                'إغلاق',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
                 ),
               ],
             );

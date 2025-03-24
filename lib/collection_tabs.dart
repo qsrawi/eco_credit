@@ -3,7 +3,6 @@ import 'package:eco_credit/wast_collection_card.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-// Add this in your main app file (e.g., main.dart)
 final RouteObserver<ModalRoute> routeObserver = RouteObserver<ModalRoute>();
 
 class CollectionTabs extends StatefulWidget {
@@ -21,19 +20,24 @@ class CollectionTabs extends StatefulWidget {
 }
 
 class _CollectionTabsState extends State<CollectionTabs>
-  with SingleTickerProviderStateMixin, RouteAware {
+    with SingleTickerProviderStateMixin, RouteAware {
   late final ApiService _apiService = ApiService();
   late TabController _tabController;
   List<Tab> myTabs = [];
   List<Widget> myTabViews = [];
-  int _refreshKey = 0; // Track refresh state
-  int _previousIndex = 0; 
-  bool _isInitialized = false; // Track initialization status
+  int _refreshKey = 0;
+  int _previousIndex = 0;
+  bool _isInitialized = false;
+  int pageSize = 5;
+  late String _userType;
+
+  Map<int, int> currentPages = {1: 1, 2: 1, 3: 1, 4: 1};
+  Map<int, int> totalPagesMap = {1: 1, 2: 1, 3: 1, 4: 1};
 
   @override
   void initState() {
     super.initState();
-    _initializeTabs(); // Start async initialization
+    _initializeTabs();
   }
 
   @override
@@ -52,7 +56,6 @@ class _CollectionTabsState extends State<CollectionTabs>
     super.dispose();
   }
 
-  // Handle route visibility changes
   @override
   void didPush() {
     refreshData();
@@ -64,70 +67,67 @@ class _CollectionTabsState extends State<CollectionTabs>
   }
 
   void _handleTabSelection() {
-    // Check if the current index has changed from the previous
     if (_tabController.index != _previousIndex) {
       refreshData();
-      _previousIndex = _tabController.index; // Update previous index
+      _previousIndex = _tabController.index;
     }
   }
 
   void refreshData() {
     setState(() {
-      _refreshKey++; // Increment to refresh FutureBuilders
+      _refreshKey++;
     });
   }
 
- Future<void> _initializeTabs() async {
-    // Initialize tabs asynchronously
-    myTabs = <Tab>[
-      const Tab(text: '♻️ قيد الانتظار '),
-      const Tab(text: '♻️ تم الاستلام'),
-    ];
+  Future<void> _initializeTabs() async {
+    final prefs = await SharedPreferences.getInstance();
+    _userType = prefs.getString('role') ?? 'Generator';
 
-    myTabViews = <Widget>[
-      createListViewPending(),
-      createListViewPicked(),
-    ];
+    // Initialize pagination for all potential statuses
+    currentPages = {1: 1, 2: 1, 3: 1, 4: 1};
+    totalPagesMap = {1: 1, 2: 1, 3: 1, 4: 1};
 
-    if (widget.showCompleted) {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      String userType = prefs.getString('role') ?? 'Generator';
-
-      if (userType == 'Generator') {
-        myTabs.add(const Tab(text: '♻️ رفض'));
-        myTabViews.add(createListViewCancelled());
-      }
-
-      myTabs.add(const Tab(text: '♻️ مكتمل'));
-      myTabViews.add(createListViewCompleted());
-    }
-
-    // Initialize controller AFTER tabs are fully configured
+    // Initialize tab controller first
     _tabController = TabController(
-      length: myTabs.length,
+      length: _calculateTabCount(),
       vsync: this,
       initialIndex: widget.initialIndex,
     );
-
-    // Add listener only after controller exists
     _tabController.addListener(_handleTabSelection);
     _previousIndex = _tabController.index;
 
-    // Trigger rebuild now that everything is ready
     setState(() => _isInitialized = true);
   }
 
-  Future<ListView> createListView(int status) async {
+  int _calculateTabCount() {
+    int count = 2; // Always have Pending and Picked
+    if (widget.showCompleted) {
+      count += 1; // Completed
+      if (_userType == 'Generator') {
+        count += 1; // Cancelled
+      }
+    }
+    return count;
+  }
+
+  Future<Widget> createListView(int status) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     int userId = prefs.getInt('id') ?? 1;
     String userType = prefs.getString('role') ?? 'Generator';
 
-    final collections = await _apiService.getCollections(status, userId: userId, userType: userType);
+    int currentPage = currentPages[status] ?? 1;
+    final collections = await _apiService.getCollections(
+      status,
+      userId: userId,
+      userType: userType,
+      page: currentPage,
+      pageSize: pageSize,
+    );
 
-     if (collections.lstData.isEmpty) {
-      return ListView(
-        physics: const NeverScrollableScrollPhysics(),
-        shrinkWrap: true,
+    totalPagesMap[status] = ((collections.rowsCount ?? 0) / pageSize).ceil();
+
+    if (collections.lstData.isEmpty) {
+      return Column(
         children: [
           Center(
             child: Padding(
@@ -143,9 +143,8 @@ class _CollectionTabsState extends State<CollectionTabs>
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.inbox_outlined, 
-                          size: 64, 
-                          color: Colors.grey.withOpacity(0.5)),
+                      Icon(Icons.inbox_outlined,
+                          size: 64, color: Colors.grey.withOpacity(0.5)),
                       const SizedBox(height: 16),
                       Text(
                         'لا توجد مجموعات',
@@ -170,38 +169,85 @@ class _CollectionTabsState extends State<CollectionTabs>
               ),
             ),
           ),
+          _buildPaginationControls(status),
         ],
       );
     }
-    
-    return ListView.builder(
-      itemCount: collections.lstData.length,
-      itemBuilder: (context, index) {
-        final collection = collections.lstData[index];
-        return Container(
-              margin: EdgeInsets.all(8.0), // Adds vertical margin between cards
-              child: WasteCollectionCard(
-                role: userType,
-                collectionID: collection.collectionID,
-                statusID: collection.collectionStatusID,
-                status: collection.collectionStatusName ?? '',
-                title: collection.wasteTypeName ?? '',
-                collectionTypeName: collection.collectionTypeName ?? '',
-                name: collection.generator?.name ?? '',
-                pickerName: collection.picker?.name ?? '',
-                imageUrl: collection.image ?? 'assets/images/default.jpg',
-                collectionSize: collection.collectionSize ?? 0.00,
-                timeAgo: _formatTimeAgo(collection.createdDate),
-                description: collection.description ?? '',
-                isInvoiced: collection.isInvoiced ?? false,
-                invoiceImage: collection.invoice?.image ?? '',
-                generatorPhone: collection.generator?.phone ?? '',
-                pickerPhone: collection.picker?.phone ?? '',
-                invoiceID: collection.invoiceID ?? 1,
-              ),
-            );
-      },
+
+    return Column(
+      children: [
+        Expanded(
+          child: ListView.builder(
+            itemCount: collections.lstData.length,
+            itemBuilder: (context, index) {
+              final collection = collections.lstData[index];
+              return Container(
+                margin: const EdgeInsets.all(8.0),
+                child: WasteCollectionCard(
+                  role: userType,
+                  collectionID: collection.collectionID,
+                  statusID: collection.collectionStatusID,
+                  status: collection.collectionStatusName ?? '',
+                  title: collection.wasteTypeName ?? '',
+                  collectionTypeName: collection.collectionTypeName ?? '',
+                  name: collection.generator?.name ?? '',
+                  pickerName: collection.picker?.name ?? '',
+                  imageUrl: collection.image ?? 'assets/images/default.jpg',
+                  collectionSize: collection.collectionSize ?? 0.00,
+                  timeAgo: _formatTimeAgo(collection.createdDate),
+                  description: collection.description ?? '',
+                  isInvoiced: collection.isInvoiced ?? false,
+                  invoiceImage: collection.invoice?.image ?? '',
+                  generatorPhone: collection.generator?.phone ?? '',
+                  pickerPhone: collection.picker?.phone ?? '',
+                  invoiceID: collection.invoiceID ?? 1,
+                ),
+              );
+            },
+          ),
+        ),
+        _buildPaginationControls(status),
+      ],
     );
+  }
+
+  Widget _buildPaginationControls(int status) {
+    final currentPage = currentPages[status]!;
+    final totalPages = totalPagesMap[status]!;
+
+    if (totalPages <= 1) {
+      return const SizedBox.shrink();
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.chevron_left),
+            onPressed: currentPage > 1
+                ? () => _updatePage(status, currentPage - 1)
+                : null,
+          ),
+          Text('الصفحة $currentPage من $totalPages',
+              style: const TextStyle(fontSize: 16)),
+          IconButton(
+            icon: const Icon(Icons.chevron_right),
+            onPressed: currentPage < totalPages
+                ? () => _updatePage(status, currentPage + 1)
+                : null,
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _updatePage(int status, int newPage) {
+    setState(() {
+      currentPages[status] = newPage;
+      _refreshKey++;
+    });
   }
 
   String _formatTimeAgo(DateTime? date) {
@@ -219,86 +265,119 @@ class _CollectionTabsState extends State<CollectionTabs>
   }
 
   Widget createListViewPending() => RefreshIndicator(
-    onRefresh: () async => refreshData(),
-    child: FutureBuilder<ListView>(
-      key: ValueKey('pending$_refreshKey'), // Unique key for refresh
-      future: createListView(1),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (snapshot.hasError) {
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error_outline, size: 40),
-              Text('Error: ${snapshot.error}'),
-              ElevatedButton(
-                onPressed: () => refreshData(),
-                child: const Text('Retry'),
-              ),
-            ],
-          );
-        }
-        return snapshot.data ?? const Text('No pending collections');
-      },
-    ),
-  );
+        onRefresh: () async => refreshData(),
+        child: FutureBuilder<Widget>(
+          key: ValueKey('pending$_refreshKey'),
+          future: createListView(1),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (snapshot.hasError) {
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error_outline, size: 40),
+                  Text('Error: ${snapshot.error}'),
+                  ElevatedButton(
+                    onPressed: () => refreshData(),
+                    child: const Text('Retry'),
+                  ),
+                ],
+              );
+            }
+            return snapshot.data ?? const Text('No pending collections');
+          },
+        ),
+      );
 
-  Widget createListViewPicked() => FutureBuilder<ListView>(
-    key: ValueKey('picked$_refreshKey'),
-    future: createListView(3),
-    builder: (context, snapshot) {
-      if (snapshot.connectionState == ConnectionState.waiting) {
-        return const Center(child: CircularProgressIndicator());
-      }
-      return snapshot.data ?? const Text('No picked collections');
-    },
-  );
+  Widget createListViewPicked() => FutureBuilder<Widget>(
+        key: ValueKey('picked$_refreshKey'),
+        future: createListView(3),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          return snapshot.data ?? const Text('No picked collections');
+        },
+      );
 
-  Widget createListViewCompleted() => FutureBuilder<ListView>(
-    key: ValueKey('completed$_refreshKey'),
-    future: createListView(4),
-    builder: (context, snapshot) {
-      if (snapshot.connectionState == ConnectionState.waiting) {
-        return const Center(child: CircularProgressIndicator());
-      }
-      return snapshot.data ?? const Text('No completed collections');
-    },
-  );
+  Widget createListViewCompleted() => FutureBuilder<Widget>(
+        key: ValueKey('completed$_refreshKey'),
+        future: createListView(4),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          return snapshot.data ?? const Text('No completed collections');
+        },
+      );
 
-  Widget createListViewCancelled() => FutureBuilder<ListView>(
-    key: ValueKey('cancelled$_refreshKey'),
-    future: createListView(2),
-    builder: (context, snapshot) {
-      if (snapshot.connectionState == ConnectionState.waiting) {
-        return const Center(child: CircularProgressIndicator());
-      }
-      return snapshot.data ?? const Text('No cancelled collections');
-    },
-  );
+  Widget createListViewCancelled() => FutureBuilder<Widget>(
+        key: ValueKey('cancelled$_refreshKey'),
+        future: createListView(2),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          return snapshot.data ?? const Text('No cancelled collections');
+        },
+      );
 
   @override
   Widget build(BuildContext context) {
     if (!_isInitialized) {
       return const Center(child: CircularProgressIndicator());
     }
+    
     return Column(
       children: <Widget>[
         TabBar(
           controller: _tabController,
-          tabs: myTabs,
-          labelColor: Color(0xFF3F9A25), // Active tab text color
-          unselectedLabelColor: Colors.grey, // Unselected tab text color
-          indicatorColor: Color(0xFF3F9A25), 
+          tabs: _buildTabs(),
+          labelColor: const Color(0xFF3F9A25),
+          unselectedLabelColor: Colors.grey,
+          indicatorColor: const Color(0xFF3F9A25),
         ),
         Expanded(
           child: TabBarView(
             controller: _tabController,
-            children: myTabViews,
+            children: _buildTabViews(),
           ),
         ),
       ],
     );
+  }
+
+  List<Tab> _buildTabs() {
+    final tabs = <Tab>[
+      const Tab(text: '♻️ قيد الانتظار'),
+      const Tab(text: '♻️ تم الاستلام'),
+    ];
+
+    if (widget.showCompleted) {
+      if (_userType == 'Generator') {
+        tabs.add(const Tab(text: '♻️ رفض'));
+      }
+      tabs.add(const Tab(text: '♻️ مكتمل'));
+    }
+
+    return tabs;
+  }
+
+  List<Widget> _buildTabViews() {
+    final views = <Widget>[
+      createListViewPending(),
+      createListViewPicked(),
+    ];
+
+    if (widget.showCompleted) {
+      if (_userType == 'Generator') {
+        views.add(createListViewCancelled());
+      }
+      views.add(createListViewCompleted());
+    }
+
+    return views;
   }
 }

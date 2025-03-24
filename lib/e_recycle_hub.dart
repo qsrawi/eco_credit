@@ -35,6 +35,7 @@ class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
   List<Widget> _widgetOptions = [];
   List<BottomNavigationBarItem> _navBarItems = [];
+  // bool _isNotificationsLoaded = false;
 
   @override
   void initState() {
@@ -64,7 +65,8 @@ class _MainScreenState extends State<MainScreen> {
     }
 
     if (widget.role != "Admin") {
-      _widgetOptions.insert(3, NotificationsScreen());  // Insert at the correct position
+      // Placeholder for NotificationsScreen, will be loaded lazily
+      _widgetOptions.insert(3, Container());
       _navBarItems.insert(3, const BottomNavigationBarItem(icon: Icon(Icons.notifications), label: 'Notifications'));
     }
 
@@ -80,6 +82,11 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   void _onItemTapped(int index) {
+    if (widget.role != "Admin" && index == 3) {
+      setState(() {
+        _widgetOptions[3] = NotificationsScreen();
+      });
+    }
     setState(() {
       _selectedIndex = index;
     });

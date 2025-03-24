@@ -539,6 +539,23 @@ class ApiService {
     }
   }
 
+  Future<GeneratorResource> fetchAdminProfile(int id) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('authToken');
+
+    final uri = Uri.parse('$baseUrl/admins/$id');
+
+    final response = await http.get(uri, headers: {
+      'Authorization': 'Bearer $token', // Use the token here
+    });
+
+    if (response.statusCode == 200) {
+      return GeneratorResource.fromJson(json.decode(response.body));
+    } else {
+      throw Exception('Failed to load profile');
+    }
+  }
+
   Future<GeneratorResource> fetchGeneratorsProfile(int id) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('authToken');

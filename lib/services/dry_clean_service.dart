@@ -319,7 +319,7 @@ class DonationResource {
       size: json['size'] != null ? double.tryParse(json['size'].toString()) : null,
       locationID: json['locationID'] != null ? int.tryParse(json['locationID'].toString()) : null,
       typesNames: (json['typesNames'] as List<dynamic>?)?.map((e) => e.toString()).toList(),
-      image: json['image'],
+      image: json['image'] != null ? 'https://10.0.2.2:7254/${json['image']}' : null,
       createdSince: json['createdSince'] != null ? int.tryParse(json['createdSince'].toString()) : null,
       createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null,
       donationStatusID: json['donationStatusID'] != null ? int.tryParse(json['donationStatusID'].toString()) : null,

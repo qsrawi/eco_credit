@@ -35,6 +35,7 @@ class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
   List<Widget> _widgetOptions = [];
   List<BottomNavigationBarItem> _navBarItems = [];
+  bool _isNotificationsLoaded = false;
 
   @override
   void initState() {
@@ -45,7 +46,7 @@ class _MainScreenState extends State<MainScreen> {
   void initializeScreenOptions() {
     _widgetOptions = [
       const DryCleanHomeScreen(),
-      const DryCleanNotificationsScreen(),
+      Container(),
       const DryCleanProfileScreen(),
     ];
 
@@ -72,6 +73,19 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   void _onItemTapped(int index) {
+    if (widget.role == "DCAdmin" && index == 3 && !_isNotificationsLoaded) {
+      setState(() {
+        _widgetOptions[3] = const DryCleanNotificationsScreen();
+        _isNotificationsLoaded = true;
+      });
+    }
+
+    if (widget.role == "Donater" && index == 2 && !_isNotificationsLoaded) {
+      setState(() {
+        _widgetOptions[2] = const DryCleanNotificationsScreen();
+        _isNotificationsLoaded = true;
+      });
+    }
     setState(() {
       _selectedIndex = index;
     });

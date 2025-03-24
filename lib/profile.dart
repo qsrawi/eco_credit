@@ -6,7 +6,10 @@ import 'waste_collection_statistics_card.dart';
 import 'dart:convert'; // Needed for base64 decode
 
 class ProfileScreen extends StatefulWidget {
+  const ProfileScreen({super.key});
+
   @override
+  // ignore: library_private_types_in_public_api
   _ProfileScreenState createState() => _ProfileScreenState();
 }
 
@@ -29,12 +32,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     setState(() {  // Update state before async call
       if(userType == "Generator") {
         profile = ApiService().fetchGeneratorsProfile(userId);
+      } else if (userType == "Admin") {
+        profile = ApiService().fetchAdminProfile(userId);
       } else {
         profile = ApiService().fetchProfile(userId);
       }
     });
   }
-
 
   @override
   Widget build(BuildContext context) {

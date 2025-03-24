@@ -15,7 +15,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int notificationCount = 5; // Example count, replace with actual data source
+  int notificationCount = 0; // Example count, replace with actual data source
   late final ApiService _apiService = ApiService();
   Future<CollectionLightResource>? _futureStatistics;
 
@@ -23,6 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _fetchStatistics();
+    _fetchUnreadNotificationCount();
   }
 
   Future<void> _fetchStatistics() async {
@@ -33,6 +34,18 @@ class _HomeScreenState extends State<HomeScreen> {
     if (pickerId != null && role == "Picker") {
       setState(() {
         _futureStatistics = _apiService.statistics(pickerId);
+      });
+    }
+  }
+
+  Future<void> _fetchUnreadNotificationCount() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    int? id = prefs.getInt('id');
+    String role = prefs.getString('role') ?? '';
+    if (id != null && role != '') {
+      int fetchedCount = await _apiService.getAllUnreadNotificationCount(id, role);
+      setState(() {
+        notificationCount = fetchedCount;
       });
     }
   }

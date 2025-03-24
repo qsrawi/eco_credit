@@ -47,7 +47,7 @@ class _RegisterPageState extends State<RegisterPage> {
     {'label': 'جميع الانواع', 'value': '3'}
   ];
   final List<MultiSelectItem<dynamic>> _items = [
-    MultiSelectItem('1', 'بلاستك'),
+    MultiSelectItem('1', 'بلاستيك'),
     MultiSelectItem('2', 'ورق'),
     MultiSelectItem('3', 'كرتون'),
     MultiSelectItem('4', 'معادن'),
@@ -107,7 +107,7 @@ class _RegisterPageState extends State<RegisterPage> {
         print('Error fetching locations: $error');
         // Optional: Show error to user
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('فشل تحميل المواقع')),
+          const SnackBar(content: Text('فشل تحميل المواقع')),
         );
       });
     }
@@ -124,7 +124,7 @@ class _RegisterPageState extends State<RegisterPage> {
         child: Column(
           children: <Widget>[
             UploadPhotoSection(onImageSelected: setImage),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             widget.type == 'erecycleHUB'
               ? DropdownButtonFormField<String>(
                   decoration: const InputDecoration(
@@ -175,43 +175,49 @@ class _RegisterPageState extends State<RegisterPage> {
                   ],
                   validator: (value) => value == null ? 'يجب اختيار قسم' : null,
                 )
-              : SizedBox.shrink(),
-            SizedBox(height: 10),
+              : const SizedBox.shrink(),
+            const SizedBox(height: 10),
             TextFormField(
               controller: _nameController,
               decoration: const InputDecoration(
                 labelText: 'أسم المستخدم',
                 border: OutlineInputBorder(),
-                enabledBorder: const OutlineInputBorder(
+                enabledBorder: OutlineInputBorder(
                   borderSide: BorderSide(color: Color(0xFF3F9A25)),
                 ),
-                focusedBorder: const OutlineInputBorder(
+                focusedBorder: OutlineInputBorder(
                   borderSide: BorderSide(color: Color(0xFF3F9A25)),
                 ),
               ),
               keyboardType: TextInputType.emailAddress,
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             TextFormField(
               controller: _emailController,
               decoration: const InputDecoration(
                 labelText: 'الأيميل',
                 border: OutlineInputBorder(),
-                enabledBorder: const OutlineInputBorder(
+                enabledBorder: OutlineInputBorder(
                   borderSide: BorderSide(color: Color(0xFF3F9A25)),
                 ),
-                focusedBorder: const OutlineInputBorder(
+                focusedBorder: OutlineInputBorder(
                   borderSide: BorderSide(color: Color(0xFF3F9A25)),
                 ),
               ),
               keyboardType: TextInputType.emailAddress,
+              validator: (value) {
+                if (value == null || value.isEmpty || !value.contains('@')) {
+                  return 'Please enter a valid email address.';
+                }
+                return null; // Return null if the input is valid
+              },
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             TextFormField(
               controller: _passwordController,
               decoration: InputDecoration(
                 labelText: 'رقم السر',
-                border: OutlineInputBorder(),
+                border: const OutlineInputBorder(),
                 enabledBorder: const OutlineInputBorder(
                   borderSide: BorderSide(color: Color(0xFF3F9A25)),
                 ),
@@ -229,7 +235,7 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               obscureText: _obscureText,
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             TextFormField(
               controller: _phoneController,
               decoration: const InputDecoration(
@@ -244,7 +250,7 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               keyboardType: TextInputType.phone,
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             TextFormField(
               controller: _addressController,
               decoration: const InputDecoration(
@@ -259,7 +265,7 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               keyboardType: TextInputType.streetAddress,
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             widget.type == 'erecycleHUB'
               ? DropdownButtonFormField<String>(
                 value: _selectedLocation,
@@ -276,7 +282,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             alignment: Alignment.centerLeft,
                             child: Text(
                               option['label'] ?? 'Unknown', // Handle null case
-                              style: TextStyle(fontSize: 16),
+                              style: const TextStyle(fontSize: 16),
                             ),
                           ),
                   );
@@ -284,33 +290,33 @@ class _RegisterPageState extends State<RegisterPage> {
               decoration: InputDecoration(
                 filled: true,
                 fillColor: Colors.green.withOpacity(0.1),
-                contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(color: Colors.green),
+                  borderSide: const BorderSide(color: Colors.green),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(color: Colors.green),
+                  borderSide: const BorderSide(color: Colors.green),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(color: Colors.green, width: 2),
+                  borderSide: const BorderSide(color: Colors.green, width: 2),
                 ),
                 labelText: 'المنطقة',
-                labelStyle: TextStyle(color: Colors.black54),
+                labelStyle: const TextStyle(color: Colors.black54),
                 hintText: 'اختر المنطقة',
               ),
-              icon: Icon(Icons.arrow_drop_down, color: Colors.green),
+              icon: const Icon(Icons.arrow_drop_down, color: Colors.green),
               iconSize: 30,
-              style: TextStyle(color: Colors.black),
+              style: const TextStyle(color: Colors.black),
               dropdownColor: Colors.green[50],
               borderRadius: BorderRadius.circular(10),
               menuMaxHeight: 400, // Set a fixed maximum height for the dropdown menu
 
             )
-            : SizedBox.shrink(),
-            SizedBox(height: 10),
+            : const SizedBox.shrink(),
+            const SizedBox(height: 10),
             if ( widget.type == 'erecycleHUB' && _selectedOption != 'Generator') // Changed condition here
               Column(
                 children: [
@@ -329,7 +335,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           alignment: Alignment.centerLeft,
                           child: Text(
                             option['label'] ?? 'Unknown',
-                            style: TextStyle(fontSize: 16),
+                            style: const TextStyle(fontSize: 16),
                           ),
                         ),
                       );
@@ -337,30 +343,30 @@ class _RegisterPageState extends State<RegisterPage> {
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: Colors.green.withOpacity(0.1),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: Colors.green),
+                        borderSide: const BorderSide(color: Colors.green),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: Colors.green),
+                        borderSide: const BorderSide(color: Colors.green),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: Colors.green, width: 2),
+                        borderSide: const BorderSide(color: Colors.green, width: 2),
                       ),
                       labelText: 'نوع المجموعة المختارة',
-                      labelStyle: TextStyle(color: Colors.black54),
+                      labelStyle: const TextStyle(color: Colors.black54),
                       hintText: 'اختر نوع',
                     ),
-                    icon: Icon(Icons.arrow_drop_down, color: Colors.green),
+                    icon: const Icon(Icons.arrow_drop_down, color: Colors.green),
                     iconSize: 30,
-                    style: TextStyle(color: Colors.black),
+                    style: const TextStyle(color: Colors.black),
                     dropdownColor: Colors.green[50],
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                 ],
               ),
             if (widget.type == 'erecycleHUB' && ((_selectedOption == 'Generator') || (_selectedOption == 'Picker' && _selectedPreferdWasteGroup == '1'))) // Changed condition here
@@ -381,7 +387,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 alignment: Alignment.centerLeft,
                                 child: Text(
                                   option['label'] ?? 'Unknown', // Handle null case
-                                  style: TextStyle(fontSize: 16),
+                                  style: const TextStyle(fontSize: 16),
                                 ),
                               ),
                       );
@@ -389,30 +395,30 @@ class _RegisterPageState extends State<RegisterPage> {
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: Colors.green.withOpacity(0.1),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: Colors.green),
+                        borderSide: const BorderSide(color: Colors.green),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: Colors.green),
+                        borderSide: const BorderSide(color: Colors.green),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: Colors.green, width: 2),
+                        borderSide: const BorderSide(color: Colors.green, width: 2),
                       ),
                       labelText: 'المجموعة المختارة',
-                      labelStyle: TextStyle(color: Colors.black54),
+                      labelStyle: const TextStyle(color: Colors.black54),
                       hintText: 'اختر مجموعة',
                     ),
-                    icon: Icon(Icons.arrow_drop_down, color: Colors.green),
+                    icon: const Icon(Icons.arrow_drop_down, color: Colors.green),
                     iconSize: 30,
-                    style: TextStyle(color: Colors.black),
+                    style: const TextStyle(color: Colors.black),
                     dropdownColor: Colors.green[50],
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                 ]
               ),
             if (widget.type == 'erecycleHUB' && (_selectedOption == 'Picker' && _selectedPreferdWasteGroup == '2')) // Changed condition here
@@ -420,21 +426,21 @@ class _RegisterPageState extends State<RegisterPage> {
                 children: [
                   MultiSelectDialogField(
                     items: _items,
-                    title: Text("المجموعة المختارة"),
+                    title: const Text("المجموعة المختارة"),
                     selectedColor: Colors.green,
                     decoration: BoxDecoration(
                       color: Colors.green.withOpacity(0.1),
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
+                      borderRadius: const BorderRadius.all(Radius.circular(10)),
                       border: Border.all(
                         color: Colors.green,
                         width: 2,
                       ),
                     ),
-                    buttonIcon: Icon(
+                    buttonIcon: const Icon(
                       Icons.arrow_drop_down,
                       color: Colors.green,
                     ),
-                    buttonText: Text(
+                    buttonText: const Text(
                       "اختر مجموعة",
                       style: TextStyle(
                         color: Colors.black54,
@@ -447,7 +453,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       });
                     },
                   ),
-                  SizedBox(height: 30),
+                  const SizedBox(height: 30),
                 ]
               ),
             ElevatedButton(
@@ -570,7 +576,7 @@ class _RegisterPageState extends State<RegisterPage> {
               style: ElevatedButton.styleFrom(
                 foregroundColor: Colors.black,
                 backgroundColor: Colors.green,
-                minimumSize: Size.fromHeight(50),
+                minimumSize: const Size.fromHeight(50),
               ),
               child: const Text('إنشاء حساب'),
             ),

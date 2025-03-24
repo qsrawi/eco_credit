@@ -74,7 +74,13 @@ class dryCleanCollectionCard extends StatelessWidget {
           ),
           actions: <Widget>[
             TextButton(
-              child: const Text('إغلاق'),
+              child: const Text(
+                'إغلاق',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               onPressed: () => Navigator.of(context).pop(),
             ),
           ],
@@ -287,12 +293,12 @@ Widget getImageWidget(String image, double size) {
     );
   } else {
     // Assuming it's a base64 string after 'data:image/jpeg;base64,'
-    return Image.memory(
-      base64Decode(image),
+    return               Image.network(
+                image, // Adjust the URL accordingly
       width: size,
       height: size,
       fit: BoxFit.cover,
-    );
+              );
   }
 }
 

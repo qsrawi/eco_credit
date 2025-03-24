@@ -61,8 +61,8 @@ class WasteCollectionCard extends StatelessWidget {
             children: <Widget>[
               Image.network(
                 imageUrl, // Adjust the URL accordingly
-                height: 100,
-                width: 100,
+                height: 300,
+                width: 300,
                 fit: BoxFit.cover,
               ),
               const SizedBox(height: 20),
@@ -85,7 +85,7 @@ class WasteCollectionCard extends StatelessWidget {
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.copy, color: Colors.green), // Copy icon
+                    icon: const Icon(Icons.copy, color: const Color(0xFF3F9A25)), // Copy icon
                     onPressed: () {
                       Clipboard.setData(ClipboardData(text: generatorPhone));
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -106,7 +106,7 @@ class WasteCollectionCard extends StatelessWidget {
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.copy, color: Colors.green), // Copy icon
+                    icon: const Icon(Icons.copy, color: const Color(0xFF3F9A25)), // Copy icon
                     onPressed: () {
                       Clipboard.setData(ClipboardData(text: pickerPhone));
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -120,7 +120,13 @@ class WasteCollectionCard extends StatelessWidget {
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('إغلاق'),
+              child: const Text(
+                'إغلاق',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               onPressed: () => Navigator.of(context).pop(),
             ),
           ],
@@ -188,7 +194,7 @@ void _showInvoiceDialogView(BuildContext context, InvoiceResource invoice) {
               style: GoogleFonts.cairo(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
-                color: Colors.green[800],
+                color: const Color(0xFF3F9A25),
               ),
             ),
           ),
@@ -213,7 +219,7 @@ void _showInvoiceDialogView(BuildContext context, InvoiceResource invoice) {
                 const SizedBox(height: 20),
                 _buildInfoRow(
                   icon: Icons.person,
-                  label: 'اسم صاحب الساحة:',
+                  label: 'ساحة الخردة:',
                   value: invoice.scarpyardOwner?? '',
                 ),
                 const Divider(height: 30, thickness: 0.5),
@@ -225,14 +231,14 @@ void _showInvoiceDialogView(BuildContext context, InvoiceResource invoice) {
                 const Divider(height: 30, thickness: 0.5),
                 _buildInfoRow(
                   icon: Icons.category,
-                  label: 'نوع النفايات:',
+                  label: 'نوع المادة القابلة للتدوير:',
                   value: invoice.wasteTypeName?? '',
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () => Navigator.pop(context),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
+                    backgroundColor: const Color(0xFF3F9A25),
                     padding: const EdgeInsets.symmetric(
                       horizontal: 40, vertical: 12),
                     shape: RoundedRectangleBorder(
@@ -321,8 +327,16 @@ void _showInvoiceDialogView(BuildContext context, InvoiceResource invoice) {
       }
     },
       child: Card(
+        color: Colors.white, // Set the background color to red
+        // elevation: 5.0,
+        // shadowColor: const Color(0xFF3F9A25),
+
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10.0),
+          // side: const BorderSide(
+          //   color: Color(0xFF3F9A25),
+          //   width: 1.0,
+          // ),
         ),
         child: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -335,7 +349,7 @@ void _showInvoiceDialogView(BuildContext context, InvoiceResource invoice) {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: collectionTypeName == 'للبيع' ? Colors.red : Colors.green,
+                      color: collectionTypeName == 'للبيع' ? Colors.red : const Color(0xFF3F9A25),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
@@ -350,8 +364,10 @@ void _showInvoiceDialogView(BuildContext context, InvoiceResource invoice) {
                   Text(
                     status,
                     style: const TextStyle(
-                      // color: status == 'قيد الإنتظار' ? Colors.orange : Colors.green,
+                      // color: status == 'قيد الإنتظار' ? Colors.orange : const Color(0xFF3F9A25),
+                      color: Colors.black,
                       fontWeight: FontWeight.bold,
+                      fontSize: 12
                     ),
                   ),
                 ],
@@ -392,6 +408,7 @@ void _showInvoiceDialogView(BuildContext context, InvoiceResource invoice) {
                   'الجمع: $pickerName',
                   style: const TextStyle(
                     fontSize: 14,
+                    color: Colors.black
                   ),
                 ),
               ),
@@ -474,9 +491,9 @@ void _showInvoiceDialogView(BuildContext context, InvoiceResource invoice) {
                         backgroundColor: MaterialStateProperty.resolveWith<Color>(
                           (Set<MaterialState> states) {
                             if (states.contains(MaterialState.pressed)) {
-                              return Colors.green.withOpacity(0.9); // Light opacity when pressed
+                              return const Color(0xFF3F9A25).withOpacity(0.9); // Light opacity when pressed
                             }
-                            return Colors.green; // Default non-pressed state
+                            return const Color(0xFF3F9A25); // Default non-pressed state
                           }
                         ),
                         foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
@@ -486,13 +503,13 @@ void _showInvoiceDialogView(BuildContext context, InvoiceResource invoice) {
                         shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                           RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8), // Smaller border radius
-                            side: BorderSide(color: Colors.green, width: 0.8), // Matching border color
+                            side: BorderSide(color: const Color(0xFF3F9A25), width: 0.8), // Matching border color
                           )
                         ),
                         overlayColor: MaterialStateProperty.resolveWith<Color>(
                           (Set<MaterialState> states) {
                             if (states.contains(MaterialState.hovered) || states.contains(MaterialState.pressed)) {
-                              return Colors.green.withOpacity(0.1); // Hover and click effect color
+                              return const Color(0xFF3F9A25).withOpacity(0.1); // Hover and click effect color
                             }
                             return Colors.transparent; // Default is transparent
                           }
@@ -517,9 +534,9 @@ void _showInvoiceDialogView(BuildContext context, InvoiceResource invoice) {
                           backgroundColor: MaterialStateProperty.resolveWith<Color>(
                             (Set<MaterialState> states) {
                               if (states.contains(MaterialState.pressed)) {
-                                return Colors.green.withOpacity(0.9); // Light opacity when pressed
+                                return const Color(0xFF3F9A25).withOpacity(0.9); // Light opacity when pressed
                               }
-                              return Colors.green; // Default non-pressed state
+                              return const Color(0xFF3F9A25); // Default non-pressed state
                             }
                           ),
                           foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
@@ -529,13 +546,13 @@ void _showInvoiceDialogView(BuildContext context, InvoiceResource invoice) {
                           shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                             RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8), // Smaller border radius
-                              side: BorderSide(color: Colors.green, width: 0.8), // Matching border color
+                              side: BorderSide(color: const Color(0xFF3F9A25), width: 0.8), // Matching border color
                             )
                           ),
                           overlayColor: MaterialStateProperty.resolveWith<Color>(
                             (Set<MaterialState> states) {
                               if (states.contains(MaterialState.hovered) || states.contains(MaterialState.pressed)) {
-                                return Colors.green.withOpacity(0.1); // Hover and click effect color
+                                return const Color(0xFF3F9A25).withOpacity(0.1); // Hover and click effect color
                               }
                               return Colors.transparent; // Default is transparent
                             }
@@ -561,9 +578,9 @@ void _showInvoiceDialogView(BuildContext context, InvoiceResource invoice) {
                           backgroundColor: MaterialStateProperty.resolveWith<Color>(
                             (Set<MaterialState> states) {
                               if (states.contains(MaterialState.pressed)) {
-                                return Colors.green.withOpacity(0.9); // Light opacity when pressed
+                                return const Color(0xFF3F9A25).withOpacity(0.9); // Light opacity when pressed
                               }
-                              return Colors.green; // Default non-pressed state
+                              return const Color(0xFF3F9A25); // Default non-pressed state
                             }
                           ),
                           foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
@@ -573,13 +590,13 @@ void _showInvoiceDialogView(BuildContext context, InvoiceResource invoice) {
                           shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                             RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8), // Smaller border radius
-                              side: BorderSide(color: Colors.green, width: 0.8), // Matching border color
+                              side: BorderSide(color: const Color(0xFF3F9A25), width: 0.8), // Matching border color
                             )
                           ),
                           overlayColor: MaterialStateProperty.resolveWith<Color>(
                             (Set<MaterialState> states) {
                               if (states.contains(MaterialState.hovered) || states.contains(MaterialState.pressed)) {
-                                return Colors.green.withOpacity(0.1); // Hover and click effect color
+                                return const Color(0xFF3F9A25).withOpacity(0.1); // Hover and click effect color
                               }
                               return Colors.transparent; // Default is transparent
                             }
@@ -665,9 +682,9 @@ class _SizeInputButtonState extends State<_SizeInputButton> {
               (Set<MaterialState> states) {
                 if (_sizeController.text.isEmpty) return Colors.grey;
                 if (states.contains(MaterialState.pressed)) {
-                  return Colors.green.withOpacity(0.9);
+                  return const Color(0xFF3F9A25).withOpacity(0.9);
                 }
-                return Colors.green;
+                return const Color(0xFF3F9A25);
               },
             ),
             // ... rest of the style
@@ -790,7 +807,7 @@ void _showInvoiceDialog(int collectionID, BuildContext context) {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green,
+              backgroundColor: const Color(0xFF3F9A25),
               padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
             ),
             onPressed: () async {
