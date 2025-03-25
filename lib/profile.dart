@@ -51,14 +51,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
             IconButton(
               icon: const Icon(Icons.settings),
               onPressed: () {
+                final RenderBox overlay = 
+                    Overlay.of(context).context.findRenderObject() as RenderBox;
+                final RenderBox button = context.findRenderObject() as RenderBox;
+                final RelativeRect position = RelativeRect.fromRect(
+                  Rect.fromPoints(
+                    button.localToGlobal(Offset.zero, ancestor: overlay),
+                    button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay),
+                  ),
+                  Offset.zero & overlay.size,
+                );
+
                 showMenu(
                   context: context,
-                  position: RelativeRect.fromLTRB(
-                    MediaQuery.of(context).size.width,
-                    100.0,
-                    0.0,
-                    0.0
-                  ), 
+                  position: position,
                   items: [
                     const PopupMenuItem<String>(
                       value: 'logout',

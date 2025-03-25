@@ -38,25 +38,13 @@ class UserCard extends StatelessWidget {
           child: Row(
             textDirection: TextDirection.rtl,
             children: [
+              CircleAvatar(
+                radius: 35,
+                backgroundImage: imageUrl != 'assets/images/default.jpg' 
+                  ? MemoryImage(base64Decode(imageUrl)) as ImageProvider<Object>
+                  : const AssetImage('assets/images/default.jpg') as ImageProvider<Object>,
+              ),
 
-            CircleAvatar(
-              radius: 35,
-              backgroundImage: imageUrl != 'assets/images/default.jpg' 
-                ? MemoryImage(base64Decode(imageUrl)) as ImageProvider<Object>
-                : const AssetImage('assets/images/default.jpg') as ImageProvider<Object>,
-            ),
-              // Image section
-              // Container(
-              //   width: 80,
-              //   height: 80,
-              //   decoration: BoxDecoration(
-              //     borderRadius: BorderRadius.circular(8),
-              //     image: DecorationImage(
-              //       image: NetworkImage(imageUrl),
-              //       fit: BoxFit.cover,
-              //     ),
-              //   ),
-              // ),
               const SizedBox(width: 16),
 
               // Details section

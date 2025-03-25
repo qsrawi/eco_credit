@@ -43,17 +43,23 @@ class _DryCleanProfileScreenState extends State<DryCleanProfileScreen> {
         appBar: AppBar(
           title: const Text('ملف شخصي'),
           actions: [
-            IconButton(
+          IconButton(
               icon: const Icon(Icons.settings),
               onPressed: () {
+                final RenderBox overlay = 
+                    Overlay.of(context).context.findRenderObject() as RenderBox;
+                final RenderBox button = context.findRenderObject() as RenderBox;
+                final RelativeRect position = RelativeRect.fromRect(
+                  Rect.fromPoints(
+                    button.localToGlobal(Offset.zero, ancestor: overlay),
+                    button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay),
+                  ),
+                  Offset.zero & overlay.size,
+                );
+
                 showMenu(
                   context: context,
-                  position: RelativeRect.fromLTRB(
-                    MediaQuery.of(context).size.width,
-                    100.0,
-                    0.0,
-                    0.0
-                  ), 
+                  position: position,
                   items: [
                     const PopupMenuItem<String>(
                       value: 'logout',
@@ -61,7 +67,7 @@ class _DryCleanProfileScreenState extends State<DryCleanProfileScreen> {
                         children: <Widget>[
                           Icon(Icons.exit_to_app),
                           SizedBox(width: 8),
-                          Text('Logout')
+                          Text('تسجيل الخروج')
                         ],
                       ),
                     ),
@@ -71,7 +77,7 @@ class _DryCleanProfileScreenState extends State<DryCleanProfileScreen> {
                         children: <Widget>[
                           Icon(Icons.delete, color: Colors.red),
                           SizedBox(width: 8),
-                          Text('Delete Account', 
+                          Text('حذف الحساب', 
                             style: TextStyle(color: Colors.red)),
                         ],
                       ),

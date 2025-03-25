@@ -155,7 +155,7 @@ body: LayoutBuilder(
                   return;
                 }
 
-                _wasteTypeId ??= prefs.getString('wasteTypeID') as int?;
+                _wasteTypeId ??= prefs.getInt('wasteTypeID') ?? 1;
 
                 Map<String, dynamic> collectionData = {
                   'GeneratorID': userId,
