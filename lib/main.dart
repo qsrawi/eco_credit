@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:eco_credit/login/login.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -13,8 +12,15 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      // Make this the ONLY MaterialApp in your app
       home: HomePage(),
-      debugShowCheckedModeBanner: false,  // Add this line to remove the debug banner
+      debugShowCheckedModeBanner: false,
+      // Add named routes for all screens
+      routes: {
+        '/login': (context) => LoginPage(type: ModalRoute.of(context)!.settings.arguments as String),
+        // '/dry_clean': (context) => DryClean(),
+        // '/erecycleHUB': (context) => ERecycleHub(),
+      },
     );
   }
 }

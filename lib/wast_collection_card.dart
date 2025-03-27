@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 import 'package:eco_credit/e_recycle_hub.dart';
 import 'package:eco_credit/picker_widget.dart';
@@ -284,20 +283,15 @@ void _showInvoiceDialogView(BuildContext context, InvoiceResource invoice) {
   );
 }
 
-    ImageProvider<Object> _getImageProvider(String? invoiceImage) {
-  if (invoiceImage != null && invoiceImage.isNotEmpty) {
-    try {
-      final cleanBase64 = invoiceImage.split(',').last;
-      return MemoryImage(
-        base64Decode(cleanBase64),
+  ImageProvider<Object> _getImageProvider(String? invoiceImage) {
+    if (invoiceImage != null && invoiceImage.isNotEmpty) {
+      return NetworkImage(
+        invoiceImage,
         scale: 0.5,
-      ) as ImageProvider<Object>;
-    } catch (e) {
-      print('Error decoding base64: $e');
+      );
     }
+    return const AssetImage('assets/images/default.jpg');
   }
-  return const AssetImage('assets/images/default.jpg') as ImageProvider<Object>;
-}
 
     Widget _buildInfoRow({required IconData icon, required String label, required String value}) {
       return Row(

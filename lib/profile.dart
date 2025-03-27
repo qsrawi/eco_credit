@@ -1,3 +1,4 @@
+import 'package:eco_credit/login/login.dart';
 import 'package:eco_credit/main.dart';
 import 'package:eco_credit/services/api_service.dart';
 import 'package:flutter/material.dart';
@@ -231,9 +232,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
 void _logout(BuildContext context) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
-  await prefs.clear(); // This clears all data in SharedPreferences
+  await prefs.clear();
   Navigator.of(context).pushAndRemoveUntil(
-    MaterialPageRoute(builder: (context) => MyApp()), // Navigates back to the initial route
+    MaterialPageRoute(builder: (context) => LoginPage(type: 'erecycleHUB')), // Replace with your login screen
     (Route<dynamic> route) => false,
   );
 }

@@ -6,8 +6,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class DryCleanApiService {
   
-  static const String baseUrl = 'https://10.0.2.2:7254/api';
-  //static const String baseUrl = 'https://pos1.io/ecoRide/api';
+  //static const String baseUrl = 'https://10.0.2.2:7254/api';
+  static const String baseUrl = 'https://pos1.io/ecoRide/api';
 
   static Future<http.Response?> createDonation(Map<String, dynamic> collectionData, File? imageFile) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -185,7 +185,7 @@ class DryCleanApiService {
     });
 
     try {
-      var response = await http.put(url, headers: headers, body: body);
+      var response = await http.post(url, headers: headers, body: body);
 
       if (response.statusCode == 200) {
         print('Update successful');
@@ -245,7 +245,7 @@ class DryCleanApiService {
     });
 
     try {
-      var response = await http.put(url, headers: headers, body: body);
+      var response = await http.post(url, headers: headers, body: body);
 
       if (response.statusCode == 200) {
         print('Created successful');

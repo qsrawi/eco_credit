@@ -14,10 +14,8 @@ class ERecycleHub extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: MainScreen(id: id, role: role),
-      debugShowCheckedModeBanner: false,  // Add this line to remove the debug banner
-    );
+    // Remove MaterialApp wrapper
+    return MainScreen(id: id, role: role);
   }
 }
 
@@ -64,10 +62,14 @@ class _MainScreenState extends State<MainScreen> {
       _navBarItems.insert(2, const BottomNavigationBarItem(icon: Icon(Icons.add), label: 'Add'));
     }
 
-    if (widget.role != "Admin") {
-      // Placeholder for NotificationsScreen, will be loaded lazily
-      _widgetOptions.insert(3, Container());
+    if (widget.role == "Generator") {
+      _widgetOptions.insert(3, NotificationsScreen());
       _navBarItems.insert(3, const BottomNavigationBarItem(icon: Icon(Icons.notifications), label: 'Notifications'));
+    }
+
+    if (widget.role == "Picker") {
+      _widgetOptions.insert(2, NotificationsScreen());
+      _navBarItems.insert(2, const BottomNavigationBarItem(icon: Icon(Icons.notifications), label: 'Notifications'));
     }
 
     if (widget.role == "Admin") {
@@ -82,9 +84,14 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   void _onItemTapped(int index) {
-    if (widget.role != "Admin" && index == 3) {
+    if (widget.role == "Generator" && index == 3) {
       setState(() {
         _widgetOptions[3] = NotificationsScreen();
+      });
+    }
+    if (widget.role == "Picker" && index == 2) {
+      setState(() {
+        _widgetOptions[2] = NotificationsScreen();
       });
     }
     setState(() {

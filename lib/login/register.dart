@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:eco_credit/login/login.dart';
 import 'package:eco_credit/services/api_service.dart';
@@ -113,476 +114,507 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 
-  @override
+    @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('إنشاء حساب'),
+        backgroundColor: Color(0xFFE8F5E9),
+        elevation: 0,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Color(0xFFE8F5E9), Color(0xFFC8E6C9)],
+            ),
+          ),
+        ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: <Widget>[
-            UploadPhotoSection(onImageSelected: setImage),
-            const SizedBox(height: 10),
-            widget.type == 'erecycleHUB'
-              ? DropdownButtonFormField<String>(
-                  decoration: const InputDecoration(
-                    labelText: 'اختر قسم',
-                    border: OutlineInputBorder(),
-                    enabledBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(color: Color(0xFF3F9A25)),
-                    ),
-                    focusedBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(color: Color(0xFF3F9A25)),
-                    ),
-                    hintText: 'اختر من القائمة',
-                  ),
-                  value: _selectedOption,
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      _selectedOption = newValue;
-                      if (newValue == 'Generator') {
-                        _selectedPreferdWasteGroup = null;
-                      }
-                    });
-                  },
-                  items: [
-                    DropdownMenuItem<String>(
-                      value: null,
-                      child: Container(
-                        height: 40,
-                        alignment: Alignment.centerLeft,
-                        child: const Text(
-                          'اختر من القائمة',
-                          style: TextStyle(color: Colors.grey),
-                        ),
-                      ),
-                    ),
-                    ..._userOptions.map<DropdownMenuItem<String>>((Map<String, String> option) {
-                      return DropdownMenuItem<String>(
-                        value: option['value'],
-                        child: Container(
-                          height: 40,
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            option['label'] ?? 'غير معروف',
-                            style: const TextStyle(fontSize: 16),
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ],
-                  validator: (value) => value == null ? 'يجب اختيار قسم' : null,
-                )
-              : const SizedBox.shrink(),
-            const SizedBox(height: 10),
-            TextFormField(
-              controller: _nameController,
-              decoration: const InputDecoration(
-                labelText: 'أسم المستخدم',
-                border: OutlineInputBorder(),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Color(0xFF3F9A25)),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Color(0xFF3F9A25)),
-                ),
-              ),
-              keyboardType: TextInputType.emailAddress,
-            ),
-            const SizedBox(height: 10),
-            TextFormField(
-              controller: _emailController,
-              decoration: const InputDecoration(
-                labelText: 'الأيميل',
-                border: OutlineInputBorder(),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Color(0xFF3F9A25)),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Color(0xFF3F9A25)),
-                ),
-              ),
-              keyboardType: TextInputType.emailAddress,
-              validator: (value) {
-                if (value == null || value.isEmpty || !value.contains('@')) {
-                  return 'Please enter a valid email address.';
-                }
-                return null; // Return null if the input is valid
-              },
-            ),
-            const SizedBox(height: 10),
-            TextFormField(
-              controller: _passwordController,
-              decoration: InputDecoration(
-                labelText: 'رقم السر',
-                border: const OutlineInputBorder(),
-                enabledBorder: const OutlineInputBorder(
-                  borderSide: BorderSide(color: Color(0xFF3F9A25)),
-                ),
-                focusedBorder: const OutlineInputBorder(
-                  borderSide: BorderSide(color: Color(0xFF3F9A25)),
-                ),
-                suffixIcon: IconButton(
-                  icon: Icon(_obscureText ? Icons.visibility_off : Icons.visibility),
-                  onPressed: () {
-                    setState(() {
-                      _obscureText = !_obscureText;
-                    });
-                  },  // Toggle password visibility
-                ),
-              ),
-              obscureText: _obscureText,
-            ),
-            const SizedBox(height: 10),
-            TextFormField(
-              controller: _phoneController,
-              decoration: const InputDecoration(
-                labelText: 'رقم الهاتف',
-                border: OutlineInputBorder(),
-                enabledBorder: const OutlineInputBorder(
-                  borderSide: BorderSide(color: Color(0xFF3F9A25)),
-                ),
-                focusedBorder: const OutlineInputBorder(
-                  borderSide: BorderSide(color: Color(0xFF3F9A25)),
-                ),
-              ),
-              keyboardType: TextInputType.phone,
-            ),
-            const SizedBox(height: 10),
-            TextFormField(
-              controller: _addressController,
-              decoration: const InputDecoration(
-                labelText: 'العنوان',
-                border: OutlineInputBorder(),
-                enabledBorder: const OutlineInputBorder(
-                  borderSide: BorderSide(color: Color(0xFF3F9A25)),
-                ),
-                focusedBorder: const OutlineInputBorder(
-                  borderSide: BorderSide(color: Color(0xFF3F9A25)),
-                ),
-              ),
-              keyboardType: TextInputType.streetAddress,
-            ),
-            const SizedBox(height: 10),
-            widget.type == 'erecycleHUB'
-              ? DropdownButtonFormField<String>(
-                value: _selectedLocation,
-                onChanged: (String? newValue) {
-                  setState(() {
-                    _selectedLocation = newValue;
-                  });
-                },
-                items: _locationOptions.map<DropdownMenuItem<String>>((Map<String, String> option) {
-                  return DropdownMenuItem<String>(
-                    value: option['value'],
-                    child: Container(
-                            height: 40, // Set a fixed height for each dropdown item
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              option['label'] ?? 'Unknown', // Handle null case
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                          ),
-                  );
-                }).toList(),
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: Colors.green.withOpacity(0.1),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(color: Colors.green),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(color: Colors.green),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(color: Colors.green, width: 2),
-                ),
-                labelText: 'المنطقة',
-                labelStyle: const TextStyle(color: Colors.black54),
-                hintText: 'اختر المنطقة',
-              ),
-              icon: const Icon(Icons.arrow_drop_down, color: Colors.green),
-              iconSize: 30,
-              style: const TextStyle(color: Colors.black),
-              dropdownColor: Colors.green[50],
-              borderRadius: BorderRadius.circular(10),
-              menuMaxHeight: 400, // Set a fixed maximum height for the dropdown menu
-
-            )
-            : const SizedBox.shrink(),
-            const SizedBox(height: 10),
-            if ( widget.type == 'erecycleHUB' && _selectedOption != 'Generator') // Changed condition here
-              Column(
-                children: [
-                  DropdownButtonFormField<String>(
-                    value: _selectedPreferdWasteGroup,  // Make sure this variable is declared in your state
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        _selectedPreferdWasteGroup = newValue;  // Changed to update the correct variable
-                      });
-                    },
-                    items: _preferdWasteGroupOptions.map<DropdownMenuItem<String>>((Map<String, String> option) {
-                      return DropdownMenuItem<String>(
-                        value: option['value'],
-                        child: Container(
-                          height: 40,
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            option['label'] ?? 'Unknown',
-                            style: const TextStyle(fontSize: 16),
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Colors.green.withOpacity(0.1),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: const BorderSide(color: Colors.green),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: const BorderSide(color: Colors.green),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: const BorderSide(color: Colors.green, width: 2),
-                      ),
-                      labelText: 'نوع المجموعة المختارة',
-                      labelStyle: const TextStyle(color: Colors.black54),
-                      hintText: 'اختر نوع',
-                    ),
-                    icon: const Icon(Icons.arrow_drop_down, color: Colors.green),
-                    iconSize: 30,
-                    style: const TextStyle(color: Colors.black),
-                    dropdownColor: Colors.green[50],
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  const SizedBox(height: 10),
-                ],
-              ),
-            if (widget.type == 'erecycleHUB' && ((_selectedOption == 'Generator') || (_selectedOption == 'Picker' && _selectedPreferdWasteGroup == '1'))) // Changed condition here
-              Column(
-                children: [
-                  DropdownButtonFormField<String>(
-                    value: _selectedWasteType,
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        _selectedWasteType = newValue;
-                      });
-                    },
-                    items: _typesOptions.map<DropdownMenuItem<String>>((Map<String, String> option) {
-                      return DropdownMenuItem<String>(
-                        value: option['value'],
-                        child: Container(
-                                height: 40, // Set a fixed height for each dropdown item
-                                alignment: Alignment.centerLeft,
-                                child: Text(
-                                  option['label'] ?? 'Unknown', // Handle null case
-                                  style: const TextStyle(fontSize: 16),
-                                ),
-                              ),
-                      );
-                    }).toList(),
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Colors.green.withOpacity(0.1),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: const BorderSide(color: Colors.green),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: const BorderSide(color: Colors.green),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: const BorderSide(color: Colors.green, width: 2),
-                      ),
-                      labelText: 'المجموعة المختارة',
-                      labelStyle: const TextStyle(color: Colors.black54),
-                      hintText: 'اختر مجموعة',
-                    ),
-                    icon: const Icon(Icons.arrow_drop_down, color: Colors.green),
-                    iconSize: 30,
-                    style: const TextStyle(color: Colors.black),
-                    dropdownColor: Colors.green[50],
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  const SizedBox(height: 10),
-                ]
-              ),
-            if (widget.type == 'erecycleHUB' && (_selectedOption == 'Picker' && _selectedPreferdWasteGroup == '2')) // Changed condition here
-              Column(
-                children: [
-                  MultiSelectDialogField(
-                    items: _items,
-                    title: const Text("المجموعة المختارة"),
-                    selectedColor: Colors.green,
-                    decoration: BoxDecoration(
-                      color: Colors.green.withOpacity(0.1),
-                      borderRadius: const BorderRadius.all(Radius.circular(10)),
-                      border: Border.all(
-                        color: Colors.green,
-                        width: 2,
-                      ),
-                    ),
-                    buttonIcon: const Icon(
-                      Icons.arrow_drop_down,
-                      color: Colors.green,
-                    ),
-                    buttonText: const Text(
-                      "اختر مجموعة",
-                      style: TextStyle(
-                        color: Colors.black54,
-                        fontSize: 16
-                      )
-                    ),
-                    onConfirm: (results) {
-                      setState(() {
-                        _selectedValues = results;
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 30),
-                ]
-              ),
-            ElevatedButton(
-              onPressed: () async {
-                if (_emailController.text.isEmpty) {
-                  print('No Eco Champion');
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('الايميل غير موجود'),
-                      backgroundColor: Colors.red, // Red for error
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                  return;
-                }
-
-                if (_passwordController.text.isEmpty) {
-                  print('No Eco Champion');
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('رقم السر غير موجود'),
-                      backgroundColor: Colors.red, // Red for error
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                  return;
-                }
-
-                if (_phoneController.text.isEmpty) {
-                  print('No Eco Champion');
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('الهاتف غير موجود'),
-                      backgroundColor: Colors.red, // Red for error
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                  return;
-                }
-
-                if (_nameController.text.isEmpty) {
-                  print('No Eco Champion');
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('اسم المتسخدم غير موجود'),
-                      backgroundColor: Colors.red, // Red for error
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                  return;
-                }
-
-                Map<String, dynamic> collectionData = {
-                  'Name': _nameController.text,
-                  'Password': _passwordController.text,
-                  'Email': _emailController.text,
-                  'Phone': _phoneController.text,
-                  'WasteTypeID': _selectedWasteType,
-                  'LocationID': _selectedLocation,
-                  'Address': _addressController.text,
-                  'PreferdWasteGroupID': _selectedPreferdWasteGroup,
-                  'WasteGroupIDs': _selectedPreferdWasteGroup == '1' ? [_selectedWasteType] : _selectedValues,
-                };
-
-                widget.type == "dry_clean"
-                ? _selectedOption = "Donater"
-                : _selectedOption;
-
-                var response = await ApiService.register(collectionData, _collectionImage, _selectedOption.toString());
-                if (response != null && response.statusCode == 200) {
-                  print('Collection created successfully!');
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Row(
-                        children: [
-                          Icon(Icons.check_circle, color: Colors.white), // Success icon
-                          SizedBox(width: 8), // Spacing between icon and text
-                          Text('تم إنشاء الحساب بنجاح'),
-                        ],
-                      ),
-                      backgroundColor: Colors.green, // Green for success
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-
-                  // Clear the form data
-                  _nameController.clear();
-                  _passwordController.clear();
-                  _emailController.clear();
-                  _phoneController.clear();
-                  _addressController.clear();
-                  _collectionImage = null;
-                  _selectedLocation = null;
-                  _selectedWasteType = null;
-                  _selectedOption = null;
-
-                  // Navigate to HomeScreen
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (context) => LoginPage(type: widget.type)),
-                    (route) => false, // Remove all previous routes
-                  );
-                } else {
-                  print('Failed to submit collection. Status code: ${response?.statusCode}');
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Row(
-                        children: [
-                          Icon(Icons.error, color: Colors.white), // Error icon
-                          SizedBox(width: 8), // Spacing between icon and text
-                          Text('Failed to add collection!'),
-                        ],
-                      ),
-                      backgroundColor: Colors.red, // Red for error
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.black,
-                backgroundColor: Colors.green,
-                minimumSize: const Size.fromHeight(50),
-              ),
-              child: const Text('إنشاء حساب'),
-            ),
-          ],
+      body: Container(
+        height: MediaQuery.of(context).size.height,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFFE8F5E9), Color(0xFFC8E6C9)],
+          ),
+        ),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            children: <Widget>[
+              SizedBox(height: MediaQuery.of(context).padding.top + 20),
+              UploadPhotoSection(onImageSelected: setImage),
+              SizedBox(height: 20),
+              // Update all form fields with new styling
+              _buildRoleDropdown(),
+              SizedBox(height: 15),
+              _buildTextField(_nameController, 'أسم المستخدم', Icons.person),
+              SizedBox(height: 15),
+              _buildTextField(_emailController, 'الأيميل', Icons.email),
+              SizedBox(height: 15),
+              _buildPasswordField(),
+              SizedBox(height: 15),
+              _buildTextField(_phoneController, 'رقم الهاتف', Icons.phone),
+              SizedBox(height: 15),
+              _buildTextField(_addressController, 'العنوان', Icons.location_on),
+              SizedBox(height: 15),
+              if (widget.type == 'erecycleHUB') _buildLocationDropdown(),
+              SizedBox(height: 15),
+              // Add other conditional fields with updated styling
+              _buildWasteTypeSection(),
+              SizedBox(height: 30),
+              _buildRegisterButton(),
+            ],
+          ),
         ),
       ),
     );
   }
+
+  Widget _buildTextField(TextEditingController controller, String label, IconData icon) {
+    return TextFormField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon, color: Color(0xFF2E7D32)),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: BorderSide.none,
+        ),
+        filled: true,
+        fillColor: Colors.white.withOpacity(0.9),
+        contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+      ),
+    );
+  }
+
+  Widget _buildPasswordField() {
+    return TextFormField(
+      controller: _passwordController,
+      obscureText: _obscureText,
+      decoration: InputDecoration(
+        labelText: 'رقم السر',
+        prefixIcon: Icon(Icons.lock, color: Color(0xFF2E7D32)),
+        suffixIcon: IconButton(
+          icon: Icon(_obscureText ? Icons.visibility_off : Icons.visibility,
+            color: Color(0xFF2E7D32)),
+          onPressed: () => setState(() => _obscureText = !_obscureText),
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: BorderSide.none,
+        ),
+        filled: true,
+        fillColor: Colors.white.withOpacity(0.9),
+        contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+      ),
+    );
+  }
+
+  Widget _buildRoleDropdown() {
+    return widget.type == 'erecycleHUB'
+        ? DropdownButtonFormField<String>(
+            decoration: _dropdownDecoration('اختر قسم'),
+            value: _selectedOption,
+            onChanged: (String? newValue) => setState(() => _selectedOption = newValue),
+            items: _userOptions.map((option) => DropdownMenuItem<String>(
+              value: option['value'],
+              child: Text(option['label']!,
+                style: GoogleFonts.cairo(fontWeight: FontWeight.w500)),
+            )).toList(),
+          )
+        : SizedBox.shrink();
+  }
+
+  Widget _buildLocationDropdown() {
+    return DropdownButtonFormField<String>(
+      decoration: _dropdownDecoration('المنطقة'),
+      value: _selectedLocation,
+      onChanged: (String? newValue) => setState(() => _selectedLocation = newValue),
+      items: _locationOptions.map((option) => DropdownMenuItem<String>(
+        value: option['value'],
+        child: Text(option['label']!,
+          style: GoogleFonts.cairo(fontWeight: FontWeight.w500)),
+      )).toList(),
+    );
+  }
+
+  InputDecoration _dropdownDecoration(String label) {
+    return InputDecoration(
+      labelText: label,
+      prefixIcon: Icon(Icons.arrow_drop_down, color: Color(0xFF2E7D32)),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(15),
+        borderSide: BorderSide.none,
+      ),
+      filled: true,
+      fillColor: Colors.white.withOpacity(0.9),
+      contentPadding: EdgeInsets.symmetric(vertical: 2, horizontal: 20),
+    );
+  }
+
+  Widget _buildRegisterButton() {
+    return Material(
+      borderRadius: BorderRadius.circular(15),
+      elevation: 4,
+      child: InkWell(
+        onTap: _handleRegistration,
+        borderRadius: BorderRadius.circular(15),
+        child: Container(
+          width: double.infinity,
+          padding: EdgeInsets.symmetric(vertical: 15),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(15),
+            gradient: LinearGradient(
+              colors: [Color(0xFF43A047), Color(0xFF2E7D32)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.person_add, color: Colors.white),
+              SizedBox(width: 10),
+              Text('إنشاء حساب',
+                style: GoogleFonts.cairo(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _handleRegistration() async {
+    if (_emailController.text.isEmpty || 
+        !_emailController.text.contains('@') || 
+        !_emailController.text.contains('.') ||
+        _emailController.text.indexOf('@') > _emailController.text.lastIndexOf('.')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Row(
+            children: [
+              Icon(Icons.error, color: Colors.white),
+              SizedBox(width: 8),
+              Text('بريد إلكتروني غير صحيح'),
+            ],
+          ),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 3),
+          action: SnackBarAction(
+            label: 'مثال',
+            textColor: Colors.white,
+            onPressed: () {
+              _emailController.text = 'example@domain.com';
+            },
+          ),
+        ),
+      );
+      return;
+    }
+
+    if (_passwordController.text.isEmpty) {
+      print('No Eco Champion');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('رقم السر غير موجود'),
+          backgroundColor: Colors.red, // Red for error
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    final password = _passwordController.text;
+    if (!_isPasswordStrong(password)) {
+      _showPasswordRequirementsDialog();
+      return;
+    }
+
+    if (_phoneController.text.isEmpty) {
+      print('No Eco Champion');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('الهاتف غير موجود'),
+          backgroundColor: Colors.red, // Red for error
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    final phoneDigits = _phoneController.text.replaceAll(RegExp(r'[^0-9]'), '');
+    if (phoneDigits.length < 10) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Row(
+            children: [
+              Icon(Icons.error, color: Colors.white),
+              SizedBox(width: 8),
+              Text('رقم الهاتف يجب أن يحتوي على 10 أرقام على الأقل'),
+            ],
+          ),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    if (_nameController.text.isEmpty) {
+      print('No Eco Champion');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('اسم المتسخدم غير موجود'),
+          backgroundColor: Colors.red, // Red for error
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    final nameParts = _nameController.text.trim().split(' ');
+    if (nameParts.length < 2) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Row(
+            children: [
+              Icon(Icons.error, color: Colors.white),
+              SizedBox(width: 8),
+              Text('الاسم يجب أن يحتوي على كلمتين على الأقل'),
+            ],
+          ),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    Map<String, dynamic> collectionData = {
+      'Name': _nameController.text,
+      'Password': _passwordController.text,
+      'Email': _emailController.text,
+      'Phone': _phoneController.text,
+      'WasteTypeID': _selectedWasteType,
+      'LocationID': _selectedLocation,
+      'Address': _addressController.text,
+      'PreferdWasteGroupID': _selectedPreferdWasteGroup,
+      'WasteGroupIDs': _selectedPreferdWasteGroup == '1' ? [_selectedWasteType] : _selectedValues,
+    };
+
+    widget.type == "dry_clean"
+    ? _selectedOption = "Donater"
+    : _selectedOption;
+
+    var response = await ApiService.register(collectionData, _collectionImage, _selectedOption.toString());
+    if (response != null && response.statusCode == 200) {
+      print('Collection created successfully!');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Row(
+            children: [
+              Icon(Icons.check_circle, color: Colors.white), // Success icon
+              SizedBox(width: 8), // Spacing between icon and text
+              Text('تم إنشاء الحساب بنجاح'),
+            ],
+          ),
+          backgroundColor: Colors.green, // Green for success
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+
+      // Clear the form data
+      _nameController.clear();
+      _passwordController.clear();
+      _emailController.clear();
+      _phoneController.clear();
+      _addressController.clear();
+      _collectionImage = null;
+      _selectedLocation = null;
+      _selectedWasteType = null;
+      _selectedOption = null;
+
+      // Navigate to HomeScreen
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => LoginPage(type: widget.type)),
+        (route) => false, // Remove all previous routes
+      );
+    } else {
+      print('Failed to submit collection. Status code: ${response?.statusCode}');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Row(
+            children: [
+              Icon(Icons.error, color: Colors.white), // Error icon
+              SizedBox(width: 8), // Spacing between icon and text
+              Text('Failed to add collection!'),
+            ],
+          ),
+          backgroundColor: Colors.red, // Red for error
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  Widget _buildWasteTypeSection() {
+    return Column(
+      children: [
+        if (widget.type == 'erecycleHUB' && _selectedOption != 'Generator')
+          Column(
+            children: [
+              DropdownButtonFormField<String>(
+                decoration: _dropdownDecoration('نوع المجموعة المختارة'),
+                value: _selectedPreferdWasteGroup,
+                onChanged: (String? newValue) => setState(() => _selectedPreferdWasteGroup = newValue),
+                items: _preferdWasteGroupOptions.map((option) => DropdownMenuItem<String>(
+                  value: option['value'],
+                  child: Text(option['label']!,
+                    style: GoogleFonts.cairo(fontWeight: FontWeight.w500)),
+                )).toList(),
+              ),
+              SizedBox(height: 15),
+            ],
+          ),
+        
+        if (widget.type == 'erecycleHUB' && 
+            ((_selectedOption == 'Generator') || 
+            (_selectedOption == 'Picker' && _selectedPreferdWasteGroup == '1')))
+          Column(
+            children: [
+              DropdownButtonFormField<String>(
+                decoration: _dropdownDecoration('المجموعة المختارة'),
+                value: _selectedWasteType,
+                onChanged: (String? newValue) => setState(() => _selectedWasteType = newValue),
+                items: _typesOptions.map((option) => DropdownMenuItem<String>(
+                  value: option['value'],
+                  child: Text(option['label']!,
+                    style: GoogleFonts.cairo(fontWeight: FontWeight.w500)),
+                )).toList(),
+              ),
+              SizedBox(height: 15),
+            ],
+          ),
+        
+        if (widget.type == 'erecycleHUB' && 
+            (_selectedOption == 'Picker' && _selectedPreferdWasteGroup == '2'))
+          Column(
+            children: [
+              MultiSelectDialogField(
+                items: _items,
+                title: Text("المجموعة المختارة", 
+                  style: GoogleFonts.cairo(fontWeight: FontWeight.bold)),
+                selectedColor: Color(0xFF2E7D32),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.9),
+                  borderRadius: BorderRadius.all(Radius.circular(15)),
+                  border: Border.all(color: Color(0xFF2E7D32)),
+                ),
+                buttonIcon: Icon(Icons.arrow_drop_down, color: Color(0xFF2E7D32)),
+                buttonText: Text("اختر مجموعة",
+                  style: GoogleFonts.cairo(
+                    color: Colors.black54,
+                    fontSize: 16
+                  )),
+                onConfirm: (results) => setState(() => _selectedValues = results),
+              ),
+              SizedBox(height: 15),
+            ],
+          ),
+      ],
+    );
+  }
+
+  bool _isPasswordStrong(String password) {
+    // Minimum 8 characters
+    if (password.length < 8) return false;
+    
+    // At least one uppercase letter
+    if (!password.contains(RegExp(r'[A-Z]'))) return false;
+    
+    // At least one lowercase letter
+    if (!password.contains(RegExp(r'[a-z]'))) return false;
+    
+    // At least one number
+    if (!password.contains(RegExp(r'[0-9]'))) return false;
+    
+    // At least one special character
+    if (!password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'))) return false;
+    
+    return true;
+  }
+
+  void _showPasswordRequirementsDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(Icons.warning, color: Colors.orange),
+            SizedBox(width: 10),
+            Text('متطلبات كلمة المرور', style: GoogleFonts.cairo()),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('يجب أن تحتوي كلمة المرور على:', style: GoogleFonts.cairo()),
+            SizedBox(height: 10),
+            _buildRequirementItem('8 أحرف على الأقل'),
+            _buildRequirementItem('حرف كبير واحد على الأقل (A-Z)'),
+            _buildRequirementItem('حرف صغير واحد على الأقل (a-z)'),
+            _buildRequirementItem('رقم واحد على الأقل (0-9)'),
+            _buildRequirementItem('رمز خاص واحد على الأقل (!@#\$% إلخ)'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('حسناً', style: GoogleFonts.cairo(color: Color(0xFF2E7D32))),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRequirementItem(String text) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Icon(Icons.check_circle, color: Color(0xFF2E7D32), size: 18),
+          SizedBox(width: 8),
+          Text(text, style: GoogleFonts.cairo(fontSize: 14)),
+        ],
+      ),
+    );
+  }
+
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(Icons.error, color: Colors.white),
+            SizedBox(width: 8),
+            Text(message),
+          ],
+        ),
+        backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
 }
+

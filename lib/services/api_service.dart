@@ -6,8 +6,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
   
-  static const String baseUrl = 'https://10.0.2.2:7254/api'; // For Android emulator
-  //static const String baseUrl = 'https://pos1.io/ecoRide/api';
+  //static const String baseUrl = 'https://10.0.2.2:7254/api'; // For Android emulator
+  static const String baseUrl = 'https://pos1.io/ecoCredit/api';
 
   static Future<http.Response?> createCollectionWithImage(Map<String, dynamic> collectionData, File? imageFile) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -197,7 +197,7 @@ class ApiService {
     });
 
     try {
-      var response = await http.put(url, headers: headers, body: body);
+      var response = await http.post(url, headers: headers, body: body);
 
       if (response.statusCode == 200) {
         print('Update successful');
@@ -820,7 +820,7 @@ class CollectionResponse {
       description: json['description'],
       isInvoiced: json['isInvoiced'],
       createdDate: DateTime.parse(json['createdDate']),
-      image: json['image'] != null ? 'https://10.0.2.2:7254/${json['image']}' : null,
+      image: json['image'] != null ? 'https://pos1.io/ecoCredit/${json['image']}' : null,
       generator: json['generator'] != null ? Generator.fromJson(json['generator']) : null,
       picker: json['picker'] != null ? Generator.fromJson(json['picker']) : null,
       invoice: json['invoice'] != null ? Invoice.fromJson(json['invoice']) : null,
@@ -1154,7 +1154,7 @@ class InvoiceResource {
       wasteTypeID: json['wasteTypeID'] as int? ?? 0,
       wasteTypeName: json['wasteTypeName'] as String?,
       scarpyardOwner: json['scarpyardOwner'] as String?,
-      image: json['image'] as String?
+      image: json['image'] != null ? 'https://pos1.io/ecoCredit/${json['image']}' : null,
     );
   }
 }
