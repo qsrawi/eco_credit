@@ -390,6 +390,7 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
       );
 
       if (loginResult.containsKey('id') && loginResult.containsKey('role')) {
+        Navigator.pop(context); // Ensure the loading overlay is closed on exception
         _navigateAfterLogin(loginResult);
       } else {
         _showErrorDialog('خطأ', 'بيانات الدخول غير صحيحة');

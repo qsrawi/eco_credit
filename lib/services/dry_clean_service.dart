@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class DryCleanApiService {
   
   //static const String baseUrl = 'https://10.0.2.2:7254/api';
-  static const String baseUrl = 'https://pos1.io/ecoRide/api';
+  static const String baseUrl = 'https://pos1.io/ecoCredit/api';
 
   static Future<http.Response?> createDonation(Map<String, dynamic> collectionData, File? imageFile) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -319,7 +319,7 @@ class DonationResource {
       size: json['size'] != null ? double.tryParse(json['size'].toString()) : null,
       locationID: json['locationID'] != null ? int.tryParse(json['locationID'].toString()) : null,
       typesNames: (json['typesNames'] as List<dynamic>?)?.map((e) => e.toString()).toList(),
-      image: json['image'] != null ? 'https://10.0.2.2:7254/${json['image']}' : null,
+      image: json['image'] != null ? 'https://pos1.io/ecoCredit/${json['image']}' : null,
       createdSince: json['createdSince'] != null ? int.tryParse(json['createdSince'].toString()) : null,
       createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null,
       donationStatusID: json['donationStatusID'] != null ? int.tryParse(json['donationStatusID'].toString()) : null,

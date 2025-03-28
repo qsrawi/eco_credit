@@ -42,7 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     int? id = prefs.getInt('id');
     String role = prefs.getString('role') ?? '';
-    if (id != null && role != '') {
+    if (id != null && role != 'Admin') {
       int fetchedCount = await _apiService.getAllUnreadNotificationCount(id, role);
       setState(() {
         notificationCount = fetchedCount;
@@ -65,8 +65,17 @@ class _HomeScreenState extends State<HomeScreen> {
             }
           },
         ),
-        actions: [
-          NotificationIcon(notificationCount: notificationCount), // Use NotificationIcon here
+      actions: [
+          FutureBuilder(
+            future: SharedPreferences.getInstance(),
+            builder: (BuildContext context, AsyncSnapshot<SharedPreferences> snapshot) {
+              if (snapshot.hasData && snapshot.data!.getString('role') != "Admin") {
+                return NotificationIcon(notificationCount: notificationCount); // Show only if not Admin
+              } else {
+                return SizedBox.shrink(); // Do not show anything if Admin
+              }
+            },
+          ),
         ],
       ),
       body: Column(

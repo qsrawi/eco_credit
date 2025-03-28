@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:eco_credit/main.dart';
 import 'package:eco_credit/services/api_service.dart';
 import 'package:eco_credit/services/dry_clean_service.dart';
@@ -180,7 +182,7 @@ class _DryCleanProfileScreenState extends State<DryCleanProfileScreen> {
           CircleAvatar(
             radius: 50,
             backgroundImage: profile.image != null 
-              ? NetworkImage(profile.image!) as ImageProvider<Object>
+              ? MemoryImage(base64Decode(profile.image!)) as ImageProvider<Object>
               : const AssetImage('assets/images/default.jpg') as ImageProvider<Object>,
           ),
 
