@@ -18,6 +18,7 @@ class RegisterPage extends StatefulWidget {
 class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
@@ -154,7 +155,9 @@ class _RegisterPageState extends State<RegisterPage> {
               SizedBox(height: 15),
               _buildTextField(_emailController, 'الأيميل', Icons.email),
               SizedBox(height: 15),
-              _buildPasswordField(),
+              _buildPasswordField(_passwordController, 'رقم السر'),
+               SizedBox(height: 15),
+              _buildPasswordField(_confirmPasswordController, 'تأكيد رقم السر'),
               SizedBox(height: 15),
               _buildTextField(_phoneController, 'رقم الهاتف', Icons.phone),
               SizedBox(height: 15),
@@ -190,12 +193,12 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  Widget _buildPasswordField() {
+  Widget _buildPasswordField(TextEditingController controller, String label) {
     return TextFormField(
-      controller: _passwordController,
+      controller: controller,
       obscureText: _obscureText,
       decoration: InputDecoration(
-        labelText: 'رقم السر',
+        labelText: label,
         prefixIcon: Icon(Icons.lock, color: Color(0xFF2E7D32)),
         suffixIcon: IconButton(
           icon: Icon(_obscureText ? Icons.visibility_off : Icons.visibility,
@@ -326,6 +329,18 @@ class _RegisterPageState extends State<RegisterPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('رقم السر غير موجود'),
+          backgroundColor: Colors.red, // Red for error
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    if (_passwordController.text !=  _confirmPasswordController.text) {
+      print('paswword not match');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('رقم السر لا يتطابق مع تأكيد رقم السر'),
           backgroundColor: Colors.red, // Red for error
           behavior: SnackBarBehavior.floating,
         ),

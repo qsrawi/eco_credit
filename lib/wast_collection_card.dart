@@ -50,72 +50,61 @@ class WasteCollectionCard extends StatelessWidget {
   void setWasteTypeId(int wasteTypeId) {
   }
 
-  void _showDetails(BuildContext context) {
+ void _showDetails(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
+        final screenHeight = MediaQuery.of(context).size.height;
+        final isPortrait = MediaQuery.of(context).orientation == Orientation.portrait;
+
         return AlertDialog(
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Image.network(
-                imageUrl, // Adjust the URL accordingly
-                height: 300,
-                width: 300,
-                fit: BoxFit.cover,
-              ),
-              const SizedBox(height: 20),
-              Text(description, style: TextStyle(fontSize: 16)),
-              const SizedBox(height: 10),
-              Text(
-                'حجم الجمع: $collectionSize كغ', // "كغ" stands for kilograms in Arabic
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                textAlign: TextAlign.right,
-              ),
-              const SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      'رقم هاتف المنشأه: $generatorPhone', // Phone number
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.right,
-                    ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxHeight: isPortrait ? screenHeight * 0.4 : screenHeight * 0.6,
+                    maxWidth: 300,
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.copy, color: const Color(0xFF3F9A25)), // Copy icon
-                    onPressed: () {
-                      Clipboard.setData(ClipboardData(text: generatorPhone));
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('تم نسخ رقم الهاتف!')), // "Phone number copied!"
-                      );
-                    },
+                  child: Image.network(
+                    imageUrl,
+                    fit: BoxFit.contain,
                   ),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      'رقم هاتف بطل البيئة: $pickerPhone', // Phone number
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.right,
-                    ),
+                ),
+                const SizedBox(height: 10),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Text(
+                    description,
+                    style: TextStyle(fontSize: isPortrait ? 16 : 14),
+                    textAlign: TextAlign.right,
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.copy, color: const Color(0xFF3F9A25)), // Copy icon
-                    onPressed: () {
-                      Clipboard.setData(ClipboardData(text: pickerPhone));
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('تم نسخ رقم الهاتف!')), // "Phone number copied!"
-                      );
-                    },
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  'حجم الجمع: $collectionSize كغ',
+                  style: TextStyle(
+                    fontSize: isPortrait ? 16 : 14,
+                    fontWeight: FontWeight.bold,
                   ),
-                ],
-              ),
-            ],
+                  textAlign: TextAlign.right,
+                ),
+                const SizedBox(height: 10),
+                _buildPhoneRow(
+                  'رقم هاتف المنشأه: $generatorPhone',
+                  generatorPhone,
+                  context,
+                  isPortrait: isPortrait,
+                ),
+                _buildPhoneRow(
+                  'رقم هاتف بطل البيئة: $pickerPhone',
+                  pickerPhone,
+                  context,
+                  isPortrait: isPortrait,
+                ),
+              ],
+            ),
           ),
           actions: <Widget>[
             TextButton(
@@ -131,6 +120,38 @@ class WasteCollectionCard extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+
+  Widget _buildPhoneRow(String label, String phone, BuildContext context, {required bool isPortrait}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: isPortrait ? 16 : 14,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.right,
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.copy, color: Color(0xFF3F9A25)),
+            onPressed: () => _copyPhoneNumber(phone, context),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _copyPhoneNumber(String phone, BuildContext context) {
+    Clipboard.setData(ClipboardData(text: phone));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('تم نسخ رقم الهاتف!')),
     );
   }
 

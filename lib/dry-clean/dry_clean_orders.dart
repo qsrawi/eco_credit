@@ -269,8 +269,16 @@ class _DryCleanOrdersState extends State<DryCleanOrders> {
                                                 // WhatsApp Button
                                                 GestureDetector(
                                                   onTap: () {
-                                                    final phone =
-                                                        order.phone ?? '+970';
+                                                    final phone = order.phone ?? '';
+                                                    if (phone.isEmpty) {
+                                                      ScaffoldMessenger.of(context).showSnackBar(
+                                                        SnackBar(
+                                                          content: Text('رقم الهاتف غير متوفر'),
+                                                          backgroundColor: Colors.red,
+                                                        ),
+                                                      );
+                                                      return;
+                                                    }
                                                     _launchWhatsApp(phone);
                                                   },
                                                   child: SvgPicture.asset(
@@ -382,15 +390,32 @@ class _DryCleanOrdersState extends State<DryCleanOrders> {
   }
 
   Future<void> _launchWhatsApp(String phone) async {
+    // 1. Clean and validate phone number
     final cleanedNumber = phone.replaceAll(RegExp(r'[^0-9+]'), '');
-    final url = "https://wa.me/${cleanedNumber.replaceFirst('+', '')}";
-
-    if (await canLaunch(url)) {
-      await launch(url);
-    } else {
+    
+    if (cleanedNumber.isEmpty || !cleanedNumber.startsWith('+')) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('تطبيق واتساب غير مثبت'),
+          content: Text('رقم هاتف غير صالح'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // 2. Create proper WhatsApp URL
+    // final countryCode = cleanedNumber.substring(1);
+    final url = "https://wa.me/$cleanedNumber";
+
+    try {
+      await launchUrl(
+        Uri.parse(url),
+        mode: LaunchMode.externalApplication,
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('خطأ في فتح واتساب: $e'),
           backgroundColor: Colors.red,
         ),
       );

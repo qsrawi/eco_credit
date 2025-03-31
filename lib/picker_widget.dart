@@ -184,39 +184,69 @@ Widget build(BuildContext context) {
           const Center(child: CircularProgressIndicator())
         else
           SizedBox(
-            height: 200, // Fixed height for the list
-            child: ListView(
-              shrinkWrap: true,
-              physics: const ClampingScrollPhysics(),
-              children: [
-                ...pickers.map((picker) => Card(
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundImage: picker.image != null
-                          ? MemoryImage(base64Decode(picker.image!))
-                          : const AssetImage('assets/images/default.jpg') 
-                            as ImageProvider,
-                    ),
-                    title: Text('${picker.name} (${picker.manualId})'),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(picker.phone ?? 'لا يوجد هاتف'),
-                        Text(picker.locationName ?? 'لا يوجد موقع'),
-                      ],
-                    ),
-                    onTap: () {
-                      setState(() {
-                        selectedPicker = picker.name;
-                        selectedPickerId = picker.id;
-                        widget.onSelected(picker.id);
-                      });
-                    },
-                    selected: selectedPicker == picker.name,
-                    selectedTileColor: Colors.blue.shade100,
+            height: 150,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return SingleChildScrollView(
+                  physics: const ClampingScrollPhysics(),
+                  child: Column(
+                    children: [
+                      ...pickers.map((picker) => Card(
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxWidth: constraints.maxWidth - 30, // Account for padding
+                          ),
+                          child: ListTile(
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+                            leading: CircleAvatar(
+                              backgroundImage: picker.image != null
+                                  ? MemoryImage(base64Decode(picker.image!))
+                                  : const AssetImage('assets/images/default.jpg') 
+                                    as ImageProvider,
+                            ),
+                            title: Text(
+                              '${picker.name} (${picker.manualId})',
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  picker.phone ?? 'لا يوجد هاتف',
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: MediaQuery.of(context).orientation == Orientation.portrait 
+                                      ? 14 
+                                      : 12,
+                                  ),
+                                ),
+                                Text(
+                                  picker.locationName ?? 'لا يوجد موقع',
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: MediaQuery.of(context).orientation == Orientation.portrait 
+                                      ? 14 
+                                      : 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            onTap: () {
+                              setState(() {
+                                selectedPicker = picker.name;
+                                selectedPickerId = picker.id;
+                                widget.onSelected(picker.id);
+                              });
+                            },
+                            selected: selectedPicker == picker.name,
+                            selectedTileColor: Colors.blue.shade100,
+                          ),
+                        ),
+                      )).toList(),
+                    ],
                   ),
-                )).toList(),
-              ],
+                );
+              },
             ),
           ),
       ],

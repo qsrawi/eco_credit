@@ -70,9 +70,9 @@ flutter_icons:
 
 flutter_native_splash:
   color: "#3F9A25"  # Background color (use hex code or color name)
-  image: assets/images/rec.jpg  # Path to your splash screen image
+  image: assets/images/main.png  # Path to your splash screen image
   android_12:
-    image: assets/images/rec.jpg  # Android 12+ requires a separate configuration
+    image: assets/images/main.png  # Android 12+ requires a separate configuration
     icon_background_color: "#3F9A25"
 
   fullscreen: true  # Optional: makes splash screen full-screen
