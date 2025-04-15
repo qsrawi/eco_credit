@@ -49,5 +49,9 @@
 		<true/>
 		<key>UIViewControllerBasedStatusBarAppearance</key>
 		<false/>
+		<key>NSCameraUsageDescription</key>
+		<string>Allow camera access to take photos</string>
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>Allow photo library access to select images</string>
 	</dict>
 </plist>

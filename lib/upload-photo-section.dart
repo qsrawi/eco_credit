@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class UploadPhotoSection extends StatefulWidget {
   final Function(File) onImageSelected;
@@ -19,6 +20,38 @@ class UploadPhotoSection extends StatefulWidget {
 class _UploadPhotoSectionState extends State<UploadPhotoSection> {
   File? _image;
   final ImagePicker _picker = ImagePicker();
+
+  Future<bool> _requestPermission(Permission permission) async {
+    final status = await permission.request();
+    if (status.isPermanentlyDenied) {
+      _showSettingsDialog();
+      return false;
+    }
+    return status.isGranted;
+  }
+
+  void _showSettingsDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("الإذن مطلوب"),
+        content: const Text("الرجاء تمكين الأذونات في إعدادات التطبيق"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("إلغاء"),
+          ),
+          TextButton(
+            onPressed: () {
+              openAppSettings();
+              Navigator.pop(context);
+            },
+            child: const Text("فتح الإعدادات"),
+          ),
+        ],
+      ),
+    );
+  }
 
   void _showImageDialog() {
     showDialog(
@@ -51,11 +84,30 @@ class _UploadPhotoSectionState extends State<UploadPhotoSection> {
   }
 
   Future<void> _pickImage(ImageSource source) async {
-    final XFile? pickedFile = await _picker.pickImage(source: source);
-    if (pickedFile != null) {
-      File imageFile = File(pickedFile.path);
-      setState(() => _image = imageFile);
-      widget.onImageSelected(imageFile);
+    try {
+      bool hasPermission = false;
+      
+      if (source == ImageSource.camera) {
+        hasPermission = await _requestPermission(Permission.camera);
+      } else {
+        // Only need photos permission for iOS gallery access
+        if (Platform.isIOS) {
+          hasPermission = await _requestPermission(Permission.photos);
+        } else {
+          hasPermission = true; // No permission needed for Android gallery
+        }
+      }
+
+      if (!hasPermission) return;
+
+      final XFile? pickedFile = await _picker.pickImage(source: source);
+      if (pickedFile != null) {
+        File imageFile = File(pickedFile.path);
+        setState(() => _image = imageFile);
+        widget.onImageSelected(imageFile);
+      }
+    } catch (e) {
+      print("Error picking image: $e");
     }
   }
 
@@ -86,13 +138,13 @@ class _UploadPhotoSectionState extends State<UploadPhotoSection> {
                   color: Colors.grey[800],
                 ),
               )
-            : null, // Hide title when an image is uploaded
+            : null,
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             if (_image != null)
               IconButton(
-                icon: const Icon(Icons.visibility, size: 30, color:  Color.fromARGB(255, 83, 207, 49)),
+                icon: const Icon(Icons.visibility, size: 30, color: Color.fromARGB(255, 83, 207, 49)),
                 onPressed: _showImageDialog,
               ),
             IconButton(
@@ -101,7 +153,7 @@ class _UploadPhotoSectionState extends State<UploadPhotoSection> {
             ),
             const SizedBox(width: 8),
             IconButton(
-              icon: const Icon(Icons.photo_library, size: 30, color:  Color(0xFF3F9A25)),
+              icon: const Icon(Icons.photo_library, size: 30, color: Color(0xFF3F9A25)),
               onPressed: () => _pickImage(ImageSource.gallery),
             ),
           ],
