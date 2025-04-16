@@ -6,8 +6,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
   
-  //static const String baseUrl = 'https://10.0.2.2:7254/api'; // For Android emulator
-  static const String baseUrl = 'https://pos1.io/ecoCredit/api';
+  static const String baseUrl = 'https://10.0.2.2:7254/api'; // For Android emulator
+  //static const String baseUrl = 'https://pos1.io/ecoCredit/api';
 
   static Future<http.Response?> createCollectionWithImage(Map<String, dynamic> collectionData, File? imageFile) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -603,6 +603,28 @@ class ApiService {
       return []; // Return an empty list if 'notificationListResource' is improperly formatted
     } else {
       throw Exception('Failed to load notifications: ${response.statusCode} ${response.body}');
+    }
+  }
+
+  static Future<void> sendTokenToBackend(String token) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    int userId = prefs.getInt('id') ?? 1;
+    String userType = prefs.getString('role') ?? 'Generator';
+
+    final response = await http.post(
+      Uri.parse('$baseUrl/notifications/register-device-token'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'token': token,
+          'userID': userId,               // Replace with real user ID
+          'userType': userType,       // Replace with real user type
+        }),
+      );
+
+    if (response.statusCode == 200) {
+      print("Token saved successfully");
+    } else {
+      print("Failed to save token");
     }
   }
 

@@ -3,6 +3,7 @@ import 'package:eco_credit/dry-clean/dry_clean_order_status_page.dart';
 import 'package:eco_credit/e_recycle_hub.dart';
 import 'package:eco_credit/login/register.dart';
 import 'package:eco_credit/services/api_service.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -391,6 +392,12 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
 
       if (loginResult.containsKey('id') && loginResult.containsKey('role')) {
         Navigator.pop(context); // Ensure the loading overlay is closed on exception
+        String? token = await FirebaseMessaging.instance.getToken();
+        print("FCM Token: $token");
+
+        if (token != null) {
+          await ApiService.sendTokenToBackend(token);
+        }
         _navigateAfterLogin(loginResult);
       } else {
         _showErrorDialog('خطأ', 'بيانات الدخول غير صحيحة');

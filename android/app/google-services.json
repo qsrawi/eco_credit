@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "96740491289",
+    "project_id": "ecocredit-3c7b4",
+    "storage_bucket": "ecocredit-3c7b4.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:96740491289:android:4373f8d2fa08b94eddea88",
+        "android_client_info": {
+          "package_name": "com.oday_qsrawi.eco_credit"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDAeH1zZ7Ukff6LrDkGi8kqw8OPhNEXtqQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

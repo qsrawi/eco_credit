@@ -53,5 +53,7 @@
 		<string>Allow camera access to take photos</string>
 		<key>NSPhotoLibraryUsageDescription</key>
 		<string>Allow photo library access to select images</string>
+		<key>UILaunchStoryboardName</key>
+		<string>LaunchScreen</string>
 	</dict>
 </plist>
